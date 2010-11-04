@@ -12,3 +12,6 @@ AR="ppu-ar" CC="ppu-gcc" CFLAGS="-O2 -Wall" RANLIB="ppu-ranlib" ./configure --pr
 
 ## Compile and install.
 make -j4 && make install || { exit 1; }
+
+#remove stray .so files so libpng won't link with them.
+rm $PS3DEV/ppu/lib/*.so.* $PS3DEV/ppu/lib/*.so
