@@ -12,7 +12,7 @@
 
  1) Set up your environment by installing the following software:
 
-  autoconf, automake, libtool, make, ps3toolchain, psl1ght, wget
+  autoconf, automake, libtool, make, pkg-config, ps3toolchain, psl1ght, wget
 
  2) Run the library script:
 
