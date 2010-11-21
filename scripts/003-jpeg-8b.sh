@@ -14,7 +14,10 @@ cat ../../patches/jpeg-8b-PPU.patch | patch -p1 || { exit 1; }
 mkdir build-ppu && cd build-ppu || { exit 1; }
 
 ## Configure the build.
-CFLAGS="-O2 -Wall -L$PS3DEV/ppu/lib" CPPFLAGS="-I$PS3DEV/ppu/include" PKG_CONFIG_PATH="$PS3DEV/ppu/lib/pkgconfig" ../configure --prefix="$PS3DEV/ppu" --host="ppu" --disable-shared || { exit 1; }
+CFLAGS="-I$PS3DEV/ppu/include" \
+LDFLAGS="-L$PS3DEV/ppu/lib -L$PSL1GHT/lib -T$PSL1GHT/lib/linker.x -nostartfiles $PSL1GHT/lib/crt1.o $PS3DEV/ppu/ppu/lib/crti.o" \
+PKG_CONFIG_PATH="$PS3DEV/ppu/lib/pkgconfig" \
+../configure --prefix="$PS3DEV/ppu" --host="ppu" --disable-shared || { exit 1; }
 
 ## Compile and install.
 make -j4 && make install || { exit 1; }
