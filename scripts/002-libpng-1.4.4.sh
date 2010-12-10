@@ -2,7 +2,7 @@
 # libpng-1.4.4.sh by Dan Peori (danpeori@oopo.net)
 
 ## Download the source code.
-wget --continue ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng-1.4.4.tar.gz || { exit 1; }
+wget --continue http://download.sourceforge.net/libpng/libpng-1.4.4.tar.gz || { exit 1; }
 
 ## Unpack the source code.
 rm -Rf libpng-1.4.4 && tar xfvz libpng-1.4.4.tar.gz && cd libpng-1.4.4 || { exit 1; }
