@@ -14,10 +14,10 @@ cat ../../patches/cairo-1.10.0-PPU.patch | patch -p1 || { exit 1; }
 mkdir build-ppu && cd build-ppu || { exit 1; }
 
 ## Configure the build.
-CFLAGS="-I$PS3DEV/ppu/include -DCAIRO_NO_MUTEX" \
-LDFLAGS="-L$PS3DEV/ppu/lib -L$PSL1GHT/lib -T$PSL1GHT/lib/linker.x -nostartfiles $PSL1GHT/lib/crt1.o $PS3DEV/ppu/ppu/lib/crti.o" \
-PKG_CONFIG_PATH="$PS3DEV/ppu/lib/pkgconfig" \
-../configure --prefix="$PS3DEV/ppu" --host="ppu" --enable-fc="no" --enable-xlib="no" --disable-shared --disable-valgrind --enable-gobject="no" || { exit 1; }
+CFLAGS="-I$PS3DEV/host/ppu/include -DCAIRO_NO_MUTEX" \
+LDFLAGS="-L$PS3DEV/host/ppu/lib -L$PSL1GHT/lib" \
+PKG_CONFIG_PATH="$PS3DEV/host/ppu/lib/pkgconfig" \
+../configure --prefix="$PS3DEV/host/ppu" --host="ppu" --enable-fc="no" --enable-xlib="no" --disable-shared --disable-valgrind --enable-gobject="no" || { exit 1; }
 
 ## Compile and install.
 make -j4 && make install || { exit 1; }
