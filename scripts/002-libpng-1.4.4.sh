@@ -14,10 +14,10 @@ cat ../../patches/libpng-1.4.4-PPU.patch | patch -p1 || { exit 1; }
 mkdir build-ppu && cd build-ppu || { exit 1; }
 
 ## Configure the build.
-CFLAGS="-I$PS3DEV/host/ppu/include" \
-LDFLAGS="-L$PS3DEV/host/ppu/lib -L$PSL1GHT/lib" \
-PKG_CONFIG_PATH="$PS3DEV/host/ppu/lib/pkgconfig" \
-../configure --prefix="$PS3DEV/host/ppu" --host="ppu" --enable-static --disable-shared || { exit 1; }
+CFLAGS="-I$PSL1GHT/ppu/include -I$PS3DEV/portlibs/ppu/include" \
+LDFLAGS="-L$PSL1GHT/ppu/lib -L$PS3DEV/portlibs/ppu/lib -lrt -llv2" \
+PKG_CONFIG_PATH="$PS3DEV/portlibs/ppu/lib/pkgconfig" \
+../configure --prefix="$PS3DEV/portlibs/ppu" --host="ppu" --enable-static --disable-shared || { exit 1; }
 
 ## Compile and install.
 make -j4 && make install || { exit 1; }
