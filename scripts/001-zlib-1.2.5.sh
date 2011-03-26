@@ -14,4 +14,4 @@ cat ../../patches/zlib-1.2.5-PPU.patch | patch -p1 || { exit 1; }
 AR="ppu-ar" CC="ppu-gcc" RANLIB="ppu-ranlib" ./configure --prefix="$PS3DEV/host/ppu" --static || { exit 1; }
 
 ## Compile and install.
-make -j4 && make install || { exit 1; }
+${MAKE:-make} -j4 && ${MAKE:-make} install || { exit 1; }

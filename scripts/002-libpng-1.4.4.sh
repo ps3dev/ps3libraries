@@ -20,4 +20,4 @@ PKG_CONFIG_PATH="$PS3DEV/host/ppu/lib/pkgconfig" \
 ../configure --prefix="$PS3DEV/host/ppu" --host="ppu" --enable-static --disable-shared || { exit 1; }
 
 ## Compile and install.
-make -j4 && make install || { exit 1; }
+${MAKE:-make} -j4 && ${MAKE:-make} install || { exit 1; }

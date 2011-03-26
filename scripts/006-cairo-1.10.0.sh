@@ -20,4 +20,4 @@ PKG_CONFIG_PATH="$PS3DEV/host/ppu/lib/pkgconfig" \
 ../configure --prefix="$PS3DEV/host/ppu" --host="ppu" --enable-fc="no" --enable-xlib="no" --disable-shared --disable-valgrind --enable-gobject="no" || { exit 1; }
 
 ## Compile and install.
-make -j4 && make install || { exit 1; }
+${MAKE:-make} -j4 && ${MAKE:-make} install || { exit 1; }
