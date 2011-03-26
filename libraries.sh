@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # libraries.sh by Dan Peori (danpeori@oopo.net)
 
 ## Enter the ps3libraries directory.
@@ -9,6 +9,9 @@ mkdir -p build || { echo "ERROR: Could not create the build directory."; exit 1;
 
 ## Enter the build directory.
 cd build || { echo "ERROR: Could not enter the build directory."; exit 1; }
+
+## Use gmake if available
+type -P gmake &>/dev/null && export MAKE=gmake
 
 ## Fetch the depend scripts.
 DEPEND_SCRIPTS=(`ls ../depends/*.sh | sort`)
