@@ -1,0 +1,36 @@
+diff -burN libmikmod-3.1.11.orig//config.sub libmikmod-3.1.11/config.sub
+--- libmikmod-3.1.11.orig//config.sub	2011-02-27 20:01:46.589221368 +0100
++++ libmikmod-3.1.11/config.sub	2011-02-27 20:02:17.430203732 +0100
+@@ -774,6 +774,8 @@
+ 		;;
+ 	ppc64)	basic_machine=powerpc64-unknown
+ 	        ;;
++	ppu)	basic_machine=powerpc64-unknown
++		;;
+ 	ppc64-*) basic_machine=powerpc64-`echo $basic_machine | sed 's/^[^-]*-//'`
+ 		;;
+ 	ppc64le | powerpc64little | ppc64-le | powerpc64-little)
+diff -burN libmikmod-3.1.11.orig//include/mikmod.h.in libmikmod-3.1.11/include/mikmod.h.in
+--- libmikmod-3.1.11.orig//include/mikmod.h.in	2011-02-27 21:02:41.268543132 +0100
++++ libmikmod-3.1.11/include/mikmod.h.in	2011-02-27 21:02:42.507469220 +0100
+@@ -85,7 +85,7 @@
+ 
+ @DOES_NOT_HAVE_SIGNED@
+ 
+-#if defined(__arch64__) || defined(__alpha)
++#if defined(__arch64__) || defined(__alpha) || defined(__LP64__)
+ /* 64 bit architectures */
+ 
+ typedef signed char     SBYTE;      /* 1 byte, signed */
+diff -burN libmikmod-3.1.11.orig//libmikmod/Makefile.in libmikmod-3.1.11/libmikmod/Makefile.in
+--- libmikmod-3.1.11.orig//libmikmod/Makefile.in	2011-02-27 21:17:24.975994484 +0100
++++ libmikmod-3.1.11/libmikmod/Makefile.in	2011-02-27 21:17:28.410182564 +0100
+@@ -29,7 +29,7 @@
+ MKINSTALLDIRS=${top_srcdir}/mkinstalldirs
+ 
+ DEFS=@DEFS@
+-CFLAGS=@CFLAGS@ -Dunix
++CFLAGS=@CFLAGS@
+ COMPILE=$(LIBTOOL) --silent --mode=compile $(CC) $(DEFS) $(CFLAGS) -I$(top_srcdir)/include -I$(top_builddir) -I$(top_builddir)/include -DMIKMOD_H=$(top_srcdir)/include/mikmod.h
+ 
+ LIB = libmikmod.la
