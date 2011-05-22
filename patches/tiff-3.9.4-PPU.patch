@@ -1,0 +1,23 @@
+diff -burN tiff-3.9.4.orig//config/config.sub tiff-3.9.4/config/config.sub
+--- tiff-3.9.4.orig//config/config.sub	2007-07-15 21:55:25.000000000 -0400
++++ tiff-3.9.4/config/config.sub	2011-01-16 21:00:47.197505000 -0500
+@@ -865,6 +865,8 @@
+ 		;;
+ 	ppc64)	basic_machine=powerpc64-unknown
+ 		;;
++	ppu)	basic_machine=powerpc64-unknown
++		;;
+ 	ppc64-*) basic_machine=powerpc64-`echo $basic_machine | sed 's/^[^-]*-//'`
+ 		;;
+ 	ppc64le | powerpc64little | ppc64-le | powerpc64-little)
+diff -burN tiff-3.9.4.orig//contrib/iptcutil/iptcutil.c tiff-3.9.4/contrib/iptcutil/iptcutil.c
+--- tiff-3.9.4.orig//contrib/iptcutil/iptcutil.c	2011-01-30 15:01:15.759211660 +0100
++++ tiff-3.9.4/contrib/iptcutil/iptcutil.c	2011-01-30 15:01:21.274911484 +0100
+@@ -5,7 +5,6 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+-#include <memory.h>
+ #include <ctype.h>
+ 
+ #ifdef HAVE_STRINGS_H
