@@ -34,3 +34,31 @@ diff -burN libmikmod-3.1.11.orig//libmikmod/Makefile.in libmikmod-3.1.11/libmikm
  COMPILE=$(LIBTOOL) --silent --mode=compile $(CC) $(DEFS) $(CFLAGS) -I$(top_srcdir)/include -I$(top_builddir) -I$(top_builddir)/include -DMIKMOD_H=$(top_srcdir)/include/mikmod.h
  
  LIB = libmikmod.la
+diff -burN libmikmod-3.1.11.orig//configure libmikmod-3.1.11/configure
+--- libmikmod-3.1.11.orig//configure	2004-01-21 18:43:52.000000000 +0100
++++ libmikmod-3.1.11/configure	2011-05-24 23:24:23.044487036 +0200
+@@ -7483,9 +7483,9 @@
+ # Choose settings.
+ # ================
+ 
+-cat >> confdefs.h <<\EOF
+-#define DRV_PIPE 1
+-EOF
++# cat >> confdefs.h <<\EOF
++# #define DRV_PIPE 1
++# EOF
+ 
+ 
+ # If we can guess the drivers needed from the system, no need to ask the user
+diff -burN libmikmod-3.1.11.orig//configure.in libmikmod-3.1.11/configure.in
+--- libmikmod-3.1.11.orig//configure.in	2004-01-21 18:43:52.000000000 +0100
++++ libmikmod-3.1.11/configure.in	2011-05-24 23:24:13.817689480 +0200
+@@ -385,7 +385,7 @@
+ # Choose settings.
+ # ================
+ 
+-AC_DEFINE(DRV_PIPE)
++dnl AC_DEFINE(DRV_PIPE)
+ 
+ # If we can guess the drivers needed from the system, no need to ask the user
+ # to specify it manually
