@@ -17,7 +17,7 @@ mkdir build-ppu && cd build-ppu || { exit 1; }
 CFLAGS="-I$PSL1GHT/ppu/include -I$PS3DEV/portlibs/ppu/include" \
 LDFLAGS="-L$PSL1GHT/ppu/lib -L$PS3DEV/portlibs/ppu/lib -lrt -llv2" \
 CC=ppu-gcc LD=ppu-ld NM=ppu-nm RANLIB=ppu-ranlib STRIP=ppu-strip \
-    ../configure --prefix="$PS3DEV/portlibs/ppu" --host=ppu \
+    ../configure --prefix="$PS3DEV/portlibs/ppu" --host="powerpc64-ps3-elf" \
 	--disable-esd --disable-dl --disable-shared \
 	|| { exit 1; }
 

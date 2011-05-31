@@ -17,8 +17,7 @@ mkdir build-ppu && cd build-ppu || { exit 1; }
 CFLAGS="-I$PSL1GHT/ppu/include -I$PS3DEV/portlibs/ppu/include" \
 LDFLAGS="-L$PSL1GHT/ppu/lib -L$PS3DEV/portlibs/ppu/lib -lrt -llv2" \
 PKG_CONFIG_PATH="$PS3DEV/portlibs/ppu/lib/pkgconfig" \
-../configure --prefix="$PS3DEV/portlibs/ppu" --host=ppu --disable-shared \
-    	|| { exit 1; }
+../configure --prefix="$PS3DEV/portlibs/ppu" --host="powerpc64-ps3-elf" --disable-shared || { exit 1; }
 
 ## Compile and install.
 ${MAKE:-make} && ${MAKE:-make} install || { exit 1; }
