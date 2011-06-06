@@ -1,17 +1,18 @@
-#!/bin/sh
+#!/bin/bash -e
 # zlib-1.2.5.sh by Dan Peori (danpeori@oopo.net)
 
 ## Download the source code.
-wget --continue http://zlib.net/zlib-1.2.5.tar.gz || { exit 1; }
+wget --continue http://zlib.net/zlib-1.2.5.tar.gz
 
 ## Unpack the source code.
-rm -Rf zlib-1.2.5 && tar xfvz zlib-1.2.5.tar.gz && cd zlib-1.2.5 || { exit 1; }
+rm -Rf zlib-1.2.5 && tar xfvz zlib-1.2.5.tar.gz && cd zlib-1.2.5
 
 ## Patch the source code.
-cat ../../patches/zlib-1.2.5-PPU.patch | patch -p1 || { exit 1; }
+cat ../../patches/zlib-1.2.5-PPU.patch | patch -p1
 
 ## Configure the build.
-AR="ppu-ar" CC="ppu-gcc" RANLIB="ppu-ranlib" ./configure --prefix="$PS3DEV/portlibs/ppu" --static || { exit 1; }
+AR="powerpc64-ps3-elf-ar" CC="powerpc64-ps3-elf-gcc" RANLIB="powerpc64-ps3-elf-ranlib" \
+./configure --prefix="$PS3DEV/portlibs/ppu" --static
 
 ## Compile and install.
-${MAKE:-make} -j4 && ${MAKE:-make} install || { exit 1; }
+${MAKE:-make} -j4 && ${MAKE:-make} install
