@@ -1,11 +1,14 @@
 #!/bin/bash -e
-# libzip-0.9.3.sh by Dan Peori (danpeori@oopo.net)
+# tiff-3.9.4.sh by Jon Limle <jonlimle123@yahoo.com>
 
 ## Download the source code.
-wget --continue http://www.nih.at/libzip/libzip-0.9.3.tar.bz2
+wget --continue ftp://ftp.remotesensing.org/pub/libtiff/tiff-3.9.4.tar.gz
 
 ## Unpack the source code.
-rm -Rf libzip-0.9.3 && tar xfvj libzip-0.9.3.tar.bz2 && cd libzip-0.9.3
+rm -Rf tiff-3.9.4 && tar xfvz ./tiff-3.9.4.tar.gz && cd tiff-3.9.4
+
+## Patch the source code.
+cat ../../patches/tiff-3.9.4-PPU.patch | patch -p1
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu
@@ -17,4 +20,4 @@ PKG_CONFIG_PATH="$PS3DEV/portlibs/ppu/lib/pkgconfig" \
 ../configure --prefix="$PS3DEV/portlibs/ppu" --host="powerpc64-ps3-elf" --disable-shared
 
 ## Compile and install.
-${MAKE:-make} -j4 && ${MAKE:-make} install
+${MAKE:-make} && ${MAKE:-make} install
