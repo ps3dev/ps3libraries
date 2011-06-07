@@ -1,15 +1,3 @@
-diff -burN libmikmod-3.1.11.orig//config.sub libmikmod-3.1.11/config.sub
---- libmikmod-3.1.11.orig//config.sub	2004-01-21 18:43:53.000000000 +0100
-+++ libmikmod-3.1.11/config.sub	2011-05-27 20:57:41.942288172 +0200
-@@ -774,6 +774,8 @@
- 		;;
- 	ppc64)	basic_machine=powerpc64-unknown
- 	        ;;
-+	ppu)	basic_machine=powerpc64-unknown
-+		;;
- 	ppc64-*) basic_machine=powerpc64-`echo $basic_machine | sed 's/^[^-]*-//'`
- 		;;
- 	ppc64le | powerpc64little | ppc64-le | powerpc64-little)
 diff -burN libmikmod-3.1.11.orig//include/mikmod.h.in libmikmod-3.1.11/include/mikmod.h.in
 --- libmikmod-3.1.11.orig//include/mikmod.h.in	2004-01-21 18:43:53.000000000 +0100
 +++ libmikmod-3.1.11/include/mikmod.h.in	2011-05-27 21:38:12.629624208 +0200
@@ -74,7 +62,7 @@ diff -burN libmikmod-3.1.11.orig//config.h.in libmikmod-3.1.11/config.h.in
  #undef MIKMOD_DEBUG
 diff -burN libmikmod-3.1.11.orig//configure libmikmod-3.1.11/configure
 --- libmikmod-3.1.11.orig//configure	2004-01-21 18:43:52.000000000 +0100
-+++ libmikmod-3.1.11/configure	2011-05-27 21:30:27.361457356 +0200
++++ libmikmod-3.1.11/configure	2011-06-07 21:31:23.725035136 +0200
 @@ -1079,6 +1079,7 @@
  libmikmod_driver_sgi=no
  libmikmod_driver_sun=no
@@ -88,7 +76,7 @@ diff -burN libmikmod-3.1.11.orig//configure libmikmod-3.1.11/configure
  fi
  
 +uname() {
-+  if test x"$CC" = x"ppu-gcc"; then echo "PSL1GHT"; else command uname "$@"; fi
++  if test x"$host_vendor" = x"ps3"; then echo "PSL1GHT"; else command uname "$@"; fi
 +}
 +
  # ====================
@@ -144,7 +132,7 @@ diff -burN libmikmod-3.1.11.orig//configure libmikmod-3.1.11/configure
  	libmikmod_dynload="yes, ${libmikmod_dynload} style"
 diff -burN libmikmod-3.1.11.orig//configure.in libmikmod-3.1.11/configure.in
 --- libmikmod-3.1.11.orig//configure.in	2004-01-21 18:43:52.000000000 +0100
-+++ libmikmod-3.1.11/configure.in	2011-05-27 21:30:15.291234100 +0200
++++ libmikmod-3.1.11/configure.in	2011-06-07 21:31:46.167446824 +0200
 @@ -30,6 +30,7 @@
  libmikmod_driver_sgi=no
  libmikmod_driver_sun=no
@@ -158,7 +146,7 @@ diff -burN libmikmod-3.1.11.orig//configure.in libmikmod-3.1.11/configure.in
  fi
  
 +uname() {
-+  if test x"$CC" = x"ppu-gcc"; then echo "PSL1GHT"; else command uname "$@"; fi
++  if test x"$host_vendor" = x"ps3"; then echo "PSL1GHT"; else command uname "$@"; fi
 +}
 +
  # ====================
