@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 # libxml2-2.7.8.sh by Dan Peori (danpeori@oopo.net)
 
 ## Download the source code.

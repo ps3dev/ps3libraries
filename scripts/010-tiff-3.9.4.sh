@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 # tiff-3.9.4.sh by Jon Limle <jonlimle123@yahoo.com>
 
 ## Download the source code.

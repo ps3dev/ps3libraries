@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 # libvorbis-1.3.2.sh by Dan Peori (danpeori@oopo.net)
 
 ## Download the source code.

@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 # cairo-1.10.0.sh by Dan Peori (danpeori@oopo.net)
 
 ## Download the source code.

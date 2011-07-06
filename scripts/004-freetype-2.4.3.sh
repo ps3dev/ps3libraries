@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 # freetype-2.4.3.sh by Dan Peori (danpeori@oopo.net)
 
 ## Download the source code.
