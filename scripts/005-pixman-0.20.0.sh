@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 # pixman-0.20.0.sh by Dan Peori (danpeori@oopo.net)
 
 ## Download the source code.

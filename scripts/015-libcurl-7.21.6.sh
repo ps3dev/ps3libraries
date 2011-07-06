@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 # libcurl-7.21.6 by KaKaRoTo
 
 ## Download the source code.

@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 # zlib-1.2.5.sh by Dan Peori (danpeori@oopo.net)
 
 ## Download the source code.

@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 # jpeg-8b.sh by Dan Peori (danpeori@oopo.net)
 
 ## Download the source code.
