@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 # libzip-0.9.3.sh by Dan Peori (danpeori@oopo.net)
 
 ## Download the source code.

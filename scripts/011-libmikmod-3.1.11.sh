@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 # libmikmod-3.1.11.sh by Marcus Comstedt <marcus@mc.pp.se>
 
 ## Download the source code.

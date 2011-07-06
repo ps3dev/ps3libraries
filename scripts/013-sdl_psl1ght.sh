@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 # sdl_psl1ght.sh by Dan Peori (dan.peori@oopo.net)
 
 ## Download the source code.

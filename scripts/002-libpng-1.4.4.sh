@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 # libpng-1.4.4.sh by Dan Peori (danpeori@oopo.net)
 
 ## Download the source code.

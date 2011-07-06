@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 # libogg-1.2.1.sh by Dan Peori (danpeori@oopo.net)
 
 ## Download the source code.

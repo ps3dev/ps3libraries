@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # libraries-sudo.sh by Dan Peori (danpeori@oopo.net)
 
 ## Enter the ps3libraries directory.
