@@ -10,9 +10,6 @@ mkdir -p build || { echo "ERROR: Could not create the build directory."; exit 1;
 ## Enter the build directory.
 cd build || { echo "ERROR: Could not enter the build directory."; exit 1; }
 
-## Use gmake if available
-which gmake 1>/dev/null 2>&1 && export MAKE=gmake
-
 ## Fetch the depend scripts.
 DEPEND_SCRIPTS=`ls ../depends/*.sh | sort`
 
