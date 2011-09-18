@@ -2,7 +2,10 @@
 # tiff-3.9.4.sh by Jon Limle <jonlimle123@yahoo.com>
 
 ## Download the source code.
-wget --continue ftp://ftp.remotesensing.org/pub/libtiff/tiff-3.9.4.tar.gz
+wget --tries 5 --timeout 15 --continue \
+  ftp://ftp.remotesensing.org/pub/libtiff/tiff-3.9.4.tar.gz \
+|| wget --continue \
+  https://github.com/downloads/ps3dev/ps3libraries/tiff-3.9.4.tar.gz
 
 ## Unpack the source code.
 rm -Rf tiff-3.9.4 && tar xfvz ./tiff-3.9.4.tar.gz && cd tiff-3.9.4
