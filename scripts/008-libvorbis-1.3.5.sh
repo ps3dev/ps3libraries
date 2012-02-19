@@ -2,7 +2,7 @@
 # libvorbis-1.3.5.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
-wget --continue http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.5.tar.gz
+../download.sh libvorbis-1.3.5.tar.gz
 
 ## Download an up-to-date config.guess and config.sub
 if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi

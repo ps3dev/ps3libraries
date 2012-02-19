@@ -2,7 +2,7 @@
 # flac-1.2.1.sh by dhewg (dhewg@wiibrew.org)
 
 ## Download the source code.
-wget --continue http://downloads.sourceforge.net/project/flac/flac-src/flac-1.2.1-src/flac-1.2.1.tar.gz
+../download.sh flac-1.2.1.tar.gz
 
 ## Download an up-to-date config.guess and config.sub
 if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi

@@ -2,7 +2,7 @@
 # libtheora-1.1.1.sh by dhewg (dhewg@wiibrew.org)
 
 ## Download the source code.
-wget --continue http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2
+../download.sh libtheora-1.1.1.tar.bz2
 
 ## Download an up-to-date config.guess and config.sub
 if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi

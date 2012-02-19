@@ -2,7 +2,7 @@
 # jpeg-8b.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
-wget --continue http://www.ijg.org/files/jpegsrc.v8b.tar.gz
+../download.sh jpegsrc.v8b.tar.gz
 
 ## Download an up-to-date config.guess and config.sub
 if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi

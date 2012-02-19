@@ -3,7 +3,7 @@
 # modified by mhaqs for 7.31.0 release and cpp compatibility
 
 ## Download the source code.
-wget --continue http://curl.haxx.se/download/curl-7.31.0.tar.gz
+../download.sh curl-7.31.0.tar.gz
 
 ## Download an up-to-date config.guess and config.sub
 if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi
