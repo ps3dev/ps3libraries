@@ -35,7 +35,7 @@ PLATFORM="PS3"
 ../download.sh polarssl-${VERSION}-gpl.tgz
 
 ## Unpack the source code.
-rm -Rf polarssl-${VERSION} && tar xfvz polarssl-${VERSION}-gpl.tgz && cd polarssl-${VERSION}/library
+rm -Rf polarssl-${VERSION} && tar xfvz ../archives/polarssl-${VERSION}-gpl.tgz && cd polarssl-${VERSION}/library
 
 ## Patch the source code.
 echo "Patching net.c and timing.c for compatibility..."

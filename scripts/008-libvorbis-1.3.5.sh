@@ -9,7 +9,7 @@ if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/
 if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
 
 ## Unpack the source code.
-rm -Rf libvorbis-1.3.5 && tar xfvz libvorbis-1.3.5.tar.gz && cd libvorbis-1.3.5
+rm -Rf libvorbis-1.3.5 && tar xfvz ../archives/libvorbis-1.3.5.tar.gz && cd libvorbis-1.3.5
 
 ## Replace config.guess and config.sub
 cp ../config.guess ../config.sub .

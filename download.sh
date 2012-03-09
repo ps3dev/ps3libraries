@@ -1,12 +1,15 @@
 #!/bin/sh
 
+cd `dirname $0`
+cd archives || exit
+
 if [ $# -ne 1 ]; then
   echo >&2 "Usage: $0 filename"
   exit 1
 fi
 file="$1"
 
-set -- `grep "$1" ../archives.txt`
+set -- `grep "$1" archives.txt`
 if [ $# -lt 3 ]; then
   echo >&2 "Unable to find $file in archives.txt"
   exit 1

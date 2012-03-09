@@ -5,7 +5,7 @@
 ../download.sh libmikmod-3.1.11.tar.gz
 
 ## Unpack the source code.
-rm -Rf libmikmod-3.1.11 && tar xfvz ./libmikmod-3.1.11.tar.gz && cd libmikmod-3.1.11
+rm -Rf libmikmod-3.1.11 && tar xfvz ../archives/libmikmod-3.1.11.tar.gz && cd libmikmod-3.1.11
 
 ## Patch the source code.
 cat ../../patches/libmikmod-3.1.11-PPU.patch | patch -p1

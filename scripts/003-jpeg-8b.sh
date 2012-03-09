@@ -9,7 +9,7 @@ if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/
 if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
 
 ## Unpack the source code.
-rm -Rf jpeg-8b && tar xfvz jpegsrc.v8b.tar.gz && cd jpeg-8b
+rm -Rf jpeg-8b && tar xfvz ../archives/jpegsrc.v8b.tar.gz && cd jpeg-8b
 
 ## Replace config.guess and config.sub
 cp ../config.guess ../config.sub .

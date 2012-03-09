@@ -9,7 +9,7 @@ if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/
 if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
 
 ## Unpack the source code.
-rm -Rf libogg-1.3.4 && tar xfvz libogg-1.3.4.tar.gz && cd libogg-1.3.4
+rm -Rf libogg-1.3.4 && tar xfvz ../archives/libogg-1.3.4.tar.gz && cd libogg-1.3.4
 
 ## Replace config.guess and config.sub
 cp ../config.guess ../config.sub .

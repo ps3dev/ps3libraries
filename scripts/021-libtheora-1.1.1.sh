@@ -9,7 +9,7 @@ if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/
 if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
 
 ## Unpack the source code.
-rm -Rf libtheora-1.1.1 && tar xfvj libtheora-1.1.1.tar.bz2 && cd libtheora-1.1.1
+rm -Rf libtheora-1.1.1 && tar xfvj ../archives/libtheora-1.1.1.tar.bz2 && cd libtheora-1.1.1
 
 ## Replace config.guess and config.sub
 cp ../config.guess ../config.sub .

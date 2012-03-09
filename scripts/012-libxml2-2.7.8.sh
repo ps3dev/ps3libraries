@@ -9,7 +9,7 @@ if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/
 if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
 
 ## Unpack the source code.
-rm -Rf libxml2-2.7.8 && tar xfvz libxml2-2.7.8.tar.gz && cd libxml2-2.7.8
+rm -Rf libxml2-2.7.8 && tar xfvz ../archives/libxml2-2.7.8.tar.gz && cd libxml2-2.7.8
 
 ## Replace config.guess and config.sub
 cp ../config.guess ../config.sub .

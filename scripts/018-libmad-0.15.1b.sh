@@ -9,7 +9,7 @@ if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/
 if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
 
 ## Unpack the source code.
-rm -Rf libmad-0.15.1b && tar xfvz libmad-0.15.1b.tar.gz && cd libmad-0.15.1b
+rm -Rf libmad-0.15.1b && tar xfvz ../archives/libmad-0.15.1b.tar.gz && cd libmad-0.15.1b
 
 ## Replace config.guess and config.sub
 cp ../config.guess ../config.sub .

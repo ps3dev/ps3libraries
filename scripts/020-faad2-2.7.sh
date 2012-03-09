@@ -9,7 +9,7 @@ if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/
 if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
 
 ## Unpack the source code.
-rm -Rf faad2-2.7 && tar xfvz faad2-2.7.tar.gz && cd faad2-2.7
+rm -Rf faad2-2.7 && tar xfvz ../archives/faad2-2.7.tar.gz && cd faad2-2.7
 
 ## Replace config.guess and config.sub
 cp ../config.guess ../config.sub .

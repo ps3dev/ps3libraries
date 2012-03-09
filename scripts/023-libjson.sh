@@ -8,7 +8,7 @@ if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/
 if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
 
 ## Unpack the source code.
-rm -Rf jsonc && mkdir jsonc && tar --strip-components=1 --directory=jsonc -xvzf json-c-0.11-20130402
+rm -Rf jsonc && mkdir jsonc && tar --strip-components=1 --directory=jsonc -xvzf ../archives/json-c-0.11-20130402
 
 ## Create the build directory.
 cd jsonc

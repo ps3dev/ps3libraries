@@ -9,7 +9,7 @@ if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/
 if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
 
 ## Unpack the source code.
-rm -Rf pixman-0.20.0 && tar xfvz pixman-0.20.0.tar.gz && cd pixman-0.20.0
+rm -Rf pixman-0.20.0 && tar xfvz ../archives/pixman-0.20.0.tar.gz && cd pixman-0.20.0
 
 ## Replace config.guess and config.sub
 cp ../config.guess ../config.sub .

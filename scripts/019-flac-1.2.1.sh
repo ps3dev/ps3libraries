@@ -9,7 +9,7 @@ if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/
 if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
 
 ## Unpack the source code.
-rm -Rf flac-1.2.1 && tar xfvz flac-1.2.1.tar.gz && cd flac-1.2.1
+rm -Rf flac-1.2.1 && tar xfvz ../archives/flac-1.2.1.tar.gz && cd flac-1.2.1
 
 ## Replace config.guess and config.sub
 cp ../config.guess ../config.sub .
