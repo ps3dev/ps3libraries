@@ -3,6 +3,13 @@
 cd `dirname $0`
 cd archives || exit
 
+if [ $# -eq 0 ]; then
+  sed -e 's:^.*/::g' < archives.txt | while read file; do
+    ../download.sh "$file" || exit
+  done
+  exit
+fi
+
 if [ $# -ne 1 ]; then
   echo >&2 "Usage: $0 filename"
   exit 1
