@@ -50,7 +50,7 @@ if [ -n "$local_md5" -a "$remote_md5" != "$local_md5" ]; then
   if [ $previous_file = yes ]; then
     echo >&2 "Deleting the file and trying again..."
     rm "$file"
-    exec "$0" "$file"
+    exec ../download.sh "$file"
   else
     exit 1
   fi
