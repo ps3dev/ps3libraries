@@ -2,10 +2,10 @@
 # zlib-1.2.6.sh by Dan Peori (danpeori@oopo.net)
 
 ## Download the source code.
-wget --continue http://zlib.net/zlib-1.2.6.tar.gz
+wget --continue http://zlib.net/zlib-1.2.7.tar.gz
 
 ## Unpack the source code.
-rm -Rf zlib-1.2.6 && tar xfvz zlib-1.2.6.tar.gz && cd zlib-1.2.6
+rm -Rf zlib-1.2.6 && tar xfvz zlib-1.2.7.tar.gz && cd zlib-1.2.7
 
 ## Patch the source code.
 cat ../../patches/zlib-1.2.6-PPU.patch | patch -p1
