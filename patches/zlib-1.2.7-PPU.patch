@@ -24,3 +24,13 @@ diff -burN orig.zlib-1.2.6/configure zlib-1.2.6/configure
          LDSHARED=${LDSHARED-"$cc -shared"}
          LDSHAREDLIBC=""
          EXE='.exe' ;;
+@@ -231,8 +231,7 @@
+              SHAREDLIBV=libz.$VER$shared_ext
+              SHAREDLIBM=libz.$VER1$shared_ext
+              LDSHARED=${LDSHARED-"$cc -dynamiclib -install_name $libdir/$SHAREDLIBM -compatibility_version $VER1 -current_version $VER3"}
+-             AR="/usr/bin/libtool"
+-             ARFLAGS="-o" ;;
++      ;;
+   *)             LDSHARED=${LDSHARED-"$cc -shared"} ;;
+   esac
+ else
