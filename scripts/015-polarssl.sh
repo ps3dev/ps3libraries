@@ -32,7 +32,7 @@ ARCH="powerpc64"
 PLATFORM="APPLE"
 
 ## Download the source code.
-wget --continue https://polarssl.org/download/polarssl-${VERSION}-gpl.tgz
+wget --continue --no-check-certificate https://polarssl.org/download/polarssl-${VERSION}-gpl.tgz?do=yes
 
 ## Unpack the source code.
 rm -Rf polarssl-${VERSION} && tar xfvz polarssl-${VERSION}.gpl.tgz && cd polarssl-${VERSION}/library
