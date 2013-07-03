@@ -1,7 +1,7 @@
 #!/bin/sh -e
 # libjson-c.sh by Mohammad Haseeb (mmhaqs@gmail.com)
 
-wget --no-check-certificate https://github.com/json-c/json-c/tarball/master -O jsonc.tar.gz
+wget --no-check-certificate https://codeload.github.com/json-c/json-c/tar.gz/json-c-0.11-20130402 -O jsonc.tar.gz
 
 ## Unpack the source code.
 rm -Rf jsonc && mkdir jsonc && tar --strip-components=1 --directory=jsonc -xvzf jsonc.tar.gz
