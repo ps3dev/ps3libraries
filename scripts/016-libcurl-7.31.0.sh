@@ -1,22 +1,21 @@
 #!/bin/sh -e
-# libcurl-7.29.0 by KaKaRoTo
+# libcurl-7.31.0 by KaKaRoTo
 
 ## Download the source code.
-wget --continue http://curl.haxx.se/download/curl-7.29.0.tar.gz
+wget --continue http://curl.haxx.se/download/curl-7.31.0.tar.gz
 
 ## Unpack the source code.
-rm -Rf curl-7.29.0 && tar xfvz curl-7.29.0.tar.gz && cd curl-7.29.0
+rm -Rf curl-7.31.0 && tar xfvz curl-7.31.0.tar.gz && cd curl-7.31.0
 
 ## Patch the source code.
-cat ../../patches/libcurl-7.29.0.patch | patch -p1
-
+cat ../../patches/libcurl-7.31.0.patch | patch -p1
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu
 
 ## Configure the build.
 AR="ppu-ar" CC="ppu-gcc" RANLIB="ppu-ranlib" \
-  CFLAGS="-O2 -Wall -I$PSL1GHT/ppu/include -I$PS3DEV/portlibs/ppu/include -I$PSL1GHT/ppu/include/net" \
+  CFLAGS="-O2 -Wall" \
   CXXFLAGS="-I$PSL1GHT/ppu/include -I$PS3DEV/portlibs/ppu/include" \
   CPPFLAGS=" -I$PSL1GHT/ppu/include -I$PS3DEV/portlibs/ppu/include -I$PSL1GHT/ppu/include/net"  \
   LDFLAGS="-L$PSL1GHT/ppu/lib -L$PS3DEV/portlibs/ppu/lib" LIBS="-lnet -lsysutil -lsysmodule -lm " \
