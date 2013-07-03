@@ -22,28 +22,25 @@
 ###########################################################################
 # Change values here
 #
-VERSION="1.2.5"
+VERSION="1.2.8"
 #
 ###########################################################################
 #
 # Don't change anything here
 CURRENTPATH=`pwd`
 ARCH="powerpc64"
-PLATFORM="APPLE"
+PLATFORM="PS3"
 
 ## Download the source code.
-wget --continue --no-check-certificate https://polarssl.org/download/polarssl-${VERSION}-gpl.tgz?do=yes
+wget --continue --no-check-certificate -O polarssl-${VERSION}.gpl.tgz  https://polarssl.org/download/polarssl-${VERSION}-gpl.tgz?do=yes
 
 ## Unpack the source code.
 rm -Rf polarssl-${VERSION} && tar xfvz polarssl-${VERSION}.gpl.tgz && cd polarssl-${VERSION}/library
 
 ## Patch the source code.
 echo "Patching net.c and timing.c for compatibility..."
-cat ../../../patches/polarssl-1.2.5-net.patch | patch -p1
-cat ../../../patches/polarssl-1.2.5-timing.patch | patch -p1
-
-## Create the build directory.
-mkdir build-ppu && cd build-ppu
+cat ../../../patches/polarssl-1.2.8-net.patch | patch -p1
+cat ../../../patches/polarssl-1.2.8-timing.patch | patch -p1
 
 echo "Building polarssl for ${PLATFORM} ${SDKVERSION} ${ARCH}"
 
@@ -69,7 +66,7 @@ echo "Build library..."
 ${MAKE:-make}
 
 cp libpolarssl.a $PS3DEV/portlibs/ppu/lib/libpolarssl.a
-cp -R ${CURRENTPATH}/polarssl-${VERSION}/include $PS3DEV/portlibs/ppu/include/
-cp ${CURRENTPATH}/polarssl-${VERSION}/LICENSE $PS3DEV/portlibs/ppu/include/polarssl/LICENSE
+cp -R ../include/polarssl $PS3DEV/portlibs/ppu/include/
+cp ../LICENSE $PS3DEV/portlibs/ppu/include/polarssl/LICENSE
 
 echo "Building done."
