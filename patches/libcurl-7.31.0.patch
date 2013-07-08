@@ -1,22 +1,20 @@
-diff --git a/src/main.c b/src/main.c
-index e33bf9b..2c37586 100644
---- a/src/main.c
-+++ b/src/main.c
-@@ -5996,6 +5996,7 @@ static int create_dir_hierarchy(const char *outfile, FILE *errors)
+diff --git a/src/tool_dirhie.c b/src/tool_dirhie.c
+--- a/src/tool_dirhie.c
++++ b/src/tool_dirhie.c
+@@ -118,6 +118,7 @@
         if not ending with DIR_CHAR, we need to prune it */
      if(tempdir2 != NULL) {
        size_t dlen = strlen(dirbuildup);
-+      struct stat st;
++          struct stat st;
        if(dlen)
          sprintf(&dirbuildup[dlen], "%s%s", DIR_CHAR, tempdir);
        else {
-@@ -6004,7 +6005,7 @@ static int create_dir_hierarchy(const char *outfile, FILE *errors)
+@@ -126,7 +127,7 @@
          else
            sprintf(dirbuildup, "%s%s", DIR_CHAR, tempdir);
        }
 -      if(access(dirbuildup, F_OK) == -1) {
 +      if(stat(dirbuildup, &st) == -1) {
-         result = mkdir(dirbuildup,(mode_t)0000750);
-         if(-1 == result) {
+         if(-1 == mkdir(dirbuildup,(mode_t)0000750)) {
            show_dir_errno(errors, dirbuildup);
-
+           result = CURLE_WRITE_ERROR;

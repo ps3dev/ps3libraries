@@ -1,0 +1,12 @@
+--- library/net.c  
++++ library/net.c	
+@@ -67,7 +67,8 @@
+ #elif defined(sun)
+ #include <sys/isa_defs.h>
+ #else
+-#include <endian.h>
++#include <machine/endian.h>
++#include <net/select.h>
+ #endif
+ 
+ #endif
