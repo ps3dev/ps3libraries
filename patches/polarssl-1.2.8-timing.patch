@@ -1,0 +1,19 @@
+--- library/timing.c  
++++ library/timing.c	
+@@ -45,6 +45,7 @@
+ #include <sys/types.h>
+ #include <sys/time.h>
+ #include <signal.h>
++#include <net/select.h>
+ #include <time.h>
+ 
+ struct _hr_time
+@@ -293,7 +294,7 @@
+ {
+     alarmed = 0;
+     signal( SIGALRM, sighandler );
+-    alarm( seconds );
++    //alarm( seconds );
+ }
+ 
+ void m_sleep( int milliseconds )
