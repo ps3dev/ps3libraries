@@ -1,6 +1,6 @@
 diff -burN orig.zlib-1.2.6/Makefile.in zlib-1.2.6/Makefile.in
---- orig.zlib-1.2.6/Makefile.in	2012-01-28 23:48:50.000000000 +0100
-+++ zlib-1.2.6/Makefile.in	2012-02-17 19:12:07.109166356 +0100
+--- orig.zlib-1.2.6/Makefile.in 2012-01-28 23:48:50.000000000 +0100
++++ zlib-1.2.6/Makefile.in  2012-02-17 19:12:07.109166356 +0100
 @@ -73,7 +73,7 @@
  
  all: static shared
@@ -11,26 +11,30 @@ diff -burN orig.zlib-1.2.6/Makefile.in zlib-1.2.6/Makefile.in
  shared: examplesh$(EXE) minigzipsh$(EXE)
  
 diff -burN orig.zlib-1.2.6/configure zlib-1.2.6/configure
---- orig.zlib-1.2.6/configure	2012-01-29 18:48:11.000000000 +0100
-+++ zlib-1.2.6/configure	2012-02-17 19:14:34.119121726 +0100
-@@ -182,8 +182,8 @@
+--- orig.zlib-1.2.6/configure 2012-01-29 18:48:11.000000000 +0100
++++ zlib-1.2.6/configure  2012-02-17 19:14:34.119121726 +0100
+@@ -193,8 +193,8 @@
    MINGW* | mingw*)
  # temporary bypass
          rm -f $test.[co] $test $test$shared_ext
 -        echo "Please use win32/Makefile.gcc instead." | tee -a configure.log
--        exit 1
-+#        echo "Please use win32/Makefile.gcc instead." | tee -a configure.log
-+#        exit 1
+-        leave 1
++        # echo "Please use win32/Makefile.gcc instead." | tee -a configure.log
++        # leave 1
          LDSHARED=${LDSHARED-"$cc -shared"}
          LDSHAREDLIBC=""
          EXE='.exe' ;;
-@@ -231,8 +231,7 @@
+@@ -217,12 +217,7 @@
               SHAREDLIBV=libz.$VER$shared_ext
               SHAREDLIBM=libz.$VER1$shared_ext
               LDSHARED=${LDSHARED-"$cc -dynamiclib -install_name $libdir/$SHAREDLIBM -compatibility_version $VER1 -current_version $VER3"}
--             AR="/usr/bin/libtool"
+-             if libtool -V 2>&1 | grep Apple > /dev/null; then
+-                 AR="libtool"
+-             else
+-                 AR="/usr/bin/libtool"
+-             fi
 -             ARFLAGS="-o" ;;
-+      ;;
++             ;;
    *)             LDSHARED=${LDSHARED-"$cc -shared"} ;;
    esac
  else
