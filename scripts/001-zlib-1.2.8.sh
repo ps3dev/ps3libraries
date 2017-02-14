@@ -2,7 +2,7 @@
 # zlib-1.2.8.sh by Dan Peori (danpeori@oopo.net)
 
 ## Download the source code.
-wget --continue http://zlib.net/zlib-1.2.8.tar.gz
+wget --continue http://zlib.net/fossils/zlib-1.2.8.tar.gz
 
 ## Unpack the source code.
 rm -Rf zlib-1.2.8 && tar xfvz zlib-1.2.8.tar.gz && cd zlib-1.2.8
