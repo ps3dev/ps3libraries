@@ -1,7 +1,6 @@
-diff -burN orig.zlib-1.2.6/Makefile.in zlib-1.2.6/Makefile.in
---- orig.zlib-1.2.6/Makefile.in 2012-01-28 23:48:50.000000000 +0100
-+++ zlib-1.2.6/Makefile.in  2012-02-17 19:12:07.109166356 +0100
-@@ -73,7 +73,7 @@
+--- orig.zlib-1.2.11/Makefile.in	2017-01-15 18:29:40.000000000 +0100
++++ zlib-1.2.11/Makefile.in	2017-02-15 12:02:49.221883981 +0100
+@@ -75,7 +75,7 @@
  
  all: static shared
  
@@ -10,10 +9,9 @@ diff -burN orig.zlib-1.2.6/Makefile.in zlib-1.2.6/Makefile.in
  
  shared: examplesh$(EXE) minigzipsh$(EXE)
  
-diff -burN orig.zlib-1.2.6/configure zlib-1.2.6/configure
---- orig.zlib-1.2.6/configure 2012-01-29 18:48:11.000000000 +0100
-+++ zlib-1.2.6/configure  2012-02-17 19:14:34.119121726 +0100
-@@ -193,8 +193,8 @@
+--- orig.zlib-1.2.11/configure	2016-12-31 19:06:40.000000000 +0100
++++ zlib-1.2.11/configure	2017-02-15 12:02:49.244443762 +0100
+@@ -217,8 +217,8 @@
    MINGW* | mingw*)
  # temporary bypass
          rm -f $test.[co] $test $test$shared_ext
@@ -24,7 +22,7 @@ diff -burN orig.zlib-1.2.6/configure zlib-1.2.6/configure
          LDSHARED=${LDSHARED-"$cc -shared"}
          LDSHAREDLIBC=""
          EXE='.exe' ;;
-@@ -217,12 +217,7 @@
+@@ -241,12 +241,7 @@
               SHAREDLIBV=libz.$VER$shared_ext
               SHAREDLIBM=libz.$VER1$shared_ext
               LDSHARED=${LDSHARED-"$cc -dynamiclib -install_name $libdir/$SHAREDLIBM -compatibility_version $VER1 -current_version $VER3"}
