@@ -1,5 +1,5 @@
 #!/bin/sh
-# libraries.sh by Dan Peori (danpeori@oopo.net)
+# libraries.sh by Naomi Peori (naomi@peori.ca)
 
 ## Enter the ps3libraries directory.
 cd "`dirname $0`" || { echo "ERROR: Could not enter the ps3libraries directory."; exit 1; }

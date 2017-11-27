@@ -1,5 +1,5 @@
 #!/bin/sh -e
-# sdl_psl1ght.sh by Dan Peori (dan.peori@oopo.net)
+# sdl_psl1ght.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
 wget --no-check-certificate https://github.com/zeldin/SDL_PSL1GHT/tarball/master -O sdl_psl1ght.tar.gz

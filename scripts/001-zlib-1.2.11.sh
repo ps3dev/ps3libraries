@@ -1,5 +1,5 @@
 #!/bin/sh -e
-# zlib-1.2.11.sh by Dan Peori (danpeori@oopo.net)
+# zlib-1.2.11.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
 wget --continue http://zlib.net/zlib-1.2.11.tar.gz

@@ -1,5 +1,5 @@
 #!/bin/sh -e
-# libogg-1.2.1.sh by Dan Peori (danpeori@oopo.net)
+# libogg-1.2.1.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
 wget --continue http://downloads.xiph.org/releases/ogg/libogg-1.2.1.tar.gz

@@ -1,5 +1,5 @@
 #!/bin/sh -e
-# freetype-2.4.3.sh by Dan Peori (danpeori@oopo.net)
+# freetype-2.4.3.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
 wget --continue http://download.savannah.gnu.org/releases/freetype/freetype-2.4.3.tar.gz

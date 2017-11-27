@@ -1,5 +1,5 @@
 #!/bin/sh -e
-# libxml2-2.7.8.sh by Dan Peori (danpeori@oopo.net)
+# libxml2-2.7.8.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
 wget --continue ftp://xmlsoft.org/libxml2/libxml2-2.7.8.tar.gz

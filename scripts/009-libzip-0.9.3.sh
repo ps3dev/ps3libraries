@@ -1,5 +1,5 @@
 #!/bin/sh -e
-# libzip-0.9.3.sh by Dan Peori (danpeori@oopo.net)
+# libzip-0.9.3.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
 wget --continue http://www.nih.at/libzip/libzip-0.9.3.tar.bz2

@@ -1,5 +1,5 @@
 #!/bin/sh -e
-# libvorbis-1.3.2.sh by Dan Peori (danpeori@oopo.net)
+# libvorbis-1.3.2.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
 wget --continue http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.2.tar.gz

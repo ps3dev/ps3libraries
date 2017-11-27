@@ -1,5 +1,5 @@
 #!/bin/sh -e
-# cairo-1.10.0.sh by Dan Peori (danpeori@oopo.net)
+# cairo-1.10.0.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
 wget --continue http://cairographics.org/releases/cairo-1.10.0.tar.gz

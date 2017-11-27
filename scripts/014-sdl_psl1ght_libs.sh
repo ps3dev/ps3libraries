@@ -1,5 +1,5 @@
 #!/bin/sh -e
-# sdl_psl1ght_libs.sh by Dan Peori (dan.peori@oopo.net)
+# sdl_psl1ght_libs.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
 wget --no-check-certificate https://github.com/zeldin/SDL_PSL1GHT_Libs/tarball/master -O sdl_psl1ght_libs.tar.gz

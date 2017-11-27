@@ -1,5 +1,5 @@
 #!/bin/sh -e
-# libpng-1.4.4.sh by Dan Peori (danpeori@oopo.net)
+# libpng-1.4.4.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
 wget --continue http://download.sourceforge.net/libpng/libpng-1.4.4.tar.gz

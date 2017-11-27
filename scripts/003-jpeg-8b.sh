@@ -1,5 +1,5 @@
 #!/bin/sh -e
-# jpeg-8b.sh by Dan Peori (danpeori@oopo.net)
+# jpeg-8b.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
 wget --continue http://www.ijg.org/files/jpegsrc.v8b.tar.gz

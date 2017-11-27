@@ -1,5 +1,5 @@
 #!/bin/sh -e
-# pixman-0.20.0.sh by Dan Peori (danpeori@oopo.net)
+# pixman-0.20.0.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
 wget --continue http://cairographics.org/releases/pixman-0.20.0.tar.gz
