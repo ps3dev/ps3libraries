@@ -4,8 +4,15 @@
 ## Download the source code.
 wget --continue http://cairographics.org/releases/pixman-0.20.0.tar.gz
 
+## Download an up-to-date config.guess and config.sub
+if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi
+if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
+
 ## Unpack the source code.
 rm -Rf pixman-0.20.0 && tar xfvz pixman-0.20.0.tar.gz && cd pixman-0.20.0
+
+## Replace config.guess and config.sub
+cp ../config.guess ../config.sub .
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu

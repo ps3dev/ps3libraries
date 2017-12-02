@@ -7,8 +7,15 @@ wget --tries 5 --timeout 15 --continue \
 || wget --continue \
   https://github.com/downloads/ps3dev/ps3libraries/tiff-3.9.4.tar.gz
 
+## Download an up-to-date config.guess and config.sub
+if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi
+if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
+
 ## Unpack the source code.
 rm -Rf tiff-3.9.4 && tar xfvz ./tiff-3.9.4.tar.gz && cd tiff-3.9.4
+
+## Replace config.guess and config.sub
+cp ../config.guess ../config.sub config/
 
 ## Patch the source code.
 cat ../../patches/tiff-3.9.4-PPU.patch | patch -p1
