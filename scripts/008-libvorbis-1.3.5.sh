@@ -1,15 +1,15 @@
 #!/bin/sh -e
-# libogg-1.2.1.sh by Naomi Peori (naomi@peori.ca)
+# libvorbis-1.3.5.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
-wget --continue http://downloads.xiph.org/releases/ogg/libogg-1.2.1.tar.gz
+wget --continue http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.5.tar.gz
 
 ## Download an up-to-date config.guess and config.sub
 if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi
 if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
 
 ## Unpack the source code.
-rm -Rf libogg-1.2.1 && tar xfvz libogg-1.2.1.tar.gz && cd libogg-1.2.1
+rm -Rf libvorbis-1.3.5 && tar xfvz libvorbis-1.3.5.tar.gz && cd libvorbis-1.3.5
 
 ## Replace config.guess and config.sub
 cp ../config.guess ../config.sub .
