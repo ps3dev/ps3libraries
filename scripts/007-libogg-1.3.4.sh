@@ -5,14 +5,14 @@
 ../download.sh libogg-1.3.4.tar.gz
 
 ## Download an up-to-date config.guess and config.sub
-if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi
-if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
+../download.sh config.guess
+../download.sh config.sub
 
 ## Unpack the source code.
 rm -Rf libogg-1.3.4 && tar xfvz ../archives/libogg-1.3.4.tar.gz && cd libogg-1.3.4
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub .
+cp ../../archives/config.guess ../../archives/config.sub .
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu
