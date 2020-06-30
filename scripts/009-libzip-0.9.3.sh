@@ -2,17 +2,17 @@
 # libzip-0.9.3.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
-wget --continue http://www.nih.at/libzip/libzip-0.9.3.tar.bz2
+../download.sh libzip-0.9.3.tar.bz2
 
 ## Download an up-to-date config.guess and config.sub
-if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi
-if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
+../download.sh config.guess
+../download.sh config.sub
 
 ## Unpack the source code.
-rm -Rf libzip-0.9.3 && tar xfvj libzip-0.9.3.tar.bz2 && cd libzip-0.9.3
+rm -Rf libzip-0.9.3 && tar xfvj ../archives/libzip-0.9.3.tar.bz2 && cd libzip-0.9.3
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub .
+cp ../../archives/config.guess ../../archives/config.sub .
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu

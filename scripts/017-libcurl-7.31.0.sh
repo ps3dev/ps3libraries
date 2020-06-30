@@ -3,17 +3,17 @@
 # modified by mhaqs for 7.31.0 release and cpp compatibility
 
 ## Download the source code.
-wget --continue http://curl.haxx.se/download/curl-7.31.0.tar.gz
+../download.sh curl-7.31.0.tar.gz
 
 ## Download an up-to-date config.guess and config.sub
-if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi
-if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
+../download.sh config.guess
+../download.sh config.sub
 
 ## Unpack the source code.
-rm -Rf curl-7.31.0 && tar xfvz curl-7.31.0.tar.gz && cd curl-7.31.0
+rm -Rf curl-7.31.0 && tar xfvz ../archives/curl-7.31.0.tar.gz && cd curl-7.31.0
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub .
+cp ../../archives/config.guess ../../archives/config.sub .
 
 ## Patch the source code.
 cat ../../patches/libcurl-7.31.0.patch | patch -p1
