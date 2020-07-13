@@ -14,6 +14,9 @@ rm -Rf cairo-1.10.0 && tar xfvz cairo-1.10.0.tar.gz && cd cairo-1.10.0
 ## Replace config.guess and config.sub
 cp ../config.guess ../config.sub build/
 
+## Patch the source code.
+cat ../../patches/cairo-1.10.0.patch | patch -p1
+
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu
 
