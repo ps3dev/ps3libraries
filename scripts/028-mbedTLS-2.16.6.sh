@@ -34,7 +34,7 @@ ARCH="powerpc64"
 PLATFORM="PS3"
 
 ## Download the source code.
-wget --continue --no-check-certificate -O mbedtls-${VERSION}.gpl.tgz https://tls.mbed.org/download/mbedtls-${VERSION}-gpl.tgz
+../download.sh mbedtls-${VERSION}-gpl.tgz
 
 ## Unpack the source code.
 rm -Rf mbedtls-${VERSION} && tar xfvz mbedtls-${VERSION}.gpl.tgz && cd mbedtls-${VERSION}
