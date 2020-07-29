@@ -32,10 +32,10 @@ ARCH="powerpc64"
 PLATFORM="PS3"
 
 ## Download the source code.
-wget --continue --no-check-certificate -O polarssl-${VERSION}.gpl.tgz  https://polarssl.org/download/polarssl-${VERSION}-gpl.tgz?do=yes
+../download.sh polarssl-${VERSION}-gpl.tgz
 
 ## Unpack the source code.
-rm -Rf polarssl-${VERSION} && tar xfvz polarssl-${VERSION}.gpl.tgz && cd polarssl-${VERSION}/library
+rm -Rf polarssl-${VERSION} && tar xfvz ../archives/polarssl-${VERSION}-gpl.tgz && cd polarssl-${VERSION}/library
 
 ## Patch the source code.
 echo "Patching net.c and timing.c for compatibility..."

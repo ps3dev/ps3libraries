@@ -2,10 +2,10 @@
 # zlib-1.2.11.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
-wget --continue http://zlib.net/zlib-1.2.11.tar.gz
+../download.sh zlib-1.2.11.tar.gz
 
 ## Unpack the source code.
-rm -Rf zlib-1.2.11 && tar xfvz zlib-1.2.11.tar.gz && cd zlib-1.2.11
+rm -Rf zlib-1.2.11 && tar xfvz ../archives/zlib-1.2.11.tar.gz && cd zlib-1.2.11
 
 ## Patch the source code.
 cat ../../patches/zlib-1.2.11-PPU.patch | patch -p1
