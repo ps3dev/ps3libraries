@@ -20,3 +20,4 @@ a36e8410cac46b00a4d01752b32c3eb1 11125077 http://www.libsdl.org/projects/SDL_mix
 ee1b4d67ea2d76ee52c5621bc6dbf61e  1137407 http://downloads.sourceforge.net/faac/faad2-2.7.tar.gz
 292ab65cedd5021d6b7ddd117e07cd8e  1903175 http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2
 7013b2471a507942eb8ed72a5d872d16   455089 https://codeload.github.com/json-c/json-c/tar.gz/json-c-0.11-20130402
+4ba3d1a090159486394ba6e46f95bf6c  2706375 https://tls.mbed.org/download/mbedtls-2.16.6-gpl.tgz
