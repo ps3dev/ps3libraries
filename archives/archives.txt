@@ -14,7 +14,7 @@ b9a66c80bdf45363605e4aa75fa951a8   589570 http://downloads.xiph.org/releases/ogg
 8127a65e8c3b08856093099b52599c86  4881808 ftp://xmlsoft.org/libxml2/libxml2-2.7.8.tar.gz
 a36e8410cac46b00a4d01752b32c3eb1 11125077 http://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.0.4.tar.gz
 985151639b1ca037293f06da44fbc6bc   998609 https://polarssl.org/download/polarssl-1.2.8-gpl.tgz
-6f26843f7e3a2fb06e02f68a55efe8c7  3380242 http://curl.haxx.se/download/curl-7.31.0.tar.gz
+371239c13ed64ae4c56cd2480cde52f8  4008103 http://curl.haxx.se/download/curl-7.64.1.tar.gz
 1be543bc30c56fb6bea1d7bf6a64e66c   502379 http://downloads.sourceforge.net/project/mad/libmad/0.15.1b/libmad-0.15.1b.tar.gz
 153c8b15a54da428d1f0fadc756c22c7  2009217 http://downloads.sourceforge.net/project/flac/flac-src/flac-1.2.1-src/flac-1.2.1.tar.gz
 ee1b4d67ea2d76ee52c5621bc6dbf61e  1137407 http://downloads.sourceforge.net/faac/faad2-2.7.tar.gz
