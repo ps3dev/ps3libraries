@@ -4,7 +4,7 @@
 #	ported to PS3 by Bucanero
 
 ## Download the source code.
-wget --no-check-certificate https://github.com/sahlberg/libsmb2/tarball/master -O tiny3d.tar.gz 
+wget --no-check-certificate https://github.com/sahlberg/libsmb2/tarball/master -O libsmb2.tar.gz 
 
 ## Unpack the source code.
 rm -Rf libsmb2 && mkdir libsmb2 && tar --strip-components=1 --directory=libsmb2 -xvzf libsmb2.tar.gz && cd libsmb2/lib
