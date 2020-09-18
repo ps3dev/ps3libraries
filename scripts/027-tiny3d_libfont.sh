@@ -10,10 +10,10 @@
 #	Bucanero, CrystalCT, Miigotu, Shagkur, Wargio and Zeldin to update Tiny3D for GCC 7.2.0
 
 ## Download the source code.
-wget --no-check-certificate https://github.com/wargio/tiny3d/tarball/master -O tiny3d.tar.gz 
+../download.sh submodules/tiny3d
 
 ## Unpack the source code.
-rm -Rf tiny3d && mkdir tiny3d && tar --strip-components=1 --directory=tiny3d -xvzf tiny3d.tar.gz && cd tiny3d
+rm -Rf tiny3d && mkdir tiny3d && git --git-dir=../submodules/tiny3d/.git --work-tree=tiny3d checkout-index -a && cd tiny3d
 
 ## Compile and install.
 ${MAKE:-make} install -C lib --no-print-directory

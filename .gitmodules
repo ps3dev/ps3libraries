@@ -1,0 +1,30 @@
+[submodule "submodules/SDL_PSL1GHT"]
+	path = submodules/SDL_PSL1GHT
+	url = https://github.com/zeldin/SDL_PSL1GHT/
+[submodule "submodules/SDL2_PSL1GHT"]
+	path = submodules/SDL2_PSL1GHT
+	url = https://github.com/sergiou87/SDL2_PSL1GHT
+[submodule "submodules/SDL_PSL1GHT_Libs"]
+	path = submodules/SDL_PSL1GHT_Libs
+	url = https://github.com/zeldin/SDL_PSL1GHT_Libs
+[submodule "submodules/NoRSX"]
+	path = submodules/NoRSX
+	url = https://github.com/wargio/NoRSX
+[submodule "submodules/ps3debugnet"]
+	path = submodules/ps3debugnet
+	url = https://github.com/sergiou87/ps3debugnet
+[submodule "submodules/ps3soundlib"]
+	path = submodules/ps3soundlib
+	url = https://github.com/wargio/ps3soundlib
+[submodule "submodules/tiny3d"]
+	path = submodules/tiny3d
+	url = https://github.com/wargio/tiny3d
+[submodule "submodules/libunrar-ps3"]
+	path = submodules/libunrar-ps3
+	url = https://github.com/bucanero/libunrar-ps3
+[submodule "submodules/libnfs"]
+	path = submodules/libnfs
+	url = https://github.com/sahlberg/libnfs
+[submodule "submodules/libsmb2"]
+	path = submodules/libsmb2
+	url = https://github.com/sahlberg/libsmb2

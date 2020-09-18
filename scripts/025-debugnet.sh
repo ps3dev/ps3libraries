@@ -2,10 +2,10 @@
 # debugnet.sh by Sergio Padrino (@sergiou87)
 
 ## Download the source code.
-wget --no-check-certificate https://github.com/sergiou87/ps3debugnet/tarball/master -O ps3debugnet.tar.gz
+../download.sh submodules/ps3debugnet
 
 ## Unpack the source code.
-rm -Rf ps3debugnet && mkdir ps3debugnet && tar --strip-components=1 --directory=ps3debugnet -xvzf ps3debugnet.tar.gz
+rm -Rf ps3debugnet && mkdir ps3debugnet && git --git-dir=../submodules/ps3debugnet/.git --work-tree=ps3debugnet checkout-index -a
 
 cd ps3debugnet/libdebugnet
 

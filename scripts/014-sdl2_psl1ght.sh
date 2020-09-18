@@ -2,10 +2,10 @@
 # sdl_psl1ght.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
-wget --no-check-certificate https://github.com/sergiou87/SDL2_PSL1GHT/tarball/master -O sdl2_psl1ght.tar.gz
+../download.sh submodules/SDL2_PSL1GHT
 
 ## Unpack the source code.
-rm -Rf sdl2_psl1ght && mkdir sdl2_psl1ght && tar --strip-components=1 --directory=sdl2_psl1ght -xvzf sdl2_psl1ght.tar.gz
+rm -Rf sdl2_psl1ght && mkdir sdl2_psl1ght && git --git-dir=../submodules/SDL2_PSL1GHT/.git --work-tree=sdl2_psl1ght checkout-index -a
 
 ## Create the build directory.
 cd sdl2_psl1ght
