@@ -22,7 +22,7 @@
 ###########################################################################
 # Change values here
 #
-VERSION="1.2.8"
+VERSION="1.3.9"
 #
 ###########################################################################
 #
@@ -35,12 +35,14 @@ PLATFORM="PS3"
 ../download.sh polarssl-${VERSION}-gpl.tgz
 
 ## Unpack the source code.
-rm -Rf polarssl-${VERSION} && tar xfvz ../archives/polarssl-${VERSION}-gpl.tgz && cd polarssl-${VERSION}/library
+rm -Rf polarssl-${VERSION} && tar xfvz ../archives/polarssl-${VERSION}-gpl.tgz && cd polarssl-${VERSION}
 
 ## Patch the source code.
 echo "Patching net.c and timing.c for compatibility..."
-cat ../../../patches/polarssl-1.2.8-net.patch | patch -p1
-cat ../../../patches/polarssl-1.2.8-timing.patch | patch -p1
+cat ../../patches/polarssl-1.3.9-ipv6.patch | patch -p1
+cd library
+cat ../../../patches/polarssl-1.3.9-net.patch | patch -p1
+cat ../../../patches/polarssl-1.3.9-timing.patch | patch -p1
 
 echo "Building polarssl for ${PLATFORM} ${SDKVERSION} ${ARCH}"
 

@@ -1,0 +1,12 @@
+--- a/include/polarssl/config.h
++++ b/include/polarssl/config.h
+@@ -112,7 +112,7 @@
+  *
+  * Comment if your system does not support the IPv6 socket interface
+  */
+-#define POLARSSL_HAVE_IPV6
++//#define POLARSSL_HAVE_IPV6
+ 
+ /**
+  * \def POLARSSL_PLATFORM_MEMORY
+
