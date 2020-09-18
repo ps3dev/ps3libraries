@@ -2,8 +2,9 @@
 	path = submodules/SDL_PSL1GHT
 	url = https://github.com/zeldin/SDL_PSL1GHT/
 [submodule "submodules/SDL2_PSL1GHT"]
+	branch = sdl2_master
 	path = submodules/SDL2_PSL1GHT
-	url = https://github.com/sergiou87/SDL2_PSL1GHT
+	url = https://github.com/shagkur/SDL_PSL1GHT	
 [submodule "submodules/SDL_PSL1GHT_Libs"]
 	path = submodules/SDL_PSL1GHT_Libs
 	url = https://github.com/zeldin/SDL_PSL1GHT_Libs
