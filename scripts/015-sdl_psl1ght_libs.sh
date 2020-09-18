@@ -2,13 +2,13 @@
 # sdl_psl1ght_libs.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
-../download.sh sdl_psl1ght_libs.tar.gz
+../download.sh submodules/SDL_PSL1GHT_Libs
 
 ## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
 ../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
-rm -Rf sdl_psl1ght_libs && mkdir sdl_psl1ght_libs && tar --strip-components=1 --directory=sdl_psl1ght_libs -xvzf ../archives/sdl_psl1ght_libs.tar.gz
+rm -Rf sdl_psl1ght_libs && mkdir sdl_psl1ght_libs && git --git-dir=../submodules/SDL_PSL1GHT_Libs/.git --work-tree=sdl_psl1ght_libs checkout-index -a
 
 ## Create the build directory.
 cd sdl_psl1ght_libs
