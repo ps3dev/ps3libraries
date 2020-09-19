@@ -16,6 +16,11 @@ if [ $# -eq 0 ]; then
   sed -e 's:^.*/::g' < archives.txt | while read file; do
     ../download.sh "$file" || exit
   done
+  for i in ../submodules/*/download.sh; do
+    if [ -x "$i" ]; then
+      "$i"
+    fi
+  done
   exit
 fi
 
