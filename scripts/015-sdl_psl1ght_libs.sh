@@ -2,10 +2,18 @@
 # sdl_psl1ght_libs.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
-wget --no-check-certificate https://github.com/zeldin/SDL_PSL1GHT_Libs/tarball/master -O sdl_psl1ght_libs.tar.gz
+../download.sh submodules/SDL_PSL1GHT_Libs
 
 ## Unpack the source code.
-rm -Rf sdl_psl1ght_libs && mkdir sdl_psl1ght_libs && tar --strip-components=1 --directory=sdl_psl1ght_libs -xvzf sdl_psl1ght_libs.tar.gz
+rm -Rf sdl_psl1ght_libs && mkdir sdl_psl1ght_libs && git --git-dir=../submodules/SDL_PSL1GHT_Libs/.git --work-tree=sdl_psl1ght_libs checkout-index -a
+
+## Use any already downloaded archives from submodules dir
+for i in ../submodules/SDL_PSL1GHT_Libs/archives/*; do
+  case "$i" in
+    */archives.txt) ;;
+    *) [ -f "$i" ] && ln "$i" sdl_psl1ght_libs/archives/ ;;
+  esac
+done
 
 ## Create the build directory.
 cd sdl_psl1ght_libs
