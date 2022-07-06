@@ -32,10 +32,10 @@ ARCH="powerpc64"
 PLATFORM="PS3"
 
 ## Download the source code.
-wget --continue --no-check-certificate -O polarssl-${VERSION}.gpl.tgz  https://src.fedoraproject.org/repo/pkgs/polarssl/polarssl-1.2.8-gpl.tgz/985151639b1ca037293f06da44fbc6bc/polarssl-${VERSION}-gpl.tgz
+wget --continue --no-check-certificate -O polarssl-${VERSION}.tgz https://github.com/Mbed-TLS/mbedtls/tarball/polarssl-${VERSION}
 
 ## Unpack the source code.
-rm -Rf polarssl-${VERSION} && tar xfvz polarssl-${VERSION}.gpl.tgz && cd polarssl-${VERSION}/library
+rm -Rf polarssl-${VERSION} && tar xfvz polarssl-${VERSION}.tgz && cd polarssl-${VERSION}/library
 
 ## Patch the source code.
 echo "Patching net.c and timing.c for compatibility..."
