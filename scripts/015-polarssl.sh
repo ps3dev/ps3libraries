@@ -32,10 +32,10 @@ ARCH="powerpc64"
 PLATFORM="PS3"
 
 ## Download the source code.
-wget --continue --no-check-certificate -O polarssl-${VERSION}.gpl.tgz  https://polarssl.org/download/polarssl-${VERSION}-gpl.tgz?do=yes
+wget --continue --no-check-certificate -O polarssl-${VERSION}.tgz https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/polarssl-${VERSION}.tar.gz
 
 ## Unpack the source code.
-rm -Rf polarssl-${VERSION} && tar xfvz polarssl-${VERSION}.gpl.tgz && cd polarssl-${VERSION}/library
+rm -Rf polarssl-${VERSION} && tar xfvz polarssl-${VERSION}.tgz && cd mbedtls-polarssl-${VERSION}/library
 
 ## Patch the source code.
 echo "Patching net.c and timing.c for compatibility..."
@@ -45,7 +45,7 @@ cat ../../../patches/polarssl-1.2.8-timing.patch | patch -p1
 echo "Building polarssl for ${PLATFORM} ${SDKVERSION} ${ARCH}"
 
 echo "Patching Makefile..."
-sed -i.bak '4d' ${CURRENTPATH}/polarssl-${VERSION}/library/Makefile
+sed -i.bak '4d' ${CURRENTPATH}/mbedtls-polarssl-${VERSION}/library/Makefile
 
 echo "Please stand by..."
 
