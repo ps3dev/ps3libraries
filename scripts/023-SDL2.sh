@@ -14,4 +14,4 @@ tar --strip-components=1 --directory=SDL2PSL1GHT -xvzf SDL2PSL1GHT.tar.gz
 cd SDL2PSL1GHT
 
 ## Compile and install.
-${MAKE:-make} && ${MAKE:-make} install
+./script.sh && ${MAKE:-make} && ${MAKE:-make} install
