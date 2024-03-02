@@ -2,7 +2,7 @@
 # zlib-1.2.11.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
-wget --continue https://www.zlib.net/fossils/zlib-1.2.11.tar.gz
+wget https://www.zlib.net/fossils/zlib-1.2.11.tar.gz
 
 ## Unpack the source code.
 rm -Rf zlib-1.2.11 && tar xfvz zlib-1.2.11.tar.gz && cd zlib-1.2.11

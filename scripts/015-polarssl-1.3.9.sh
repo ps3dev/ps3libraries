@@ -22,7 +22,7 @@
 ###########################################################################
 # Change values here
 #
-VERSION="1.2.8"
+VERSION="1.3.9"
 #
 ###########################################################################
 #
@@ -32,20 +32,22 @@ ARCH="powerpc64"
 PLATFORM="PS3"
 
 ## Download the source code.
-wget --continue --no-check-certificate -O polarssl-${VERSION}.tgz https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/polarssl-${VERSION}.tar.gz
+wget -O polarssl-${VERSION}.gpl.tgz https://src.fedoraproject.org/repo/pkgs/polarssl/polarssl-1.3.9-gpl.tgz/48af7d1f0d5de512cbd6dacf5407884c/polarssl-${VERSION}-gpl.tgz
 
 ## Unpack the source code.
-rm -Rf polarssl-${VERSION} && tar xfvz polarssl-${VERSION}.tgz && cd mbedtls-polarssl-${VERSION}/library
+rm -Rf polarssl-${VERSION} && tar xfvz polarssl-${VERSION}.gpl.tgz && cd polarssl-${VERSION}
 
 ## Patch the source code.
 echo "Patching net.c and timing.c for compatibility..."
-cat ../../../patches/polarssl-1.2.8-net.patch | patch -p1
-cat ../../../patches/polarssl-1.2.8-timing.patch | patch -p1
+cat ../../patches/polarssl-1.3.9-ipv6.patch | patch -p1
+cd library
+cat ../../../patches/polarssl-1.3.9-net.patch | patch -p1
+cat ../../../patches/polarssl-1.3.9-timing.patch | patch -p1
 
 echo "Building polarssl for ${PLATFORM} ${SDKVERSION} ${ARCH}"
 
 echo "Patching Makefile..."
-sed -i.bak '4d' ${CURRENTPATH}/mbedtls-polarssl-${VERSION}/library/Makefile
+sed -i.bak '4d' ${CURRENTPATH}/polarssl-${VERSION}/library/Makefile
 
 echo "Please stand by..."
 

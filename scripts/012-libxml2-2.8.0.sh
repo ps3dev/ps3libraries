@@ -1,15 +1,18 @@
 #!/bin/sh -e
-# libxml2-2.7.8.sh by Naomi Peori (naomi@peori.ca)
+# libxml2-2.8.0.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
-wget --continue http://xmlsoft.org/download/libxml2-2.7.8.tar.gz
+wget http://xmlsoft.org/download/libxml2-2.8.0.tar.gz -O libxml2.tar.gz
 
 ## Download an up-to-date config.guess and config.sub
-if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi
-if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
+if [ ! -f config.guess ]; then wget http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi
+if [ ! -f config.sub ]; then wget http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
 
 ## Unpack the source code.
-rm -Rf libxml2-2.7.8 && tar xfvz libxml2-2.7.8.tar.gz && cd libxml2-2.7.8
+rm -Rf libxml2 && mkdir libxml2 && tar --strip-components=1 --directory=libxml2 -xvzf libxml2.tar.gz
+
+## Create the build directory.
+cd libxml2
 
 ## Replace config.guess and config.sub
 cp ../config.guess ../config.sub .
