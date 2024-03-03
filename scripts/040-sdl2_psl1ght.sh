@@ -13,3 +13,6 @@ cd sdl2_psl1ght
 
 ## Compile and install.
 ./script.sh && ${MAKE:-make} && ${MAKE:-make} install
+
+# Copy sdl2-config to PATH
+cp sdl2-config $PS3DEV/portlibs/ppu/bin
