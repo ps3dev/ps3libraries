@@ -1,3 +1,4 @@
+[![Run Tests](https://github.com/humbertodias/ps3libraries/actions/workflows/test.yml/badge.svg)](https://github.com/humbertodias/ps3libraries/actions/workflows/test.yml)
 
 ###  What does this do?
 
