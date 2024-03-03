@@ -1,8 +1,8 @@
 #!/bin/sh -e
-# libxml2-2.8.0.sh by Naomi Peori (naomi@peori.ca)
+# libxml2-2.9.12.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
-wget http://xmlsoft.org/download/libxml2-2.8.0.tar.gz -O libxml2.tar.gz
+wget http://xmlsoft.org/download/libxml2-2.9.12.tar.gz -O libxml2.tar.gz
 
 ## Download an up-to-date config.guess and config.sub
 if [ ! -f config.guess ]; then wget http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi
