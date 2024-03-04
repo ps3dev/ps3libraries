@@ -11,4 +11,4 @@ rm -Rf pthreads-emb && mkdir pthreads-emb && tar --strip-components=1 --director
 cd pthreads-emb/src/platform/psl1ght
 
 ## Compile and install.
-${MAKE:-make} && ${MAKE:-make} install
+${MAKE:-make} && ${MAKE:-make} install || { exit 1; }
