@@ -2,14 +2,11 @@
 # tiff-3.9.4.sh by Jon Limle <jonlimle123@yahoo.com>
 
 ## Download the source code.
-wget --tries 5 --timeout 15 --continue \
-  http://download.osgeo.org/libtiff/old/tiff-3.9.4.tar.gz \
-|| wget --continue \
-  https://github.com/downloads/ps3dev/ps3libraries/tiff-3.9.4.tar.gz
+wget --tries 5 --timeout 15 https://ftp.osuosl.org/pub/blfs/conglomeration/tiff/tiff-3.9.4.tar.gz
 
 ## Download an up-to-date config.guess and config.sub
-if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi
-if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
+if [ ! -f config.guess ]; then wget http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi
+if [ ! -f config.sub ]; then wget http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
 
 ## Unpack the source code.
 rm -Rf tiff-3.9.4 && tar xfvz ./tiff-3.9.4.tar.gz && cd tiff-3.9.4
