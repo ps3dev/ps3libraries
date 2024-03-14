@@ -23,4 +23,4 @@ no_clobber = on
 continue = on
 # quiet (default is no)
 quiet = on
-" > /etc/wgetrc
+" > ~/.wgetrc
