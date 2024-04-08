@@ -2,11 +2,11 @@
 # libvorbis-1.3.2.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
-wget --continue http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.2.tar.gz
+wget http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.2.tar.gz
 
 ## Download an up-to-date config.guess and config.sub
-if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi
-if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
+if [ ! -f config.guess ]; then wget http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi
+if [ ! -f config.sub ]; then wget http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
 
 ## Unpack the source code.
 rm -Rf libvorbis-1.3.2 && tar xfvz libvorbis-1.3.2.tar.gz && cd libvorbis-1.3.2
