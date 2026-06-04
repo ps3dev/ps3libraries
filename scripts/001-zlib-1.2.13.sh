@@ -1,5 +1,5 @@
 #!/bin/sh -e
-# zlib-1.2.11.sh by Naomi Peori (naomi@peori.ca)
+# zlib-1.2.13.sh by Naomi Peori (naomi@peori.ca)
 ZLIB="zlib-1.2.13"
 
 ## Download the source code.
@@ -16,4 +16,5 @@ AR="powerpc64-ps3-elf-ar" CC="powerpc64-ps3-elf-gcc" RANLIB="powerpc64-ps3-elf-r
 ./configure --prefix="$PS3DEV/portlibs/ppu" --static
 
 ## Compile and install.
-${MAKE:-make} -j4 && ${MAKE:-make} install
+${MAKE:-make} -j4 AR="powerpc64-ps3-elf-ar" ARFLAGS="rc" RANLIB="powerpc64-ps3-elf-ranlib"
+${MAKE:-make} install AR="powerpc64-ps3-elf-ar" ARFLAGS="rc" RANLIB="powerpc64-ps3-elf-ranlib"

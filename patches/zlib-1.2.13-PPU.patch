@@ -8,22 +8,3 @@
 +static: $(STATICLIB) # example$(EXE) minigzip$(EXE)
  
  shared: examplesh$(EXE) minigzipsh$(EXE)
-
---- orig.zlib-1.2.13/configure
-+++ zlib-1.2.13/configure
-@@ -260,12 +260,7 @@
-         shared_ext='.dylib'
-         SHAREDLIB=libz$shared_ext
-         SHAREDLIBV=libz.$VER$shared_ext
-         SHAREDLIBM=libz.$VER1$shared_ext
-         LDSHARED=${LDSHARED-"$cc -dynamiclib -install_name $libdir/$SHAREDLIBM -compatibility_version $VER1 -current_version $VER3"}
--        if libtool -V 2>&1 | grep Apple > /dev/null; then
--            AR="libtool"
--        else
--            AR="/usr/bin/libtool"
--        fi
--        ARFLAGS="-o" ;;
-+        ;;
-   *)
-         LDSHARED=${LDSHARED-"$cc -shared"} ;;
-   esac
