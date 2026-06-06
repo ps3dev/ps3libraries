@@ -4,7 +4,7 @@
 ## Unpack the source code.
 rm -Rf libzip-0.9.3
 echo "Unpacking libzip-0.9.3.tar"
-pv -pterab ../downloads/libzip-0.9.3.tar.tar.bz2 | tar xjf -
+pv -pterab ../downloads/libzip-0.9.3.tar.bz2 | tar xjf -
 cd libzip-0.9.3
 
 ## Replace config.guess and config.sub
