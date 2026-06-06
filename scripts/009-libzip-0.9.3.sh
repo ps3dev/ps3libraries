@@ -5,8 +5,8 @@
 wget --continue http://www.nih.at/libzip/libzip-0.9.3.tar.bz2
 
 ## Download an up-to-date config.guess and config.sub
-if [ ! -f config.guess ]; then wget --continue https://raw.githubusercontent.com/gcc-mirror/gcc/master/config.guess; fi
-if [ ! -f config.sub ]; then wget --continue https://raw.githubusercontent.com/gcc-mirror/gcc/master/config.sub; fi
+if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi
+if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
 
 ## Unpack the source code.
 rm -Rf libzip-0.9.3 && tar xfvj libzip-0.9.3.tar.bz2 && cd libzip-0.9.3
