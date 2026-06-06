@@ -4,9 +4,8 @@
 ## Download the source code.
 wget --continue http://downloads.xiph.org/releases/ogg/libogg-1.2.1.tar.gz
 
-## Download an up-to-date config.guess and config.sub
-if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi
-if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
+## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
+../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
 rm -Rf libogg-1.2.1 && tar xfvz libogg-1.2.1.tar.gz && cd libogg-1.2.1

@@ -4,9 +4,8 @@
 ## Download the source code.
 wget --continue http://www.ijg.org/files/jpegsrc.v8b.tar.gz
 
-## Download an up-to-date config.guess and config.sub
-if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi
-if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
+## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
+../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
 rm -Rf jpeg-8b && tar xfvz jpegsrc.v8b.tar.gz && cd jpeg-8b
