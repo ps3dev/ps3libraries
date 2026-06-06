@@ -23,7 +23,7 @@
 ###########################################################################
 # Change values here
 #
-VERSION="2.16.6"
+VERSION="2.28.10"
 #
 ###########################################################################
 #
@@ -34,17 +34,15 @@ ARCH="powerpc64"
 PLATFORM="PS3"
 
 ## Download the source code.
-../download.sh mbedtls-${VERSION}-gpl.tgz
+../download.sh mbedtls-${VERSION}.tar.bz2
 
 ## Unpack the source code.
-rm -Rf mbedtls-${VERSION} && tar xfvz ../archives/mbedtls-${VERSION}-gpl.tgz && cd mbedtls-${VERSION}
+rm -Rf mbedtls-${VERSION} && tar xfvz ../archives/mbedtls-${VERSION}.tar.bz2 && cd mbedtls-${VERSION}
 
 echo "Building mbedTLS ${VERSION} for ${PLATFORM} ${ARCH}"
 
 echo "Patching Makefile..."
-sed -i.bak '4d' ${CURRENTPATH}/mbedtls-${VERSION}/library/Makefile
-
-echo "Please stand by..."
+patch -p1 < ../patches/mbedtls-${VERSION}.patch
 
 TOOLCHAIN_PATH=$PS3DEV/ppu/bin/powerpc64-ps3-elf-
 export CC=${TOOLCHAIN_PATH}gcc
@@ -57,39 +55,11 @@ export NM=${TOOLCHAIN_PATH}nm
 export CXXCPP=${TOOLCHAIN_PATH}cpp
 export RANLIB=${TOOLCHAIN_PATH}ranlib
 export LDFLAGS="-L$PS3DEV/ppu/powerpc64-ps3-elf/lib -L$PSL1GHT/ppu/lib -L$PS3DEV/portlibs/ppu/lib -lrt -llv2"
-export CFLAGS="-I${CURRENTPATH}/mbedtls-${VERSION}/include -I$PS3DEV/ppu/powerpc64-ps3-elf/include -I$PSL1GHT/ppu/include -I$PS3DEV/portlibs/ppu/include -mcpu=cell \
-	-DMBEDTLS_KEY_EXCHANGE_RSA_ENABLED \
-	-DMBEDTLS_KEY_EXCHANGE_PSK_ENABLED \
-	-DMBEDTLS_KEY_EXCHANGE_RSA_PSK_ENABLED \
-	-DMBEDTLS_KEY_EXCHANGE_DHE_PSK_ENABLED \
-	-DMBEDTLS_KEY_EXCHANGE_DHE_RSA_ENABLED \
-	-DMBEDTLS_KEY_EXCHANGE_ECDH_RSA_ENABLED \
-	-DMBEDTLS_KEY_EXCHANGE_ECDH_ECDSA_ENABLED \
-	-DMBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED \
-	-DMBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED \
-	-DMBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED \
-	-DMBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED \
-	-DMBEDTLS_SSL_PROTO_DTLS \
-	-DMBEDTLS_SSL_PROTO_SSL3 \
-	-DMBEDTLS_SSL_PROTO_TLS1 \
-	-DMBEDTLS_SSL_PROTO_TLS1_1 \
-	-DMBEDTLS_SSL_PROTO_TLS1_2 \
-	-DMBEDTLS_SHA1_C \
-	-DMBEDTLS_MD5_C \
-	-DMBEDTLS_DHM_C \
-	-DMBEDTLS_ECDH_C \
-	-DMBEDTLS_ECJPAKE_C \
-	-DMBEDTLS_SSL_CLI_C \
-	-DMBEDTLS_SSL_SRV_C \
-	-DMBEDTLS_SSL_TLS_C \
-	"
-export MBEDTLS_NO_PLATFORM_ENTROPY=1
-
-cd library
-cp ../configs/config-no-entropy.h ../include/mbedtls/config.h
+export CFLAGS="-I../include -I$PS3DEV/ppu/powerpc64-ps3-elf/include -I$PSL1GHT/ppu/include -I$PS3DEV/portlibs/ppu/include -mcpu=cell"
 
 echo "Build library..."
 ## Compile and install.
+cd library
 ${MAKE:-make}
 
 cp lib*.a $PS3DEV/portlibs/ppu/lib/
