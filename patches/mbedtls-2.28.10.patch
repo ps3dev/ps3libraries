@@ -214,30 +214,6 @@ diff -Nru mbedtls-2.28.10-orig/library/net_sockets.c mbedtls-2.28.10/library/net
          }
      }
  
-diff -Nru mbedtls-2.28.10-orig/library/ps3-build.sh mbedtls-2.28.10/library/ps3-build.sh
---- mbedtls-2.28.10-orig/library/ps3-build.sh	1969-12-31 21:00:00
-+++ mbedtls-2.28.10/library/ps3-build.sh	2026-04-25 20:45:12
-@@ -0,0 +1,20 @@
-+#!/bin/sh -e
-+
-+echo "Please stand by..."
-+
-+export PS3DEV=$PSL1GHT
-+export CC=$PS3DEV/ppu/bin/powerpc64-ps3-elf-gcc
-+export LD=$PS3DEV/ppu/bin/powerpc64-ps3-elf-ld
-+export CPP=$PS3DEV/ppu/bin/powerpc64-ps3-elf-cpp
-+export CXX=$PS3DEV/ppu/bin/powerpc64-ps3-elf-g++
-+export AR=$PS3DEV/ppu/bin/powerpc64-ps3-elf-ar
-+export AS=$PS3DEV/ppu/bin/powerpc64-ps3-elf-as
-+export NM=$PS3DEV/ppu/bin/powerpc64-ps3-elf-nm
-+export CXXCPP=$PS3DEV/ppu/bin/powerpc64-ps3-elf-cpp
-+export RANLIB=$PS3DEV/ppu/bin/powerpc64-ps3-elf-ranlib
-+export LDFLAGS="-L$PS3DEV/ppu/powerpc64-ps3-elf/lib -L$PSL1GHT/ppu/lib -L$PS3DEV/portlibs/ppu/lib -lrt -llv2"
-+export CFLAGS="-I../include -I$PS3DEV/ppu/powerpc64-ps3-elf/include -I$PSL1GHT/ppu/include -I$PS3DEV/portlibs/ppu/include -mcpu=cell"
-+
-+echo "Build library..."
-+## Compile and install.
-+${MAKE:-make}
 diff -Nru mbedtls-2.28.10-orig/library/timing.c mbedtls-2.28.10/library/timing.c
 --- mbedtls-2.28.10-orig/library/timing.c	2025-03-24 08:49:00
 +++ mbedtls-2.28.10/library/timing.c	2026-04-25 20:02:39
