@@ -4,9 +4,8 @@
 ## Download the source code.
 ../download.sh libmad-0.15.1b.tar.gz
 
-## Download an up-to-date config.guess and config.sub
-../download.sh config.guess
-../download.sh config.sub
+## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
+../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
 rm -Rf libmad-0.15.1b && tar xfvz ../archives/libmad-0.15.1b.tar.gz && cd libmad-0.15.1b

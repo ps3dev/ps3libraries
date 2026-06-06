@@ -1,0 +1,11 @@
+--- cairo-1.10.0/configure.orig	2020-07-14 08:42:30.270250297 +0200
++++ cairo-1.10.0/configure	2020-07-14 08:43:50.044392514 +0200
+@@ -17005,7 +17005,7 @@
+ MAYBE_WARN="$MAYBE_WARN -erroff=E_ENUM_TYPE_MISMATCH_ARG \
+ 			-erroff=E_ENUM_TYPE_MISMATCH_OP"
+ 
+-MAYBE_WARN="$MAYBE_WARN -fno-strict-aliasing -fno-common -flto"
++MAYBE_WARN="$MAYBE_WARN -fno-strict-aliasing -fno-common"
+ 
+ MAYBE_WARN="$MAYBE_WARN -Wp,-D_FORTIFY_SOURCE=2"
+ 

@@ -4,9 +4,8 @@
 ## Download the source code.
 ../download.sh libvorbis-1.3.5.tar.gz
 
-## Download an up-to-date config.guess and config.sub
-../download.sh config.guess
-../download.sh config.sub
+## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
+../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
 rm -Rf libvorbis-1.3.5 && tar xfvz ../archives/libvorbis-1.3.5.tar.gz && cd libvorbis-1.3.5

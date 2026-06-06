@@ -3,9 +3,8 @@
 ## Download the source code.
 ../download.sh SDL2_mixer-2.0.4.tar.gz
 
-## Download an up-to-date config.guess and config.sub
-../download.sh config.guess
-../download.sh config.sub
+## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
+../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
 rm -Rf SDL2_mixer-2.0.4 && tar xfvz ../archives/SDL2_mixer-2.0.4.tar.gz && cd SDL2_mixer-2.0.4
@@ -29,7 +28,9 @@ export LIBMIKMOD_CONFIG
     --disable-music-cmd \
     --disable-music-ogg-shared \
     --disable-music-mp3 \
-    --disable-music-flac
+    --disable-music-flac \
+    --disable-music-mod-modplug \
+    --enable-music-mod-mikmod
 
 ## Compile and install.
 ${MAKE:-make} -j4 && ${MAKE:-make} install

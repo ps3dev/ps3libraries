@@ -4,9 +4,8 @@
 ## Download the source code.
 ../download.sh tiff-3.9.4.tar.gz
 
-## Download an up-to-date config.guess and config.sub
-../download.sh config.guess
-../download.sh config.sub
+## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
+../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
 rm -Rf tiff-3.9.4 && tar xfvz ../archives/tiff-3.9.4.tar.gz && cd tiff-3.9.4

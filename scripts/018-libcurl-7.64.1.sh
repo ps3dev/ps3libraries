@@ -6,9 +6,8 @@ VERSION=7.64.1
 ## Download the source code.
 ../download.sh curl-${VERSION}.tar.gz
 
-## Download an up-to-date config.guess and config.sub
-../download.sh config.guess
-../download.sh config.sub
+## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
+../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
 rm -Rf curl-${VERSION} && tar xfvz ../archives/curl-${VERSION}.tar.gz && cd curl-${VERSION}

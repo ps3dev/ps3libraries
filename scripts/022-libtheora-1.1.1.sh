@@ -4,9 +4,8 @@
 ## Download the source code.
 ../download.sh libtheora-1.1.1.tar.bz2
 
-## Download an up-to-date config.guess and config.sub
-../download.sh config.guess
-../download.sh config.sub
+## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
+../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
 rm -Rf libtheora-1.1.1 && tar xfvj ../archives/libtheora-1.1.1.tar.bz2 && cd libtheora-1.1.1

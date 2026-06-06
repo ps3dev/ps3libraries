@@ -4,9 +4,8 @@
 ## Download the source code.
 ../download.sh libzip-0.9.3.tar.bz2
 
-## Download an up-to-date config.guess and config.sub
-../download.sh config.guess
-../download.sh config.sub
+## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
+../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
 rm -Rf libzip-0.9.3 && tar xfvj ../archives/libzip-0.9.3.tar.bz2 && cd libzip-0.9.3

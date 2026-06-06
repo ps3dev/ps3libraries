@@ -4,9 +4,8 @@
 ## Download the source code.
 ../download.sh jpegsrc.v8b.tar.gz
 
-## Download an up-to-date config.guess and config.sub
-../download.sh config.guess
-../download.sh config.sub
+## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
+../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
 rm -Rf jpeg-8b && tar xfvz ../archives/jpegsrc.v8b.tar.gz && cd jpeg-8b

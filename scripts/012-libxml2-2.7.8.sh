@@ -4,9 +4,8 @@
 ## Download the source code.
 ../download.sh libxml2-2.7.8.tar.gz
 
-## Download an up-to-date config.guess and config.sub
-../download.sh config.guess
-../download.sh config.sub
+## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
+../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
 rm -Rf libxml2-2.7.8 && tar xfvz ../archives/libxml2-2.7.8.tar.gz && cd libxml2-2.7.8

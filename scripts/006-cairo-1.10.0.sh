@@ -4,15 +4,17 @@
 ## Download the source code.
 ../download.sh cairo-1.10.0.tar.gz
 
-## Download an up-to-date config.guess and config.sub
-../download.sh config.guess
-../download.sh config.sub
+## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
+../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
 rm -Rf cairo-1.10.0 && tar xfvz ../archives/cairo-1.10.0.tar.gz && cd cairo-1.10.0
 
 ## Replace config.guess and config.sub
 cp ../../archives/config.guess ../../archives/config.sub build/
+
+## Patch the source code.
+cat ../../patches/cairo-1.10.0.patch | patch -p1
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu

@@ -4,7 +4,8 @@ cd `dirname $0`
 cd archives || exit
 
 if [ $# -eq 0 ]; then
-  sed -e 's:^.*/::g' < archives.txt | while read file; do
+  ../scripts/get-config-scripts.sh
+  sed -e 's:^.*/::g' -e 's/.* -> //g' < archives.txt | while read file; do
     ../download.sh "$file" || exit
   done
   exit
@@ -39,10 +40,17 @@ fi
 
 if [ $previous_file = no -o "$remote_size" != "$local_size" ]; then
   while [ "$#" -gt 0 ]; do
+    url="$1"
+    rename=""
+    if [ "$2" == "->" ]; then
+	rename="$3"
+	shift
+	shift
+    fi
     if [ "$#" -gt 1 ]; then
-      wget --tries 5 --timeout 15 --continue "$1" && break
+      wget ${rename:+-O} ${rename} --tries 5 --timeout 15 --continue "$url" && break
     else
-      wget --continue "$1" || exit
+      wget ${rename:+-O} ${rename} --continue "$url" || exit
     fi
     shift
   done

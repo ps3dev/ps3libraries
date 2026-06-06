@@ -1,0 +1,10 @@
+--- orig.zlib-1.2.13/Makefile.in
++++ zlib-1.2.13/Makefile.in
+@@ -71,7 +71,7 @@
+ 
+ all: static shared
+ 
+-static: example$(EXE) minigzip$(EXE)
++static: $(STATICLIB) # example$(EXE) minigzip$(EXE)
+ 
+ shared: examplesh$(EXE) minigzipsh$(EXE)
