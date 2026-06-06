@@ -1,17 +1,14 @@
 #!/bin/sh -e
 # jpeg-8b.sh by Naomi Peori (naomi@peori.ca)
 
-## Download the source code.
-wget --continue http://www.ijg.org/files/jpegsrc.v8b.tar.gz
-
-## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
-
 ## Unpack the source code.
-rm -Rf jpeg-8b && tar xfvz jpegsrc.v8b.tar.gz && cd jpeg-8b
+rm -Rf jpeg-8b
+echo "Unpacking jpeg-8b"
+pv -pterab ../downloads/jpegsrc.v8b.tar.gz | tar xzf -
+cd jpeg-8b
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub .
+cp "$(automake --print-libdir)"/config.guess "$(automake --print-libdir)"/config.sub .
 
 ## Patch the source code.
 cat ../../patches/jpeg-8b-PPU.patch | patch -p1

@@ -1,17 +1,14 @@
 #!/bin/sh -e
 # libvorbis-1.3.2.sh by Naomi Peori (naomi@peori.ca)
 
-## Download the source code.
-wget --continue http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.2.tar.gz
-
-## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
-
 ## Unpack the source code.
-rm -Rf libvorbis-1.3.2 && tar xfvz libvorbis-1.3.2.tar.gz && cd libvorbis-1.3.2
+rm -Rf libvorbis-1.3.2
+echo "Unpacking libvorbis-1.3.2"
+pv -pterab ../downloads/libvorbis-1.3.2.tar.gz | tar xzf -
+cd libvorbis-1.3.2
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub .
+cp "$(automake --print-libdir)"/config.guess "$(automake --print-libdir)"/config.sub .
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu

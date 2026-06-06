@@ -1,17 +1,14 @@
 #!/bin/sh -e
 # libzip-0.9.3.sh by Naomi Peori (naomi@peori.ca)
 
-## Download the source code.
-wget --continue http://www.nih.at/libzip/libzip-0.9.3.tar.bz2
-
-## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
-
 ## Unpack the source code.
-rm -Rf libzip-0.9.3 && tar xfvj libzip-0.9.3.tar.bz2 && cd libzip-0.9.3
+rm -Rf libzip-0.9.3
+echo "Unpacking libzip-0.9.3.tar"
+pv -pterab ../downloads/libzip-0.9.3.tar.tar.bz2 | tar xjf -
+cd libzip-0.9.3
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub .
+cp "$(automake --print-libdir)"/config.guess "$(automake --print-libdir)"/config.sub .
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu

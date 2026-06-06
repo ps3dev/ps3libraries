@@ -2,11 +2,11 @@
 # zlib-1.2.13.sh by Naomi Peori (naomi@peori.ca)
 ZLIB="zlib-1.2.13"
 
-## Download the source code.
-wget --continue https://github.com/madler/zlib/releases/download/v1.2.13/${ZLIB}.tar.gz
-
 ## Unpack the source code.
-rm -Rf ${ZLIB} && tar xfvz ${ZLIB}.tar.gz && cd ${ZLIB}
+rm -Rf ${ZLIB}
+echo "Unpacking %{ZLIB}"
+pv -pterab ../downloads/${ZLIB}.tar.gz | tar xzf -
+cd ${ZLIB}
 
 ## Patch the source code.
 cat ../../patches/${ZLIB}-PPU.patch | patch -p1

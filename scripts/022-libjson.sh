@@ -1,19 +1,15 @@
 #!/bin/sh -e
 # libjson-c.sh by Mohammad Haseeb (mmhaqs@gmail.com)
 
-wget --no-check-certificate https://codeload.github.com/json-c/json-c/tar.gz/json-c-0.11-20130402 -O jsonc.tar.gz
-
-## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
-
 ## Unpack the source code.
-rm -Rf jsonc && mkdir jsonc && tar --strip-components=1 --directory=jsonc -xvzf jsonc.tar.gz
-
-## Create the build directory.
+rm -Rf jsonc
+mkdir jsonc
+echo "Unpacking jsonc"
+pv -pterab ../downloads/jsonc.tar.gz | tar xzf -
 cd jsonc
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub .
+cp "$(automake --print-libdir)"/config.guess "$(automake --print-libdir)"/config.sub .
 
 ## Configure the build.
 CFLAGS="-Wno-error -I$PSL1GHT/ppu/include -I$PS3DEV/portlibs/ppu/include" \

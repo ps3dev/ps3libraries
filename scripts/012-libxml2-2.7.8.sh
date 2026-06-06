@@ -1,17 +1,15 @@
 #!/bin/sh -e
 # libxml2-2.7.8.sh by Naomi Peori (naomi@peori.ca)
 
-## Download the source code.
-wget --continue http://xmlsoft.org/sources/libxml2-2.7.8.tar.gz -O libxml2-2.7.8.tar.gz
-
-## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
-
 ## Unpack the source code.
-rm -Rf libxml2-2.7.8 && mkdir libxml2-2.7.8 && tar --strip-components=1 -xvzf libxml2-2.7.8.tar.gz -C libxml2-2.7.8 && cd libxml2-2.7.8
+rm -Rf libxml2-2.7.8
+mkdir libxml2-2.7.8
+echo "Unpacking libxml2-2.7.8"
+pv -pterb ../downloads/libxml2-2.7.8.tar.gz | tar --strip-components=1 -xzf -
+cd libxml2-2.7.8
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub .
+cp "$(automake --print-libdir)"/config.guess "$(automake --print-libdir)"/config.sub .
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu

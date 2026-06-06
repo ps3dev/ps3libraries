@@ -2,17 +2,14 @@
 # libcurl-7.31.0 by KaKaRoTo
 # modified by mhaqs for 7.31.0 release and cpp compatibility
 
-## Download the source code.
-wget --continue http://curl.haxx.se/download/curl-7.31.0.tar.gz
-
-## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
-
 ## Unpack the source code.
-rm -Rf curl-7.31.0 && tar xfvz curl-7.31.0.tar.gz && cd curl-7.31.0
+rm -Rf curl-7.31.0
+echo "Unpacking curl-7.31.0"
+pv -pterab ../downloads/curl-7.31.0.tar.gz | tar xzf -
+cd curl-7.31.0
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub .
+cp "$(automake --print-libdir)"/config.guess "$(automake --print-libdir)"/config.sub .
 
 ## Patch the source code.
 cat ../../patches/libcurl-7.31.0.patch | patch -p1

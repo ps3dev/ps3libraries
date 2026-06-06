@@ -1,17 +1,14 @@
 #!/bin/sh -e
 # libmad-0.15.1b.sh by dhewg (dhewg@wiibrew.org)
 
-## Download the source code.
-wget --continue http://downloads.sourceforge.net/project/mad/libmad/0.15.1b/libmad-0.15.1b.tar.gz
-
-## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
-
 ## Unpack the source code.
-rm -Rf libmad-0.15.1b && tar xfvz libmad-0.15.1b.tar.gz && cd libmad-0.15.1b
+rm -Rf libmad-0.15.1b
+echo "Unpacking libmad-0.15.1b"
+pv -pterab ../downloads/libmad-0.15.1b.tar.gz | tar xzf -
+cd libmad-0.15.1b
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub .
+cp "$(automake --print-libdir)"/config.guess "$(automake --print-libdir)"/config.sub .
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu

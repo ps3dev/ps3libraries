@@ -1,20 +1,14 @@
 #!/bin/sh -e
 # tiff-3.9.4.sh by Jon Limle <jonlimle123@yahoo.com>
 
-## Download the source code.
-wget --tries 5 --timeout 15 --continue \
-  http://download.osgeo.org/libtiff/old/tiff-3.9.4.tar.gz \
-|| wget --continue \
-  https://github.com/downloads/ps3dev/ps3libraries/tiff-3.9.4.tar.gz
-
-## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
-
 ## Unpack the source code.
-rm -Rf tiff-3.9.4 && tar xfvz ./tiff-3.9.4.tar.gz && cd tiff-3.9.4
+rm -Rf tiff-3.9.4
+echo "Unpacking tiff-3.9.4.tar.gz"
+pv -pterab ../downloads/tiff-3.9.4.tar.gz | tar xzf -
+cd tiff-3.9.4
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub config/
+cp "$(automake --print-libdir)"/config.guess "$(automake --print-libdir)"/config.sub config/
 
 ## Patch the source code.
 cat ../../patches/tiff-3.9.4-PPU.patch | patch -p1

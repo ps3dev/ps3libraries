@@ -1,17 +1,14 @@
 #!/bin/sh -e
 # libtheora-1.1.1.sh by dhewg (dhewg@wiibrew.org)
 
-## Download the source code.
-wget --continue http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2
-
-## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
-
 ## Unpack the source code.
-rm -Rf libtheora-1.1.1 && tar xfvj libtheora-1.1.1.tar.bz2 && cd libtheora-1.1.1
+rm -Rf libtheora-1.1.1
+echo "Unpacking libtheora-1.1.1"
+pv -pterab ../downloads/libtheora-1.1.1.tar.bz2 | tar xjf -
+cd libtheora-1.1.1
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub .
+cp "$(automake --print-libdir)"/config.guess "$(automake --print-libdir)"/config.sub .
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu

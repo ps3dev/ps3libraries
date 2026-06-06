@@ -31,11 +31,11 @@ CURRENTPATH=`pwd`
 ARCH="powerpc64"
 PLATFORM="PS3"
 
-## Download the source code.
-wget --continue --no-check-certificate -O polarssl-${VERSION}.tgz https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/polarssl-${VERSION}.tar.gz
-
 ## Unpack the source code.
-rm -Rf polarssl-${VERSION} && tar xfvz polarssl-${VERSION}.tgz && cd mbedtls-polarssl-${VERSION}/library
+rm -Rf polarssl-${VERSION}
+echo "Unpacking polarssl-${VERSION}"
+pv -pterab ../downloads/polarssl-${VERSION}.tgz | tar xzf -
+cd mbedtls-polarssl-${VERSION}/library
 
 ## Patch the source code.
 echo "Patching net.c and timing.c for compatibility..."

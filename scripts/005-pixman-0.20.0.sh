@@ -1,17 +1,14 @@
 #!/bin/sh -e
 # pixman-0.20.0.sh by Naomi Peori (naomi@peori.ca)
 
-## Download the source code.
-wget --continue http://cairographics.org/releases/pixman-0.20.0.tar.gz
-
-## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
-
 ## Unpack the source code.
-rm -Rf pixman-0.20.0 && tar xfvz pixman-0.20.0.tar.gz && cd pixman-0.20.0
+rm -Rf pixman-0.20.0
+echo "Unpacking pixman-0.20.0"
+pv -pterab ../downloads/pixman-0.20.0.tar.gz | tar xzf -
+cd pixman-0.20.0
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub .
+cp "$(automake --print-libdir)"/config.guess "$(automake --print-libdir)"/config.sub .
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu

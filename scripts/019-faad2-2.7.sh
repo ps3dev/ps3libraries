@@ -1,17 +1,14 @@
 #!/bin/sh -e
 # faad2-2.7.sh by dhewg (dhewg@wiibrew.org)
 
-## Download the source code.
-wget --continue http://downloads.sourceforge.net/faac/faad2-2.7.tar.gz
-
-## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
-
 ## Unpack the source code.
-rm -Rf faad2-2.7 && tar xfvz faad2-2.7.tar.gz && cd faad2-2.7
+rm -Rf faad2-2.7
+echo "Unpacking faad2-2.7"
+pv -pterab ../downloads/faad2-2.7.tar.gz | tar xzf -
+cd faad2-2.7
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub .
+cp "$(automake --print-libdir)"/config.guess "$(automake --print-libdir)"/config.sub .
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu
