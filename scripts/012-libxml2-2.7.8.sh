@@ -4,9 +4,8 @@
 ## Download the source code.
 wget --continue http://xmlsoft.org/sources/libxml2-2.7.8.tar.gz -O libxml2-2.7.8.tar.gz
 
-## Download an up-to-date config.guess and config.sub
-if [ ! -f config.guess ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.guess; fi
-if [ ! -f config.sub ]; then wget --continue http://git.savannah.gnu.org/cgit/config.git/plain/config.sub; fi
+## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
+../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
 rm -Rf libxml2-2.7.8 && mkdir libxml2-2.7.8 && tar --strip-components=1 -xvzf libxml2-2.7.8.tar.gz -C libxml2-2.7.8 && cd libxml2-2.7.8
