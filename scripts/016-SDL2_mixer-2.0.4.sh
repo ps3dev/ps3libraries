@@ -28,7 +28,9 @@ export LIBMIKMOD_CONFIG
     --disable-music-cmd \
     --disable-music-ogg-shared \
     --disable-music-mp3 \
-    --disable-music-flac
+    --disable-music-flac \
+    --disable-music-mod-modplug \
+    --enable-music-mod-mikmod
 
 ## Compile and install.
 ${MAKE:-make} -j4 && ${MAKE:-make} install
