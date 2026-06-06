@@ -1,0 +1,42 @@
+name: Build libraries package
+
+on: [ push, pull_request, workflow_dispatch ]
+
+jobs:
+  build_pkg:
+    runs-on: ubuntu-22.04
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set env vars
+      id: slug
+      run: |
+        echo "sha_name=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_ENV
+        sudo apt install python2.7
+
+      # using pre-compiled sdk
+      # to do: replace toolchain link
+    - name: Download PSL1GHT Toolchain
+      run: |
+        curl -sL https://github.com/bucanero/ps3toolchain/releases/download/ubuntu-latest-fad3b5fb/ps3dev-ubuntu-latest-2020-08-31.tar.gz | tar xvz -C ./
+        curl -sL https://github.com/ps3dev/PSL1GHT/raw/master/ppu/include/sysutil/sysutil.h -o ps3dev/ppu/include/sysutil/sysutil.h
+        echo "PS3DEV=${GITHUB_WORKSPACE}/ps3dev" >> $GITHUB_ENV
+        echo "PSL1GHT=${GITHUB_WORKSPACE}/ps3dev" >> $GITHUB_ENV
+
+    - name: Install libraries
+      run: |
+        sed -i.bak '8d' libraries-sudo.sh
+        ./libraries-sudo.sh
+
+    - name: Build Package
+      run: |
+        7z a ps3libraries.zip $PSL1GHT/portlibs/
+
+    - name: Push package artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ps3libraries-build_${{ env.sha_name }}
+        path: ps3libraries.zip
+        if-no-files-found: error
