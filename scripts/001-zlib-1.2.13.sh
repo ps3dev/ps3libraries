@@ -3,10 +3,10 @@
 ZLIB="zlib-1.2.13"
 
 ## Download the source code.
-wget --continue https://github.com/madler/zlib/releases/download/v1.2.13/${ZLIB}.tar.gz
+../download.sh ${ZLIB}.tar.gz
 
 ## Unpack the source code.
-rm -Rf ${ZLIB} && tar xfvz ${ZLIB}.tar.gz && cd ${ZLIB}
+rm -Rf ${ZLIB} && tar xfvz ../archives/${ZLIB}.tar.gz && cd ${ZLIB}
 
 ## Patch the source code.
 cat ../../patches/${ZLIB}-PPU.patch | patch -p1

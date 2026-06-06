@@ -2,16 +2,16 @@
 # flac-1.2.1.sh by dhewg (dhewg@wiibrew.org)
 
 ## Download the source code.
-wget --continue http://downloads.sourceforge.net/project/flac/flac-src/flac-1.2.1-src/flac-1.2.1.tar.gz
+../download.sh flac-1.2.1.tar.gz
 
 ## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
 ../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
-rm -Rf flac-1.2.1 && tar xfvz flac-1.2.1.tar.gz && cd flac-1.2.1
+rm -Rf flac-1.2.1 && tar xfvz ../archives/flac-1.2.1.tar.gz && cd flac-1.2.1
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub .
+cp ../../archives/config.guess ../../archives/config.sub .
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu

@@ -1,17 +1,17 @@
 #!/bin/sh -e
-# faad2-2.7.sh by dhewg (dhewg@wiibrew.org)
+# libogg-1.3.4.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
-wget --continue http://downloads.sourceforge.net/faac/faad2-2.7.tar.gz
+../download.sh libogg-1.3.4.tar.gz
 
 ## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
 ../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
-rm -Rf faad2-2.7 && tar xfvz faad2-2.7.tar.gz && cd faad2-2.7
+rm -Rf libogg-1.3.4 && tar xfvz ../archives/libogg-1.3.4.tar.gz && cd libogg-1.3.4
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub .
+cp ../../archives/config.guess ../../archives/config.sub .
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu

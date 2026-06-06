@@ -1,17 +1,17 @@
 #!/bin/sh -e
-# libmad-0.15.1b.sh by dhewg (dhewg@wiibrew.org)
+# faad2-2.7.sh by dhewg (dhewg@wiibrew.org)
 
 ## Download the source code.
-wget --continue http://downloads.sourceforge.net/project/mad/libmad/0.15.1b/libmad-0.15.1b.tar.gz
+../download.sh faad2-2.7.tar.gz
 
 ## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
 ../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
-rm -Rf libmad-0.15.1b && tar xfvz libmad-0.15.1b.tar.gz && cd libmad-0.15.1b
+rm -Rf faad2-2.7 && tar xfvz ../archives/faad2-2.7.tar.gz && cd faad2-2.7
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub .
+cp ../../archives/config.guess ../../archives/config.sub .
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu

@@ -1,17 +1,17 @@
 #!/bin/sh -e
-# libvorbis-1.3.2.sh by Naomi Peori (naomi@peori.ca)
+# libmad-0.15.1b.sh by dhewg (dhewg@wiibrew.org)
 
 ## Download the source code.
-wget --continue http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.2.tar.gz
+../download.sh libmad-0.15.1b.tar.gz
 
 ## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
 ../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
-rm -Rf libvorbis-1.3.2 && tar xfvz libvorbis-1.3.2.tar.gz && cd libvorbis-1.3.2
+rm -Rf libmad-0.15.1b && tar xfvz ../archives/libmad-0.15.1b.tar.gz && cd libmad-0.15.1b
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub .
+cp ../../archives/config.guess ../../archives/config.sub .
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu

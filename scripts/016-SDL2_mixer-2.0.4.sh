@@ -1,20 +1,16 @@
 #!/bin/sh -e
-# jpeg-8b.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
-../download.sh jpegsrc.v8b.tar.gz
+../download.sh SDL2_mixer-2.0.4.tar.gz
 
 ## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
 ../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
-rm -Rf jpeg-8b && tar xfvz ../archives/jpegsrc.v8b.tar.gz && cd jpeg-8b
+rm -Rf SDL2_mixer-2.0.4 && tar xfvz ../archives/SDL2_mixer-2.0.4.tar.gz && cd SDL2_mixer-2.0.4
 
 ## Replace config.guess and config.sub
-cp ../../archives/config.guess ../../archives/config.sub .
-
-## Patch the source code.
-cat ../../patches/jpeg-8b-PPU.patch | patch -p1
+cp ../../archives/config.guess ../../archives/config.sub build-scripts/
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu
@@ -23,8 +19,16 @@ mkdir build-ppu && cd build-ppu
 CFLAGS="-I$PSL1GHT/ppu/include -I$PS3DEV/portlibs/ppu/include" \
 LDFLAGS="-L$PSL1GHT/ppu/lib -L$PS3DEV/portlibs/ppu/lib -lrt -llv2" \
 PKG_CONFIG_PATH="$PS3DEV/portlibs/ppu/lib/pkgconfig" \
-../configure --prefix="$PS3DEV/portlibs/ppu" --host="powerpc64-ps3-elf" --disable-shared
+LIBMIKMOD_CONFIG="$PS3DEV/portlibs/ppu/bin/libmikmod-config"
+export LIBMIKMOD_CONFIG
+../configure --prefix="$PS3DEV/portlibs/ppu" --host="powerpc64-ps3-elf" \
+    --disable-sdltest \
+    --with-sdl-exec-prefix="$PS3DEV/portlibs/ppu" \
+    --disable-shared \
+    --disable-music-cmd \
+    --disable-music-ogg-shared \
+    --disable-music-mp3 \
+    --disable-music-flac
 
 ## Compile and install.
 ${MAKE:-make} -j4 && ${MAKE:-make} install
-

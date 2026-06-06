@@ -2,16 +2,16 @@
 # libpng-1.4.4.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
-wget --continue http://download.sourceforge.net/libpng/libpng-1.4.4.tar.gz
+../download.sh libpng-1.4.4.tar.gz
 
 ## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
 ../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
-rm -Rf libpng-1.4.4 && tar xfvz libpng-1.4.4.tar.gz && cd libpng-1.4.4
+rm -Rf libpng-1.4.4 && tar xfvz ../archives/libpng-1.4.4.tar.gz && cd libpng-1.4.4
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub .
+cp ../../archives/config.guess ../../archives/config.sub .
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu

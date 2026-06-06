@@ -2,16 +2,16 @@
 # cairo-1.10.0.sh by Naomi Peori (naomi@peori.ca)
 
 ## Download the source code.
-wget --continue http://cairographics.org/releases/cairo-1.10.0.tar.gz
+../download.sh cairo-1.10.0.tar.gz
 
 ## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
 ../scripts/get-config-scripts.sh
 
 ## Unpack the source code.
-rm -Rf cairo-1.10.0 && tar xfvz cairo-1.10.0.tar.gz && cd cairo-1.10.0
+rm -Rf cairo-1.10.0 && tar xfvz ../archives/cairo-1.10.0.tar.gz && cd cairo-1.10.0
 
 ## Replace config.guess and config.sub
-cp ../config.guess ../config.sub build/
+cp ../../archives/config.guess ../../archives/config.sub build/
 
 ## Patch the source code.
 cat ../../patches/cairo-1.10.0.patch | patch -p1
