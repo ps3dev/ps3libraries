@@ -42,10 +42,10 @@ if [ $previous_file = no -o "$remote_size" != "$local_size" ]; then
   while [ "$#" -gt 0 ]; do
     url="$1"
     rename=""
-    if [ "$2" == "->" ]; then
-	rename="$3"
-	shift
-	shift
+    if [ "${2:-}" = "->" ]; then
+      rename="$3"
+      shift
+      shift
     fi
     if [ "$#" -gt 1 ]; then
       wget ${rename:+-O} ${rename} --tries 5 --timeout 15 --continue "$url" && break
