@@ -15,7 +15,7 @@ jobs:
       run: |
         echo "sha_name=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_ENV
         sudo apt install python2.7
-        sudo apt-get -y install autoconf automake bison flex make texinfo patch python wget zlib1g-dev libtool-bin python-dev bzip2 pkg-config
+        sudo apt-get -y install autoconf automake bison flex make texinfo patch wget zlib1g-dev libtool-bin bzip2 pkg-config
 
       # using pre-compiled sdk
       # to do: replace toolchain link
