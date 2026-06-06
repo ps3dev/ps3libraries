@@ -5,7 +5,7 @@
 rm -Rf libxml2-2.7.8
 mkdir libxml2-2.7.8
 echo "Unpacking libxml2-2.7.8"
-pv -pterb ../downloads/libxml2-2.7.8.tar.gz | tar --strip-components=1 -xzf -
+pv -pterb ../downloads/libxml2-2.7.8.tar.gz | tar --strip-components=1 -C libxml2-2.7.8 -xzf -
 cd libxml2-2.7.8
 
 ## Replace config.guess and config.sub
