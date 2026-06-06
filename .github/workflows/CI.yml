@@ -18,13 +18,13 @@ jobs:
         test -x scripts/get-config-scripts.sh
         find scripts depends -name '*.sh' -exec test -x {} \;
 
-    - name: Check config helper fallback path
+    - name: Check config helper cache path
       run: |
         mkdir -p build
         cd build
-        CONFIG_BASE_URL="https://127.0.0.1/does-not-exist" CONFIG_TIMEOUT=1 ../scripts/get-config-scripts.sh
-        test -s config.guess
-        test -s config.sub
+        CONFIG_BASE_URL="https://127.0.0.1/pretend-savannah-is-down" CONFIG_TIMEOUT=1 ../scripts/get-config-scripts.sh
+        test -s ../archives/config.guess
+        test -s ../archives/config.sub
 
     - name: Check no direct Savannah config downloads remain
       run: |
