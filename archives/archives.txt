@@ -21,7 +21,7 @@ ee1b4d67ea2d76ee52c5621bc6dbf61e  1137407 http://downloads.sourceforge.net/faac/
 4ba3d1a090159486394ba6e46f95bf6c  2706375 https://down.vpsaff.net/linux/mbedtls/mbedtls-2.16.6-gpl.tgz
 -                                       - https://github.com/zeldin/SDL_PSL1GHT/tarball/master -> sdl_psl1ght.tar.gz
 -                                       - https://github.com/zeldin/SDL_PSL1GHT_Libs/tarball/master -> sdl_psl1ght_libs.tar.gz
--                                       - https://github.com/sergiou87/SDL2_PSL1GHT/tarball/master -> sdl2_psl1ght.tar.gz
+-                                       - https://github.com/shagkur/SDL_PSL1GHT/archive/refs/heads/sdl2_master.tar.gz -> sdl2_psl1ght.tar.gz
 -                                       - https://github.com/wargio/NoRSX/tarball/master -> NoRSX.tar.gz
 -                                       - https://github.com/sergiou87/ps3debugnet/tarball/master -> ps3debugnet.tar.gz
 -                                       - https://github.com/wargio/ps3soundlib/tarball/master -> ps3soundlib.tar.gz
