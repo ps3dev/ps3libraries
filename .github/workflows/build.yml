@@ -3,7 +3,7 @@ name: Build libraries package
 on: [ push, pull_request, workflow_dispatch ]
 
 jobs:
-  build_pkg:
+  build_ps3libraries:
     runs-on: ubuntu-22.04
     steps:
 
@@ -17,7 +17,7 @@ jobs:
         sudo apt install python2.7
         sudo apt-get -y install autoconf automake bison flex make texinfo patch wget zlib1g-dev libtool-bin bzip2 pkg-config
 
-      # using pre-compiled sdk
+      # using pre-compiled PS3 toolchain
       # to do: replace toolchain link
     - name: Download PSL1GHT Toolchain
       run: |
