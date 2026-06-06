@@ -2,7 +2,7 @@ name: CI
 # NOT a full build! Just smoke testing script integrity
 
 on:
-  workflow-dispatch:
+  workflow_dispatch:
 
 jobs:
   smoke:
