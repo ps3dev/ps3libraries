@@ -1,0 +1,30 @@
+name: CI
+# NOT a full build! Just smoke testing script integrity
+
+on:
+  workflow-dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Check shell scripts are executable
+      run: |
+        test -x libraries.sh
+        test -x scripts/get-config-scripts.sh
+        find scripts depends -name '*.sh' -exec test -x {} \;
+
+    - name: Check config helper fallback path
+      run: |
+        mkdir -p build
+        cd build
+        CONFIG_BASE_URL="https://127.0.0.1/does-not-exist" CONFIG_TIMEOUT=1 ../scripts/get-config-scripts.sh
+        test -s config.guess
+        test -s config.sub
+
+    - name: Check no direct Savannah config downloads remain
+      run: |
+        ! grep -R "git.savannah.gnu.org.*config\.\(guess\|sub\)" -n scripts depends
