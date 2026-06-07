@@ -19,7 +19,7 @@ if [ $# -eq 0 ]; then
   done
   for i in ../submodules/*/download.sh; do
     if [ -x "$i" ]; then
-      "$i"
+      CONFIGS_DIR="$(pwd)" "$i"
     fi
   done
   exit
