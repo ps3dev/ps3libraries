@@ -1,12 +1,26 @@
 #!/bin/sh
 
+submodule_options='--init --depth 1 --recursive --single-branch'
+
 cd `dirname $0`
+
+if expr "$1" : submodules/ >/dev/null; then
+  test -d "$1"/.git -o -f "$1"/.git || exec git submodule update $submodule_options -- "$1"
+  exit
+fi
+
 cd archives || exit
 
 if [ $# -eq 0 ]; then
+  git submodule update $submodule_options
   ../scripts/get-config-scripts.sh
   sed -e 's:^.*/::g' -e 's/.* -> //g' < archives.txt | while read file; do
     ../download.sh "$file" || exit
+  done
+  for i in ../submodules/*/download.sh; do
+    if [ -x "$i" ]; then
+      CONFIGS_DIR="$(pwd)" "$i"
+    fi
   done
   exit
 fi

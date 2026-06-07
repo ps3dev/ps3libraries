@@ -3,10 +3,10 @@
 # unRAR library ported to PS3 by Bucanero
 
 ## Download the source code.
-../download.sh libunrar.tar.gz 
+../download.sh submodules/libunrar-ps3
 
 ## Unpack the source code.
-rm -Rf libunrar && mkdir libunrar && tar --strip-components=1 --directory=libunrar -xvzf ../archives/libunrar.tar.gz && cd libunrar
+rm -Rf libunrar && mkdir libunrar && git --git-dir=../submodules/libunrar-ps3/.git --work-tree=libunrar checkout-index -a && cd libunrar
 
 ## Compile and install.
 ${MAKE:-make} install
