@@ -18,7 +18,7 @@ a36e8410cac46b00a4d01752b32c3eb1 11125077 http://www.libsdl.org/projects/SDL_mix
 ee1b4d67ea2d76ee52c5621bc6dbf61e  1137407 http://downloads.sourceforge.net/faac/faad2-2.7.tar.gz
 292ab65cedd5021d6b7ddd117e07cd8e  1903175 http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2
 7013b2471a507942eb8ed72a5d872d16   455089 https://codeload.github.com/json-c/json-c/tar.gz/json-c-0.11-20130402
-4ba3d1a090159486394ba6e46f95bf6c  2706375 https://down.vpsaff.net/linux/mbedtls/mbedtls-2.16.6-gpl.tgz
+d12e48309d6d1cfdc31a6ebf866c25db  3489179 https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-2.28.10/mbedtls-2.28.10.tar.bz2
 -                                       - https://github.com/zeldin/SDL_PSL1GHT/tarball/master -> sdl_psl1ght.tar.gz
 -                                       - https://github.com/zeldin/SDL_PSL1GHT_Libs/tarball/master -> sdl_psl1ght_libs.tar.gz
 -                                       - https://github.com/shagkur/SDL_PSL1GHT/archive/refs/heads/sdl2_master.tar.gz -> sdl2_psl1ght.tar.gz
