@@ -42,7 +42,7 @@ rm -Rf mbedtls-${VERSION} && tar xfvj ../archives/mbedtls-${VERSION}.tar.bz2 && 
 echo "Building mbedTLS ${VERSION} for ${PLATFORM} ${ARCH}"
 
 echo "Patching Makefile..."
-patch -p1 < ../patches/mbedtls-${VERSION}.patch
+patch -p1 < ../../patches/mbedtls-${VERSION}.patch
 
 echo "Please stand by..."
 
