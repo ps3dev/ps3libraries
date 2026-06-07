@@ -37,7 +37,7 @@ PLATFORM="PS3"
 ../download.sh mbedtls-${VERSION}.tar.bz2
 
 ## Unpack the source code.
-rm -Rf mbedtls-${VERSION} && tar xfvz ../archives/mbedtls-${VERSION}.tar.bz2 && cd mbedtls-${VERSION}
+rm -Rf mbedtls-${VERSION} && tar xfvj ../archives/mbedtls-${VERSION}.tar.bz2 && cd mbedtls-${VERSION}
 
 echo "Building mbedTLS ${VERSION} for ${PLATFORM} ${ARCH}"
 
