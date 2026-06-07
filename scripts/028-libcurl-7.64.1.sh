@@ -26,7 +26,7 @@ AR="ppu-ar" CC="ppu-gcc" RANLIB="ppu-ranlib" \
   LDFLAGS="-L$PSL1GHT/ppu/lib -L$PS3DEV/portlibs/ppu/lib" LIBS="-lnet -lsysutil -lsysmodule -lm " \
   PKG_CONFIG_LIBDIR="$PSL1GHT/ppu/lib/pkgconfig" PKG_CONFIG_PATH="$PS3DEV/portlibs/ppu/lib/pkgconfig" \
      ../configure   --prefix="$PS3DEV/portlibs/ppu"  --host="powerpc64-ps3-elf"  \
-          --disable-threaded-resolver --disable-ipv6 \
+          --disable-threaded-resolver --disable-ipv6 --disable-ntlm-wb \
           --includedir="$PS3DEV/portlibs/ppu/include" --libdir="$PS3DEV/portlibs/ppu/lib" --with-mbedtls="$PS3DEV/portlibs/ppu/include/mbedtls" --with-ca-bundle="/usr/ssl/certs/ca-bundle.crt"
 
 ## Compile and install.
