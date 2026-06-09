@@ -1,4 +1,4 @@
-[![CI](https://github.com/ps3dev/ps3libraries/actions/workflows/CI.yml/badge.svg)](https://github.com/ps3dev/ps3libraries/actions/workflows/CI.yml) 
+[![CI](https://github.com/ps3dev/ps3libraries/actions/workflows/build.yml/badge.svg)](https://github.com/ps3dev/ps3libraries/actions/workflows/build.yml) 
 
 # ps3libraries
 
