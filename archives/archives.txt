@@ -25,7 +25,8 @@ d12e48309d6d1cfdc31a6ebf866c25db  3489179 https://github.com/Mbed-TLS/mbedtls/re
 -                                       - https://github.com/wargio/NoRSX/tarball/master -> NoRSX.tar.gz
 -                                       - https://github.com/sergiou87/ps3debugnet/tarball/master -> ps3debugnet.tar.gz
 -                                       - https://github.com/wargio/ps3soundlib/tarball/master -> ps3soundlib.tar.gz
--                                       - https://github.com/wargio/tiny3d/tarball/master -> tiny3d.tar.gz 
--                                       - https://github.com/bucanero/libunrar-ps3/tarball/master -> libunrar.tar.gz 
+-                                       - https://github.com/wargio/tiny3d/tarball/master -> tiny3d.tar.gz
+-                                       - https://github.com/bucanero/libunrar-ps3/tarball/master -> libunrar.tar.gz
 -                                       - https://github.com/sahlberg/libnfs/tarball/master -> libnfs.tar.gz
 -                                       - https://github.com/sahlberg/libsmb2/tarball/master -> libsmb2.tar.gz
+-                                       - https://github.com/bucanero/pthread-emb-ps3/tarball/master -> pthread-emb-ps3.tar.gz
