@@ -30,6 +30,7 @@ export LIBMIKMOD_CONFIG
     --disable-music-mp3 \
     --disable-music-flac \
     --disable-music-mod-modplug \
+    --disable-music-opus \
     --enable-music-mod-mikmod
 
 ## Compile and install.
