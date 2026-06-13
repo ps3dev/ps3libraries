@@ -1,11 +1,12 @@
-#!/bin/sh -e
+#!/bin/sh
+set -e
 
 CONFIG_TIMEOUT="${CONFIG_TIMEOUT:-15}"
 CONFIG_BASE_URL="https://git.savannah.gnu.org/cgit/config.git/plain"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-ASSET_DIR="${ROOT_DIR}/assets"
+CONFIG_DIR="${ROOT_DIR}/config"
 
 cd "${ROOT_DIR}/archives"
 
@@ -36,9 +37,15 @@ fetch_config_file() {
 
   echo "Falling back to safe ${file}."
   rm -f "${tmp}"
-  cp "${ASSET_DIR}/${file}" "${file}"
+  cp "${CONFIG_DIR}/${file}" "${file}"
   chmod +x "${file}"
 }
 
-fetch_config_file config.guess
-fetch_config_file config.sub
+if [ -z "${NO_SAVANNAH}" ]; then
+    fetch_config_file config.guess
+    fetch_config_file config.sub
+else
+    echo "NO_SAVANNAH is set, skipping Savannah downloads."
+    cp "${CONFIG_DIR}/config.guess" "config.guess"
+    cp "${CONFIG_DIR}/config.sub" "config.sub"
+fi

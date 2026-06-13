@@ -1,14 +1,23 @@
-#!/bin/sh -e
+#!/usr/bin/env bash
+set -eo pipefail
+
 # libvorbis-1.3.5.sh by Naomi Peori (naomi@peori.ca)
+LIBVORBIS="libvorbis-1.3.5"
+
+## Source util functions
+source ../utils/utils.sh
 
 ## Download the source code.
-../download.sh libvorbis-1.3.5.tar.gz
+../download.sh ${LIBVORBIS}.tar.gz
 
 ## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
+../config/get-config-scripts.sh
 
 ## Unpack the source code.
-rm -Rf libvorbis-1.3.5 && tar xfvz ../archives/libvorbis-1.3.5.tar.gz && cd libvorbis-1.3.5
+rm -Rf ${LIBVORBIS}
+echo "Unpacking ${LIBVORBIS}"
+extract ../archives/${LIBVORBIS}.tar.gz
+cd ${LIBVORBIS}
 
 ## Replace config.guess and config.sub
 cp ../../archives/config.guess ../../archives/config.sub .
@@ -23,4 +32,5 @@ PKG_CONFIG_PATH="$PS3DEV/portlibs/ppu/lib/pkgconfig" \
 ../configure --prefix="$PS3DEV/portlibs/ppu" --host="powerpc64-ps3-elf" --disable-shared
 
 ## Compile and install.
-${MAKE:-make} -j4 && ${MAKE:-make} install
+jobs=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+${MAKE:-make} -j"$jobs" && ${MAKE:-make} -j"$jobs" install
