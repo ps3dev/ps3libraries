@@ -1,14 +1,23 @@
-#!/bin/sh -e
+#!/usr/bin/env bash
+set -eo pipefail
+
 # pixman-0.20.0.sh by Naomi Peori (naomi@peori.ca)
+PIXMAN="pixman-0.20.0"
+
+## Source util functions
+source ../utils/utils.sh
 
 ## Download the source code.
-../download.sh pixman-0.20.0.tar.gz
+../download.sh ${PIXMAN}.tar.gz
 
 ## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
+../config/get-config-scripts.sh
 
 ## Unpack the source code.
-rm -Rf pixman-0.20.0 && tar xfvz ../archives/pixman-0.20.0.tar.gz && cd pixman-0.20.0
+rm -Rf ${PIXMAN}
+echo "Unpacking ${PIXMAN}"
+extract ../archives/${PIXMAN}.tar.gz
+cd ${PIXMAN}
 
 ## Replace config.guess and config.sub
 cp ../../archives/config.guess ../../archives/config.sub .
@@ -23,4 +32,5 @@ PKG_CONFIG_PATH="$PS3DEV/portlibs/ppu/lib/pkgconfig" \
 ../configure --prefix="$PS3DEV/portlibs/ppu" --host="powerpc64-ps3-elf" --disable-shared --disable-vmx
 
 ## Compile and install.
-${MAKE:-make} -j4 && ${MAKE:-make} install
+jobs=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+${MAKE:-make} -j"$jobs" && ${MAKE:-make} -j"$jobs" install

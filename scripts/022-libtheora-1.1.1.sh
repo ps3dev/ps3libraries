@@ -1,14 +1,22 @@
-#!/bin/sh -e
+#!/usr/bin/env bash
+set -eo pipefail
 # libtheora-1.1.1.sh by dhewg (dhewg@wiibrew.org)
+LIBTHEORA="libtheora-1.1.1"
+
+## Source util functions
+source ../utils/utils.sh
 
 ## Download the source code.
-../download.sh libtheora-1.1.1.tar.bz2
+../download.sh ${LIBTHEORA}.tar.bz2
 
 ## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
+../config/get-config-scripts.sh
 
 ## Unpack the source code.
-rm -Rf libtheora-1.1.1 && tar xfvj ../archives/libtheora-1.1.1.tar.bz2 && cd libtheora-1.1.1
+rm -Rf ${LIBTHEORA}
+echo "Unpacking ${LIBTHEORA}"
+extract ../archives/${LIBTHEORA}.tar.bz2
+cd ${LIBTHEORA}
 
 ## Replace config.guess and config.sub
 cp ../../archives/config.guess ../../archives/config.sub .
@@ -23,4 +31,5 @@ PKG_CONFIG_PATH="$PS3DEV/portlibs/ppu/lib/pkgconfig" \
 ../configure --prefix="$PS3DEV/portlibs/ppu" --host="powerpc64-ps3-elf" --disable-shared --disable-examples
 
 ## Compile and install.
-${MAKE:-make} -j4 && ${MAKE:-make} install
+jobs=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+${MAKE:-make} -j"$jobs" && ${MAKE:-make} -j"$jobs" install

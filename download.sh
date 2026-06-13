@@ -1,73 +1,149 @@
 #!/bin/sh
+set -eu
+cd "$(dirname "$0")"
+cd archives || exit 1
 
-cd `dirname $0`
-cd archives || exit
+ARCHIVE="archives.txt"
+WGET="wget --tries=5 --timeout=15 --quiet --show-progress"
 
-if [ $# -eq 0 ]; then
-  ../scripts/get-config-scripts.sh
-  sed -e 's:^.*/::g' -e 's/.* -> //g' < archives.txt | while read file; do
-    ../download.sh "$file" || exit
-  done
-  exit
-fi
+# -----------------------------------------------------------------------------
+# verify_sha256 <file> <expected_sha>
+# Returns 0 on match, 1 on mismatch or error.
+# -----------------------------------------------------------------------------
+verify_sha256() {
+    file="$1"
+    expected="$2"
+    out=$(sha256sum "$file" 2>/dev/null) || {
+        echo "  !! sha256sum failed: $file" >&2
+        return 1
+    }
+    set -- $out
+    actual="$1"
+    if [ "$actual" != "$expected" ]; then
+        echo "  !! SHA256 mismatch: $file" >&2
+        echo "     expected: $expected" >&2
+        echo "     got:      $actual"  >&2
+        return 1
+    fi
+    return 0
+}
 
-if [ $# -ne 1 ]; then
-  echo >&2 "Usage: $0 filename"
-  exit 1
-fi
-file="$1"
-
-set -- `grep "$1" archives.txt`
-if [ $# -lt 3 ]; then
-  echo >&2 "Unable to find $file in archives.txt"
-  exit 1
-fi
-remote_md5="$1"
-remote_size="$2"
-shift
-shift
-
-if [ -s "$file" ]; then
-  previous_file=yes
-  if [ "$remote_size" = "-" ]; then
-    local_size='-'
-  else
-    local_size=`stat 2>/dev/null -L -c'%s' "$file"`
-  fi
-else
-  previous_file=no
-fi
-
-if [ $previous_file = no -o "$remote_size" != "$local_size" ]; then
-  while [ "$#" -gt 0 ]; do
+# -----------------------------------------------------------------------------
+# fetch <url> <dest>
+# -----------------------------------------------------------------------------
+fetch() {
     url="$1"
-    rename=""
-    if [ "${2:-}" = "->" ]; then
-      rename="$3"
-      shift
-      shift
-    fi
-    if [ "$#" -gt 1 ]; then
-      wget ${rename:+-O} ${rename} --tries 5 --timeout 15 --continue "$url" && break
-    else
-      wget ${rename:+-O} ${rename} --continue "$url" || exit
-    fi
-    shift
-  done
-fi
+    dest="$2"
+    $WGET -O "$dest" "$url" || {
+        echo "  !! Download failed: $url" >&2
+        rm -f "$dest"
+        return 1
+    }
+}
 
-if [ "$remote_md5" = "-" ]; then
-  local_md5='-'
+# -----------------------------------------------------------------------------
+# download <sha> <size> <url> [rename]
+# -----------------------------------------------------------------------------
+download() {
+    sha="$1"
+    size="$2"
+    url="$3"
+    rename="${4:-}"
+    file="${rename:-$(basename "$url")}"
+
+    printf '==> %s\n' "$file"
+
+    # If already present, verify immediately — size alone is not enough.
+    if [ -f "$file" ]; then
+        if [ "$sha" = "-" ]; then
+            echo "  -- no checksum, skipping re-download of existing file"
+            return 0
+        fi
+        if verify_sha256 "$file" "$sha"; then
+            echo "  -- already good"
+            return 0
+        fi
+        echo "  -- existing file failed verification, re-downloading..."
+        rm -f "$file"
+    fi
+
+    # First attempt
+    fetch "$url" "$file"
+
+    # Verify, with one retry on mismatch
+    if [ "$sha" != "-" ]; then
+        if ! verify_sha256 "$file" "$sha"; then
+            echo "  -- retrying download..."
+            rm -f "$file"
+            fetch "$url" "$file"
+            verify_sha256 "$file" "$sha" || {
+                rm -f "$file"
+                echo "  !! Giving up on $file" >&2
+                return 1
+            }
+        fi
+    fi
+
+    echo "  -- ok"
+}
+
+# -----------------------------------------------------------------------------
+# parse_line <line> -> prints "sha\tsize\turl\trename" or returns 1
+# -----------------------------------------------------------------------------
+parse_line() {
+    line="$1"
+    [ -z "$line" ] && return 1
+    set -- $line
+    [ "$#" -lt 3 ] && return 1
+    sha="$1"; size="$2"; url="$3"
+    rename=""
+    shift 3
+    if [ "${1:-}" = "->" ]; then
+        rename="${2:-}"
+    fi
+    printf '%s\t%s\t%s\t%s\n' "$sha" "$size" "$url" "$rename"
+}
+
+# -----------------------------------------------------------------------------
+# run_all / run_one
+# -----------------------------------------------------------------------------
+run_all() {
+    ../config/get-config-scripts.sh
+    while IFS= read -r line; do
+        [ -z "$line" ] && continue
+        parsed=$(parse_line "$line") || continue
+        IFS="$(printf '\t')" read -r sha size url rename <<EOF
+$parsed
+EOF
+        download "$sha" "$size" "$url" "$rename"
+    done < "$ARCHIVE"
+}
+
+run_one() {
+    target="$1"
+    found=0
+    while IFS= read -r line; do
+        case "$line" in
+            *"$target"*) ;;
+            *) continue ;;
+        esac
+        parsed=$(parse_line "$line") || continue
+        IFS="$(printf '\t')" read -r sha size url rename <<EOF
+$parsed
+EOF
+        download "$sha" "$size" "$url" "$rename"
+        found=1
+        break
+    done < "$ARCHIVE"
+    [ "$found" -eq 1 ] || {
+        echo "Not found: $target" >&2
+        exit 1
+    }
+}
+
+# -----------------------------------------------------------------------------
+if [ "$#" -eq 0 ]; then
+    run_all
 else
-  local_md5=`md5sum 2>/dev/null -b "$file" | cut -c 1-32`
-fi
-if [ -n "$local_md5" -a "$remote_md5" != "$local_md5" ]; then
-  echo >&2 "Incorrect MD5 for $file"
-  if [ $previous_file = yes ]; then
-    echo >&2 "Deleting the file and trying again..."
-    rm "$file"
-    exec ../download.sh "$file"
-  else
-    exit 1
-  fi
+    run_one "$1"
 fi

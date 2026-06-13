@@ -3,38 +3,228 @@ name: Build libraries package
 on: [ push, pull_request, workflow_dispatch ]
 
 jobs:
-  build_ps3libraries:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            os: linux
+
+          - runner: macos-15-intel
+            os: macos
+
+          - runner: macos-26
+            os: macos
+
     steps:
+      - name: Checkout
+        uses: actions/checkout@v6
 
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Set env vars
+        id: slug
+        run: |
+          echo "sha_name=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_ENV
+          echo "NO_SAVANNAH=1" >> $GITHUB_ENV
 
-    - name: Set env vars
-      id: slug
-      run: |
-        echo "sha_name=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_ENV
-        sudo apt-get -y install autoconf automake bison flex make texinfo patch wget zlib1g-dev libtool-bin bzip2 pkg-config
+      - name: Install Linux requirements
+        if: matrix.os == 'linux'
+        run: |
+          sudo apt-get -y install gcc libelf-dev autoconf automake bison flex make texinfo patch wget zlib1g-dev libtool-bin bzip2 pkg-config libssl-dev
 
-      # using pre-compiled PS3 toolchain
-    - name: Download PSL1GHT Toolchain
-      run: |
-        curl -sL https://github.com/ps3dev/ps3toolchain/releases/download/2026-06-09/ps3dev-92534e60-ubuntu-latest.tar.gz | tar xvz -C ./
-        echo "PS3DEV=${GITHUB_WORKSPACE}/ps3dev" >> $GITHUB_ENV
-        echo "PSL1GHT=${GITHUB_WORKSPACE}/ps3dev" >> $GITHUB_ENV
+      - name: Install MacOS requirements
+        if: matrix.os == 'macos'
+        shell: bash
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+          HOMEBREW_NO_ENV_HINTS: 1
+        run: |
+          eval "$(brew shellenv)"
+          brew install autoconf automake openssl libelf ncurses zlib gmp wget pkg-config texinfo
 
-    - name: Install libraries
-      run: |
-        sed -i.bak '8d' libraries-sudo.sh
-        ./libraries-sudo.sh
+      - name: Create build folder
+        run: |
+          mkdir build
 
-    - name: Build Package
-      run: |
-        7z a ps3libraries.zip $PSL1GHT/portlibs/
+      - name: Cache downloaded archives
+        uses: actions/cache@v5
+        with:
+          path: archives
+          key: archives-${{ hashFiles('archives/archives.txt') }}
 
-    - name: Push package artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ps3libraries-build_${{ env.sha_name }}
-        path: ps3libraries.zip
-        if-no-files-found: error
+      - name: Purge unverifiable archives
+        run: |
+          while IFS= read -r line; do
+            set -- $line
+            [ "${1:-}" = "-" ] || continue
+            # 3rd field is URL, 5th field (if "->") is rename
+            url="$3"
+            rename=""
+            [ "${4:-}" = "->" ] && rename="${5:-}"
+            file="${rename:-$(basename "$url")}"
+            rm -f "archives/$file"
+          done < archives/archives.txt
+
+      - name: Download PS3DEV Toolchain
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TOOLCHAIN_URL=$(gh api repos/ps3dev/ps3toolchain/releases \
+            --jq '
+              map(select(.prerelease and (.draft | not)))
+              | sort_by(.published_at)
+              | reverse
+              | .[0].assets[]
+              | select(.name == "ps3dev-${{ matrix.os }}-${{ runner.arch }}.tar.gz")
+              | .browser_download_url
+            ')
+
+          curl -sL "$TOOLCHAIN_URL" | tar xvz -C ./
+          echo "PS3DEV=${GITHUB_WORKSPACE}/ps3dev" >> $GITHUB_ENV
+          echo "PSL1GHT=${GITHUB_WORKSPACE}/ps3dev" >> $GITHUB_ENV
+          echo "PATH=$PATH:$PWD/ps3dev/bin:$PWD/ps3dev/ppu/bin:$PWD/ps3dev/spu/bin" >> $GITHUB_ENV
+
+      - name: Download files
+        working-directory: ./build
+        run: ../download.sh
+
+      - name: Build PSL1GHT
+        run: |
+          git clone https://github.com/ps3dev/PSL1GHT.git
+          cd PSL1GHT
+          JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+          make -j"$JOBS" install-ctrl
+          make -j"$JOBS"
+          make -j"$JOBS" install
+
+      - name: Build Zlib 1.2.13
+        run: ./libraries.sh 001
+
+      - name: Build Libpng 1.4.4
+        run: ./libraries.sh 002
+
+      - name: Build Jpeg 8b
+        run: ./libraries.sh 003
+
+      - name: Build Freetype 2.4.3
+        run: ./libraries.sh 004
+
+      - name: Build Pixman 0.20.0
+        run: ./libraries.sh 005
+
+      - name: Build Cairo 1.10.0
+        run: ./libraries.sh 006
+
+      - name: Build Libogg 1.3.4
+        run: ./libraries.sh 007
+
+      - name: Build Libvorbis 1.3.5
+        run: ./libraries.sh 008
+
+      - name: Build Libzip 0.9.3
+        run: ./libraries.sh 009
+
+      - name: Build Tiff 3.9.4
+        run: ./libraries.sh 010
+
+      - name: Build Libmikmod 3.1.11
+        run: ./libraries.sh 011
+
+      - name: Build Libxml2 2.7.8
+        run: ./libraries.sh 012
+
+      - name: Build Sdl_psl1ght
+        run: ./libraries.sh 013
+
+      - name: Build Sdl2_psl1ght
+        run: ./libraries.sh 014
+
+      - name: Build Sdl_psl1ght_libs
+        run: ./libraries.sh 015
+
+      - name: Build SDL2_mixer 2.0.4
+        run: ./libraries.sh 016
+
+      - name: Build Polarssl 1.3.9
+        run: ./libraries.sh 017
+
+      - name: Build Libcurl 7.64.1
+        run: ./libraries.sh 018
+
+      - name: Build Libmad 0.15.1b
+        run: ./libraries.sh 019
+
+      - name: Build Flac 1.2.1
+        run: ./libraries.sh 020
+
+      - name: Build Faad2 2.7
+        run: ./libraries.sh 021
+
+      - name: Build Libtheora 1.1.1
+        run: ./libraries.sh 022
+
+      - name: Build NoRSX
+        run: ./libraries.sh 023
+
+      - name: Build Libjson
+        run: ./libraries.sh 024
+
+      - name: Build Debugnet
+        run: ./libraries.sh 025
+
+      - name: Build Ps3soundlib
+        run: ./libraries.sh 026
+
+      - name: Build Tiny3d_libfont
+        run: ./libraries.sh 027
+
+      - name: Build MbedTLS 2.28.10
+        run: ./libraries.sh 028
+
+      - name: Build Libunrar
+        run: ./libraries.sh 029
+
+      - name: Build Libnfs
+        run: ./libraries.sh 030
+
+      - name: Build Libsmb2
+        run: ./libraries.sh 031
+
+      - name: Build Package
+        run: |
+          7z a ps3libraries-${{ matrix.os }}-${{ runner.arch }}.tar.gz $PSL1GHT/portlibs/
+
+      - name: Push package artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ps3libraries-${{ env.sha_name }}-${{ matrix.os }}-${{ runner.arch }}
+          path: ps3libraries-${{ matrix.os }}-${{ runner.arch }}.tar.gz
+          if-no-files-found: error
+
+  push_release:
+    if: |
+      github.event_name == 'push' &&
+      github.repository == 'ps3dev/ps3libraries'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create Pre-Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="nightly-$(date -u +%Y-%m-%d)"
+          gh release delete "$TAG" --yes --cleanup-tag || true
+          gh release create "$TAG" artifacts/*.tar.gz --target ${{ GITHUB.SHA }} -t "$TAG" --prerelease
