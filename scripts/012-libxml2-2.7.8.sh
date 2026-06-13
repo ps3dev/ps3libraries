@@ -1,14 +1,23 @@
-#!/bin/sh -e
+#!/usr/bin/env bash
+set -eo pipefail
+
 # libxml2-2.7.8.sh by Naomi Peori (naomi@peori.ca)
+LIBXML2="libxml2-2.7.8"
+
+## Source util functions
+source ../utils/utils.sh
 
 ## Download the source code.
-../download.sh libxml2-2.7.8.tar.gz
+../download.sh ${LIBXML2}.tar.gz
 
 ## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
+../config/get-config-scripts.sh
 
 ## Unpack the source code.
-rm -Rf libxml2-2.7.8 && tar xfvz ../archives/libxml2-2.7.8.tar.gz && cd libxml2-2.7.8
+rm -Rf ${LIBXML2}
+echo "Unpacking ${LIBXML2}"
+extract ../archives/${LIBXML2}.tar.gz
+cd ${LIBXML2}
 
 ## Replace config.guess and config.sub
 cp ../../archives/config.guess ../../archives/config.sub .
@@ -23,4 +32,5 @@ PKG_CONFIG_PATH="$PS3DEV/portlibs/ppu/lib/pkgconfig" \
 ../configure --prefix="$PS3DEV/portlibs/ppu" --host="powerpc64-ps3-elf" --enable-static --disable-shared --without-ftp --without-http --without-python
 
 ## Compile and install.
-${MAKE:-make} -j4 && ${MAKE:-make} install
+jobs=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+${MAKE:-make} -j"$jobs" && ${MAKE:-make} -j"$jobs" install

@@ -1,20 +1,29 @@
-#!/bin/sh -e
+#!/usr/bin/env bash
+set -eo pipefail
+
 # tiff-3.9.4.sh by Jon Limle <jonlimle123@yahoo.com>
+TIFF="tiff-3.9.4"
+
+## Source util functions
+source ../utils/utils.sh
 
 ## Download the source code.
-../download.sh tiff-3.9.4.tar.gz
+../download.sh ${TIFF}.tar.gz
 
 ## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
+../config/get-config-scripts.sh
 
 ## Unpack the source code.
-rm -Rf tiff-3.9.4 && tar xfvz ../archives/tiff-3.9.4.tar.gz && cd tiff-3.9.4
+rm -Rf ${TIFF}
+echo "Unpacking ${TIFF}"
+extract ../archives/${TIFF}.tar.gz
+cd ${TIFF}
 
 ## Replace config.guess and config.sub
 cp ../../archives/config.guess ../../archives/config.sub config/
 
 ## Patch the source code.
-cat ../../patches/tiff-3.9.4-PPU.patch | patch -p1
+cat ../../patches/${TIFF}-PPU.patch | patch -p1
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu
@@ -26,4 +35,5 @@ PKG_CONFIG_PATH="$PS3DEV/portlibs/ppu/lib/pkgconfig" \
 ../configure --prefix="$PS3DEV/portlibs/ppu" --host="powerpc64-ps3-elf" --disable-shared
 
 ## Compile and install.
-${MAKE:-make} && ${MAKE:-make} install
+jobs=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+${MAKE:-make} -j"$jobs" && ${MAKE:-make} -j"$jobs" install

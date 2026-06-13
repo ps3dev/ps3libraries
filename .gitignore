@@ -1,5 +1,4 @@
 /build
-/archives/*-[0-9]*
-/archives/*.tar.gz
-/archives/config.guess
-/archives/config.sub
+/archives/*
+!/archives/archives.txt
+/ps3dev
