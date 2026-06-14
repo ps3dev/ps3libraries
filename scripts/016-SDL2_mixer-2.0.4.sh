@@ -18,9 +18,8 @@ mkdir build-ppu && cd build-ppu
 ## Configure the build.
 CFLAGS="-I$PSL1GHT/ppu/include -I$PS3DEV/portlibs/ppu/include" \
 LDFLAGS="-L$PSL1GHT/ppu/lib -L$PS3DEV/portlibs/ppu/lib -lrt -llv2" \
-PKG_CONFIG_PATH="$PS3DEV/portlibs/ppu/lib/pkgconfig" \
-LIBMIKMOD_CONFIG="$PS3DEV/portlibs/ppu/bin/libmikmod-config"
-export LIBMIKMOD_CONFIG
+PKG_CONFIG_LIBDIR="$PS3DEV/portlibs/ppu/lib/pkgconfig" \
+LIBMIKMOD_CONFIG="$PS3DEV/portlibs/ppu/bin/libmikmod-config" \
 ../configure --prefix="$PS3DEV/portlibs/ppu" --host="powerpc64-ps3-elf" \
     --disable-sdltest \
     --with-sdl-exec-prefix="$PS3DEV/portlibs/ppu" \
