@@ -1,4 +1,5 @@
-#!/bin/sh -e
+#!/usr/bin/env bash
+set -eo pipefail
 
 # Automatic build script for polarssl
 # for psl1ght, playstaion 3 open source sdk.
@@ -31,18 +32,24 @@ CURRENTPATH=`pwd`
 ARCH="powerpc64"
 PLATFORM="PS3"
 
+## Source util functions
+source ../utils/utils.sh
+
 ## Download the source code.
 ../download.sh polarssl-${VERSION}-gpl.tgz
 
 ## Unpack the source code.
-rm -Rf polarssl-${VERSION} && tar xfvz ../archives/polarssl-${VERSION}-gpl.tgz && cd polarssl-${VERSION}
+rm -Rf polarssl-${VERSION}
+echo "Unpacking polarssl-${VERSION}"
+extract ../archives/polarssl-${VERSION}-gpl.tgz
+cd polarssl-${VERSION}
 
 ## Patch the source code.
 echo "Patching net.c and timing.c for compatibility..."
-cat ../../patches/polarssl-1.3.9-ipv6.patch | patch -p1
+cat ../../patches/polarssl-${VERSION}-ipv6.patch | patch -p1
 cd library
-cat ../../../patches/polarssl-1.3.9-net.patch | patch -p1
-cat ../../../patches/polarssl-1.3.9-timing.patch | patch -p1
+cat ../../../patches/polarssl-${VERSION}-net.patch | patch -p1
+cat ../../../patches/polarssl-${VERSION}-timing.patch | patch -p1
 
 echo "Building polarssl for ${PLATFORM} ${SDKVERSION} ${ARCH}"
 
@@ -65,7 +72,8 @@ export CFLAGS="-I${CURRENTPATH}/polarssl-${VERSION}/include -I$PS3DEV/ppu/powerp
 
 echo "Build library..."
 ## Compile and install.
-${MAKE:-make}
+jobs=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+${MAKE:-make} -j"$jobs"
 
 cp libpolarssl.a $PS3DEV/portlibs/ppu/lib/libpolarssl.a
 cp -R ../include/polarssl $PS3DEV/portlibs/ppu/include/

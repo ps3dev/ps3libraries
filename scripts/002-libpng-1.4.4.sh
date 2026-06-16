@@ -1,14 +1,23 @@
-#!/bin/sh -e
+#!/usr/bin/env bash
+set -eo pipefail
+
 # libpng-1.4.4.sh by Naomi Peori (naomi@peori.ca)
+LIBPNG="libpng-1.4.4"
+
+## Source util functions
+source ../utils/utils.sh
 
 ## Download the source code.
-../download.sh libpng-1.4.4.tar.gz
+../download.sh ${LIBPNG}.tar.gz
 
 ## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
+../config/get-config-scripts.sh
 
 ## Unpack the source code.
-rm -Rf libpng-1.4.4 && tar xfvz ../archives/libpng-1.4.4.tar.gz && cd libpng-1.4.4
+rm -Rf ${LIBPNG}
+echo "Unpacking ${LIBPNG}"
+extract ../archives/${LIBPNG}.tar.gz
+cd ${LIBPNG}
 
 ## Replace config.guess and config.sub
 cp ../../archives/config.guess ../../archives/config.sub .
@@ -24,4 +33,5 @@ PKG_CONFIG_PATH="$PS3DEV/portlibs/ppu/lib/pkgconfig" \
 ../configure --prefix="$PS3DEV/portlibs/ppu" --host="powerpc64-ps3-elf" --enable-static --disable-shared
 
 ## Compile and install.
-${MAKE:-make} -j4 && ${MAKE:-make} install
+jobs=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+${MAKE:-make} -j"$jobs" && ${MAKE:-make} -j"$jobs" install
