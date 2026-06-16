@@ -17,4 +17,4 @@ cd libunrar
 
 ## Compile and install.
 jobs=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
-${MAKE:-make} -j"$jobs"
+${MAKE:-make} -j"$jobs" install
