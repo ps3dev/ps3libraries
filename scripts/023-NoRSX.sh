@@ -1,11 +1,20 @@
-#!/bin/sh -e
+#!/usr/bin/env bash
+set -eo pipefail
 # libNoRSX.sh by wargio (wargio@libero.it)
+
+## Source util functions
+source ../utils/utils.sh
 
 ## Download the source code.
 ../download.sh NoRSX.tar.gz 
 
 ## Unpack the source code.
-rm -Rf NoRSX && mkdir NoRSX && tar --strip-components=1 --directory=NoRSX -xvzf ../archives/NoRSX.tar.gz && cd NoRSX
+rm -Rf NoRSX
+mkdir NoRSX
+echo "Unpacking NoRSX"
+extract ../archives/NoRSX.tar.gz --strip-components=1 --directory=NoRSX
+cd NoRSX
 
 ## Compile and install.
-${MAKE:-make}
+jobs=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+${MAKE:-make} -j"$jobs"

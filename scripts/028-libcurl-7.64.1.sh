@@ -1,16 +1,24 @@
-#!/bin/sh -e
+#!/usr/bin/env bash
+set -eo pipefail
 # libcurl-7.31.0 by KaKaRoTo
 # modified by mhaqs for 7.31.0 release and cpp compatibility
 
-VERSION=7.64.1
+VERSION="7.64.1"
+
+## Source util functions
+source ../utils/utils.sh
+
 ## Download the source code.
 ../download.sh curl-${VERSION}.tar.gz
 
 ## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
+../config/get-config-scripts.sh
 
 ## Unpack the source code.
-rm -Rf curl-${VERSION} && tar xfvz ../archives/curl-${VERSION}.tar.gz && cd curl-${VERSION}
+rm -Rf curl-${VERSION}
+echo "Unpacking curl-${VERSION}"
+extract ../archives/curl-${VERSION}.tar.gz
+cd curl-${VERSION}
 
 ## Replace config.guess and config.sub
 cp ../../archives/config.guess ../../archives/config.sub .
@@ -30,4 +38,5 @@ AR="ppu-ar" CC="ppu-gcc" RANLIB="ppu-ranlib" \
           --includedir="$PS3DEV/portlibs/ppu/include" --libdir="$PS3DEV/portlibs/ppu/lib" --with-mbedtls="$PS3DEV/portlibs/ppu/include/mbedtls" --with-ca-bundle="/usr/ssl/certs/ca-bundle.crt"
 
 ## Compile and install.
-${MAKE:-make} -j4 && ${MAKE:-make} install
+jobs=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+${MAKE:-make} -j"$jobs" && ${MAKE:-make} -j"$jobs" install
