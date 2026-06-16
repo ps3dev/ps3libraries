@@ -1,5 +1,5 @@
-#!/bin/sh -e
-
+#!/usr/bin/env bash
+set -eo pipefail
 # Update by Damian Parrino (2020-07-29)
 # Automatic build script for mbedTLS
 # for PSL1GHT, PlayStation 3 open source SDK.
@@ -33,11 +33,17 @@ CURRENTPATH=`pwd`
 ARCH="powerpc64"
 PLATFORM="PS3"
 
+## Source util functions
+source ../utils/utils.sh
+
 ## Download the source code.
 ../download.sh mbedtls-${VERSION}.tar.bz2
 
 ## Unpack the source code.
-rm -Rf mbedtls-${VERSION} && tar xfvj ../archives/mbedtls-${VERSION}.tar.bz2 && cd mbedtls-${VERSION}
+rm -Rf mbedtls-${VERSION}
+echo "Unpacking mbedtls-${VERSION}"
+extract ../archives/mbedtls-${VERSION}.tar.bz2
+cd mbedtls-${VERSION}
 
 echo "Building mbedTLS ${VERSION} for ${PLATFORM} ${ARCH}"
 
@@ -62,7 +68,8 @@ export CFLAGS="-I../include -I$PS3DEV/ppu/powerpc64-ps3-elf/include -I$PSL1GHT/p
 echo "Build library..."
 ## Compile and install.
 cd library
-${MAKE:-make}
+jobs=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+${MAKE:-make} -j"$jobs"
 
 cp lib*.a $PS3DEV/portlibs/ppu/lib/
 cp -R ../include/mbedtls $PS3DEV/portlibs/ppu/include/
