@@ -194,7 +194,7 @@ jobs:
 
       - name: Build Package
         run: |
-          7z a ps3libraries-${{ matrix.os }}-${{ runner.arch }}.tar.gz $PSL1GHT/portlibs/
+           tar -zcvf ps3libraries-${{ matrix.os }}-${{ runner.arch }}.tar.gz $PSL1GHT/portlibs/
 
       - name: Push package artifact
         uses: actions/upload-artifact@v7
