@@ -1,15 +1,21 @@
-#!/bin/sh -e
+#!/usr/bin/env bash
+set -eo pipefail
 # libjson-c.sh by Mohammad Haseeb (mmhaqs@gmail.com)
 
-../download.sh json-c-0.11-20130402
+## Source util functions
+source ../utils/utils.sh
+
+## Download the source code.
+../download.sh json-c-0.11-20130402.tar.gz
 
 ## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
+../config/get-config-scripts.sh
 
 ## Unpack the source code.
-rm -Rf jsonc && mkdir jsonc && tar --strip-components=1 --directory=jsonc -xvzf ../archives/json-c-0.11-20130402
-
-## Create the build directory.
+rm -Rf jsonc
+mkdir jsonc
+echo "Unpacking jsonc"
+extract ../archives/json-c-0.11-20130402.tar.gz --strip-components=1 --directory=jsonc
 cd jsonc
 
 ## Replace config.guess and config.sub
@@ -24,4 +30,5 @@ ac_cv_func_malloc_0_nonnull=yes ac_cv_func_realloc_0_nonnull=yes \
 ./configure --prefix="$PS3DEV/portlibs/ppu" --host="powerpc64-ps3-elf" --enable-static --disable-shared
 
 ## Compile and install.
-${MAKE:-make} && ${MAKE:-make} install
+jobs=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+${MAKE:-make} -j"$jobs" && ${MAKE:-make} -j"$jobs" install

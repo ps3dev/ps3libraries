@@ -1,13 +1,22 @@
-#!/bin/sh -e
+#!/usr/bin/env bash
+set -eo pipefail
+
+SDL2_MIXER="SDL2_mixer-2.0.4"
+
+## Source util functions
+source ../utils/utils.sh
 
 ## Download the source code.
-../download.sh SDL2_mixer-2.0.4.tar.gz
+../download.sh ${SDL2_MIXER}.tar.gz
 
 ## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
-../scripts/get-config-scripts.sh
+../config/get-config-scripts.sh
 
 ## Unpack the source code.
-rm -Rf SDL2_mixer-2.0.4 && tar xfvz ../archives/SDL2_mixer-2.0.4.tar.gz && cd SDL2_mixer-2.0.4
+rm -Rf ${SDL2_MIXER}
+echo "Unpacking ${SDL2_MIXER}"
+extract ../archives/${SDL2_MIXER}.tar.gz
+cd ${SDL2_MIXER}
 
 ## Replace config.guess and config.sub
 cp ../../archives/config.guess ../../archives/config.sub build-scripts/
@@ -33,4 +42,5 @@ LIBMIKMOD_CONFIG="$PS3DEV/portlibs/ppu/bin/libmikmod-config" \
     --enable-music-mod-mikmod
 
 ## Compile and install.
-${MAKE:-make} -j4 && ${MAKE:-make} install
+jobs=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+${MAKE:-make} -j"$jobs" && ${MAKE:-make} -j"$jobs" install
