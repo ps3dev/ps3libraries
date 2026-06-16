@@ -30,3 +30,4 @@ b6ae1ee2fa3d42ac489287d3ec34c5885730b1296f0801ae577a35193d3affbc  1903175 https:
 -                                                                       - https://github.com/sahlberg/libnfs/tarball/master -> libnfs.tar.gz
 -                                                                       - https://github.com/sahlberg/libsmb2/tarball/master -> libsmb2.tar.gz
 -                                                                       - https://github.com/clienthax/psl1ght/tarball/master -> psl1ght.tar.gz
+-                                                                       - https://github.com/bucanero/pthread-emb-ps3/tarball/master -> pthread-emb-ps3.tar.gz

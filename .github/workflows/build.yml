@@ -150,7 +150,7 @@ jobs:
       - name: Build Polarssl 1.3.9
         run: ./libraries.sh 017
 
-      - name: Build Libcurl 7.64.1
+      - name: Build MbedTLS 2.28.10
         run: ./libraries.sh 018
 
       - name: Build Libmad 0.15.1b
@@ -180,7 +180,7 @@ jobs:
       - name: Build Tiny3d_libfont
         run: ./libraries.sh 027
 
-      - name: Build MbedTLS 2.28.10
+      - name: Build Libcurl 7.64.1
         run: ./libraries.sh 028
 
       - name: Build Libunrar
@@ -191,6 +191,9 @@ jobs:
 
       - name: Build Libsmb2
         run: ./libraries.sh 031
+
+      - name: Build Pthread-emb
+        run: ./libraries.sh 032
 
       - name: Build Package
         run: |
