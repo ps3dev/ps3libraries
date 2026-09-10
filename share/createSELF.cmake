@@ -15,11 +15,11 @@ cmake_minimum_required(VERSION 3.10)
 # Usage:
 #
 #   add_executable(mygame main.c)
-#   create_self_file(TARGET mygame)
+#   ps3_create_self_file(TARGET mygame)
 #
 # Optional arguments let you skip steps or change output locations:
 #
-#   create_self_file(
+#   ps3_create_self_file(
 #     TARGET       mygame
 #     OUTPUT_DIR   "${CMAKE_BINARY_DIR}/pkg/USRDIR"
 #     OUTPUT_NAME  EBOOT
@@ -40,11 +40,6 @@ find_program(PPU_STRIP_EXECUTABLE    NAMES powerpc64-ps3-elf-strip PATHS "${PS3D
 
 macro(ps3_create_self_file)
 
-  set(options
-    NO_SPRXLINK   # optional, skip the sprxlinker OPD-relocation fixup step
-    NO_STRIP      # optional, skip stripping (packages the raw ELF)
-    NO_FSELF      # optional, don't build the fake SELF (.fake.self)
-  )
   set(oneValueArgs
     TARGET        # required, defined by add_executable() before calling create_self_file
     OUTPUT_DIR    # optional, directory the .self/.fake.self are written to (default: target's own output dir)
@@ -71,7 +66,6 @@ macro(ps3_create_self_file)
     set(ARG_STRIP_FLAGS "--strip-debug")
   endif()
 
-  # ---- sanity check the tools -------------------------------------------
   if(NOT ARG_NO_SPRXLINK AND NOT SPRXLINKER_EXECUTABLE)
     message(FATAL_ERROR "ps3_create_self_file: sprxlinker not found, is PS3DEV set and in PATH?")
   endif()
@@ -85,59 +79,46 @@ macro(ps3_create_self_file)
     message(FATAL_ERROR "ps3_create_self_file: fself not found, is PS3DEV set and in PATH?")
   endif()
 
-  set(PS3_SELF_ELF "$<TARGET_FILE:${ARG_TARGET}>")
-
   if(DEFINED ARG_OUTPUT_DIR)
     set(PS3_SELF_OUT_DIR "${ARG_OUTPUT_DIR}")
   else()
     set(PS3_SELF_OUT_DIR "$<TARGET_FILE_DIR:${ARG_TARGET}>")
   endif()
 
+  set(PS3_SELF_WORK_ELF "${PS3_SELF_OUT_DIR}/${ARG_OUTPUT_NAME}")
+
   if(ARG_NO_STRIP)
-    set(PS3_SELF_PACKAGE_ELF "${PS3_SELF_ELF}")
+    set(PS3_SELF_PACKAGE_ELF "${PS3_SELF_WORK_ELF}")
   else()
-    set(PS3_SELF_PACKAGE_ELF "${PS3_SELF_ELF}.stripped.elf")
+    set(PS3_SELF_PACKAGE_ELF "${PS3_SELF_OUT_DIR}/${ARG_OUTPUT_NAME}.stripped.elf")
   endif()
 
   set(PS3_SELF_FILE  "${PS3_SELF_OUT_DIR}/${ARG_OUTPUT_NAME}.self")
   set(PS3_FSELF_FILE "${PS3_SELF_OUT_DIR}/${ARG_OUTPUT_NAME}.fake.self")
 
   add_custom_command(
-    TARGET ${ARG_TARGET}
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${PS3_SELF_OUT_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E echo "Running PS3 post-build steps for ${ARG_TARGET}..."
+      TARGET ${ARG_TARGET}
+      POST_BUILD
+      COMMAND echo "Running PS3 post-build steps..."
 
-    # 1. Fix OPD relocations FIRST, before anything else
-    $<$<NOT:$<BOOL:${ARG_NO_SPRXLINK}>>:COMMAND>
-    $<$<NOT:$<BOOL:${ARG_NO_SPRXLINK}>>:${SPRXLINKER_EXECUTABLE}>
-    $<$<NOT:$<BOOL:${ARG_NO_SPRXLINK}>>:${PS3_SELF_ELF}>
+      # 1. Fix OPD relocations FIRST, before anything else
+      COMMAND ${SPRXLINKER_EXECUTABLE} ${PS3_SELF_WORK_ELF}
 
-    # 2. Strip AFTER sprxlinker, preserve OPD via the caller-supplied flags
-    $<$<NOT:$<BOOL:${ARG_NO_STRIP}>>:COMMAND>
-    $<$<NOT:$<BOOL:${ARG_NO_STRIP}>>:${PPU_STRIP_EXECUTABLE}>
-    $<$<NOT:$<BOOL:${ARG_NO_STRIP}>>:${ARG_STRIP_FLAGS}>
-    $<$<NOT:$<BOOL:${ARG_NO_STRIP}>>:${PS3_SELF_ELF}>
-    $<$<NOT:$<BOOL:${ARG_NO_STRIP}>>:-o>
-    $<$<NOT:$<BOOL:${ARG_NO_STRIP}>>:${PS3_SELF_PACKAGE_ELF}>
+      # 2. Strip AFTER sprxlinker, preserve OPD with -R flag
+      COMMAND ${PPU_STRIP_EXECUTABLE}
+          --strip-debug
+          ${PS3_SELF_WORK_ELF}
+          -o ${PS3_SELF_PACKAGE_ELF}
 
-    # 3. Package the (stripped) elf into SELF, and optionally a fake SELF
-    COMMAND "${MAKE_SELF_EXECUTABLE}" "${PS3_SELF_PACKAGE_ELF}" "${PS3_SELF_FILE}"
+      # 3. Package the STRIPPED elf into SELF
+      COMMAND ${MAKE_SELF_EXECUTABLE} ${PS3_SELF_PACKAGE_ELF} ${PS3_SELF_FILE}
+      COMMAND ${FSELF_EXECUTABLE} ${PS3_SELF_PACKAGE_ELF} ${PS3_FSELF_FILE}
 
-    $<$<NOT:$<BOOL:${ARG_NO_FSELF}>>:COMMAND>
-    $<$<NOT:$<BOOL:${ARG_NO_FSELF}>>:${FSELF_EXECUTABLE}>
-    $<$<NOT:$<BOOL:${ARG_NO_FSELF}>>:${PS3_SELF_PACKAGE_ELF}>
-    $<$<NOT:$<BOOL:${ARG_NO_FSELF}>>:${PS3_FSELF_FILE}>
-
-    COMMAND ${CMAKE_COMMAND} -E echo "Done: ${PS3_SELF_FILE}"
-
-    COMMENT "Building PS3 SELF for ${ARG_TARGET}"
-    VERBATIM
-    COMMAND_EXPAND_LISTS
+      COMMAND echo "Done: ${PS3_SELF_FILE}"
   )
 
-  unset(PS3_SELF_ELF)
   unset(PS3_SELF_OUT_DIR)
+  unset(PS3_SELF_WORK_ELF)
   unset(PS3_SELF_PACKAGE_ELF)
   unset(PS3_SELF_FILE)
   unset(PS3_FSELF_FILE)

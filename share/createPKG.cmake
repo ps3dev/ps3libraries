@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # ---------------------------------------------------------------------------
-# create_pkg_file
+# ps3_create_pkg_file
 #
 # Packages a PS3 ELF/SELF target into a signed .pkg.
 #
@@ -47,7 +47,6 @@ macro(ps3_create_pkg_file)
   )
   set(multiValueArgs)
 
-
   cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   if(NOT DEFINED ARG_TARGET)
@@ -58,7 +57,6 @@ macro(ps3_create_pkg_file)
     message(FATAL_ERROR "create_pkg_file: '${ARG_TARGET}' is not a defined CMake target (call add_executable() first)")
   endif()
 
-  # ---- fill in defaults for anything not passed in --------------------
   if(NOT DEFINED ARG_TITLE)
     set(ARG_TITLE "${ARG_TARGET}")
   endif()
@@ -89,9 +87,7 @@ macro(ps3_create_pkg_file)
 
   set(PS3_PKG_STAGE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${ARG_TARGET}.pkgdir")
   set(PS3_PKG_FILE      "${ARG_OUTPUT_DIR}/${ARG_OUTPUT_NAME}.pkg")
-# Attached directly to the target's own build steps: runs every time
-  # ${ARG_TARGET} is (re)built, right after it links, no separate
-  # "_pkg" target to remember to invoke and no EXCLUDE_FROM_ALL surprises.
+
   add_custom_command(
     TARGET ${ARG_TARGET}
     POST_BUILD
