@@ -9,12 +9,6 @@ source ../utils/utils.sh
 ## Download the source code.
 ../download.sh SDL3_mixer-3.2.4.tar.gz
 
-## Copy make file.
-if [ ! -f "$PS3DEV/share/ps3dev.cmake" ]; then
-    mkdir -p "$PS3DEV/share"
-    cp ../depends/ps3dev.cmake  "$PS3DEV/share/ps3dev.cmake"
-fi
-
 ## Unpack the source code.
 rm -Rf ${SDL3_MIXER}
 mkdir ${SDL3_MIXER}
@@ -24,6 +18,6 @@ cd ${SDL3_MIXER}
 mkdir -p build-ppc
 cd build-ppc
 
-cmake -DCMAKE_TOOLCHAIN_FILE="../../depends/ps3build.cmake" -DCMAKE_BUILD_TYPE=Release  ..
+cmake -DCMAKE_TOOLCHAIN_FILE="../../cmake/ps3-toolchain.cmake" -DCMAKE_BUILD_TYPE=Release  ..
 cmake --build . 
 cmake --install .

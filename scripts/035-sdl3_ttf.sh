@@ -9,12 +9,6 @@ source ../utils/utils.sh
 ## Download the source code.
 ../download.sh ${SDL3_TTF}.tar.gz
 
-## Copy make file.
-if [ ! -f "$PS3DEV/share/ps3dev.cmake" ]; then
-    mkdir -p "$PS3DEV/share"
-    cp ../depends/ps3dev.cmake  "$PS3DEV/share/ps3dev.cmake"
-fi
-
 ## Unpack the source code.
 rm -Rf ${SDL3_TTF}
 mkdir ${SDL3_TTF}
@@ -32,6 +26,6 @@ cat ../../patches/SDL3_ttf-1.patch | patch -p1
 mkdir -p build-ppc
 cd build-ppc
 
-cmake -DCMAKE_TOOLCHAIN_FILE="../../depends/ps3build.cmake" -DCMAKE_BUILD_TYPE=Release  ..
+cmake -DCMAKE_TOOLCHAIN_FILE="../../cmake/ps3-toolchain.cmake" -DCMAKE_BUILD_TYPE=Release  ..
 cmake --build . 
 cmake --install .
