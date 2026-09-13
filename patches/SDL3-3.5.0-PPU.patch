@@ -1,0 +1,4301 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 51657f6e4..6b64bbd66 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -215,7 +215,7 @@ if(EMSCRIPTEN)
+   set(SDL_SHARED_AVAILABLE OFF)
+ endif()
+ 
+-if(VITA OR PSP OR PS2 OR N3DS OR RISCOS OR NGAGE OR DOS)
++if(VITA OR PSP OR PS2 OR PS3 OR N3DS OR RISCOS OR NGAGE OR DOS)
+   set(SDL_SHARED_AVAILABLE OFF)
+ endif()
+ 
+@@ -3380,6 +3380,48 @@ elseif(PS2)
+       ps2_drivers
+       atomic
+   )
++elseif(PS3)
++  sdl_glob_sources("${SDL3_SOURCE_DIR}/src/main/ps3/*.c")
++
++  if(SDL_AUDIO)
++    set(SDL_AUDIO_DRIVER_PS3 1)
++    sdl_glob_sources(
++      "${SDL3_SOURCE_DIR}/src/audio/ps3/*.c"
++      "${SDL3_SOURCE_DIR}/src/audio/ps3/*.h"
++    )
++    set(HAVE_SDL_AUDIO TRUE)
++  endif()
++
++  if(SDL_JOYSTICK)
++    set(SDL_JOYSTICK_PS3 1)
++    sdl_glob_sources("${SDL3_SOURCE_DIR}/src/joystick/ps3/*.c")
++    set(HAVE_SDL_JOYSTICK TRUE)
++  endif()
++
++  set(SDL_THREAD_PS3 1)
++  sdl_glob_sources(
++    "${SDL3_SOURCE_DIR}/src/thread/generic/SDL_syscond.c"
++    "${SDL3_SOURCE_DIR}/src/thread/generic/SDL_syscond_c.h"
++    "${SDL3_SOURCE_DIR}/src/thread/generic/SDL_systls.c"
++    "${SDL3_SOURCE_DIR}/src/thread/ps3/*.c"
++    "${SDL3_SOURCE_DIR}/src/thread/ps3/*.h"
++  )
++  set(HAVE_SDL_THREADS TRUE)
++
++  set(SDL_TIMER_PS3 1)
++  sdl_glob_sources("${SDL3_SOURCE_DIR}/src/timer/ps3/*.c")
++  set(HAVE_SDL_TIMERS TRUE)
++
++  if(SDL_VIDEO)
++    set(SDL_VIDEO_DRIVER_PS3 1)
++    set(SDL_VIDEO_RENDER_PS3 1)
++    sdl_glob_sources(
++      "${SDL3_SOURCE_DIR}/src/video/ps3/*.c"
++      "${SDL3_SOURCE_DIR}/src/render/ps3/*.c"
++    )
++    set(SDL_VIDEO_OPENGL 0)
++    set(HAVE_SDL_VIDEO TRUE)
++  endif()
+ elseif(N3DS)
+   sdl_glob_sources("${SDL3_SOURCE_DIR}/src/main/n3ds/*.c")
+ 
+diff --git a/cmake/sdlplatform.cmake b/cmake/sdlplatform.cmake
+index 14455f435..74f5a8428 100644
+--- a/cmake/sdlplatform.cmake
++++ b/cmake/sdlplatform.cmake
+@@ -32,6 +32,8 @@ function(SDL_DetectCMakePlatform)
+     set(sdl_cmake_platform ngage)
+   elseif(PS2)
+     set(sdl_cmake_platform ps2)
++  elseif(PS3)
++    set(sdl_cmake_platform ps3)
+   elseif(RISCOS)
+     set(sdl_cmake_platform RISCOS)
+   elseif(VITA)
+diff --git a/docs/README-ps3.md b/docs/README-ps3.md
+new file mode 100644
+index 000000000..761aa2a74
+--- /dev/null
++++ b/docs/README-ps3.md
+@@ -0,0 +1,45 @@
++PS3
++======
++SDL port for the Sony Playstation 3 contributed by:
++- 16rom.com
++
++
++Credit to
++   - Developers of the PSL1GHT library.
++   - Developers of PSL1GHT ports for SDL2.
++   - Developers of ps3toolchain.
++   - Developers of ps3libraries. 
++
++## Building
++
++First you need to setup [ps3toolchain](https://github.com/onesixromcom/ps3toolchain). New fork was created to fix build on the latest Linux system.
++
++There's also referenced [ps3libraries](https://github.com/onesixromcom/ps3libraries) from ps3toolchain which builds SDL3, SDL3_mixer and SDL3_ttf.
++
++Example PS3 program that builds with cmake [https://github.com/onesixromcom/sdl3-ps3-example](https://github.com/onesixromcom/sdl3-ps3-example)
++
++Add variables to .bashrc
++```bash
++export PS3DEV=/usr/local/ps3dev
++export PSL1GHT=$PS3DEV
++export PATH=$PATH:$PS3DEV/bin
++export PATH=$PATH:$PS3DEV/ppu/bin
++export PATH=$PATH:$PS3DEV/spu/bin
++````
++More information could be found in ps3toolchain for setup guide.
++
++## Notes
++Use ps3loadx installed on PS3 and ps3load compiled from ps3toolchain to run and debug code on real PS3.
++
++## Getting PS3 Dev
++[Installing PS3 Dev](https://github.com/ps3dev/ps3dev)
++
++## Running on RPCS3 Emulator
++[RPCS3](https://github.com/RPCS3/rpcs3)
++
++## To Do
++- PS3 Screen Keyboard
++- PS3 Screen Mouse
++- Handle video mode/resolution change
++- Render target Ex
++- Filesystem
+diff --git a/include/SDL3/SDL_main.h b/include/SDL3/SDL_main.h
+index 64daa42c3..685c40261 100644
+--- a/include/SDL3/SDL_main.h
++++ b/include/SDL3/SDL_main.h
+@@ -219,6 +219,8 @@
+            void reset_IOP(); \
+            void reset_IOP() {}
+ 
++    #elif defined(SDL_PLATFORM_PS3)
++        #define SDL_MAIN_AVAILABLE
+     #elif defined(SDL_PLATFORM_DOS)
+         /*
+           On DOS, SDL provides a main function that sets up memory
+diff --git a/include/SDL3/SDL_platform_defines.h b/include/SDL3/SDL_platform_defines.h
+index 4d1374007..811024501 100644
+--- a/include/SDL3/SDL_platform_defines.h
++++ b/include/SDL3/SDL_platform_defines.h
+@@ -453,6 +453,17 @@
+ #define SDL_PLATFORM_PS2 1
+ #endif
+ 
++#if defined(__PS3__) || defined(PS3)
++
++/**
++ * A preprocessor macro that is only defined if compiling for Sony PlayStation
++ * 3.
++ *
++ * \since This macro is available since SDL 3.4.0.
++ */
++#define SDL_PLATFORM_PS3 1
++#endif
++
+ #if defined(__vita__) || defined(__psp2__)
+ 
+ /**
+diff --git a/include/build_config/SDL_build_config.h b/include/build_config/SDL_build_config.h
+index a1658c2dc..2f1e21a70 100644
+--- a/include/build_config/SDL_build_config.h
++++ b/include/build_config/SDL_build_config.h
+@@ -45,6 +45,8 @@
+ #include "SDL_build_config_ios.h"
+ #elif defined(SDL_PLATFORM_ANDROID)
+ #include "SDL_build_config_android.h"
++#elif defined(SDL_PLATFORM_PS3)
++#include "SDL_build_config_ps3.h"
+ #else
+ /* This is a minimal configuration just to get SDL running on new platforms. */
+ #include "SDL_build_config_minimal.h"
+diff --git a/include/build_config/SDL_build_config.h.cmake b/include/build_config/SDL_build_config.h.cmake
+index 4507d4361..83ee1fba7 100644
+--- a/include/build_config/SDL_build_config.h.cmake
++++ b/include/build_config/SDL_build_config.h.cmake
+@@ -292,6 +292,7 @@
+ #cmakedefine SDL_AUDIO_DRIVER_VITA 1
+ #cmakedefine SDL_AUDIO_DRIVER_PSP 1
+ #cmakedefine SDL_AUDIO_DRIVER_PS2 1
++#cmakedefine SDL_AUDIO_DRIVER_PS3 1
+ #cmakedefine SDL_AUDIO_DRIVER_N3DS 1
+ #cmakedefine SDL_AUDIO_DRIVER_NGAGE 1
+ #cmakedefine SDL_AUDIO_DRIVER_QNX 1
+@@ -317,6 +318,7 @@
+ #cmakedefine SDL_JOYSTICK_MFI 1
+ #cmakedefine SDL_JOYSTICK_N3DS 1
+ #cmakedefine SDL_JOYSTICK_PS2 1
++#cmakedefine SDL_JOYSTICK_PS3 1
+ #cmakedefine SDL_JOYSTICK_PSP 1
+ #cmakedefine SDL_JOYSTICK_RAWINPUT 1
+ #cmakedefine SDL_JOYSTICK_USBHID 1
+@@ -373,6 +375,7 @@
+ #cmakedefine SDL_THREAD_VITA 1
+ #cmakedefine SDL_THREAD_PSP 1
+ #cmakedefine SDL_THREAD_PS2 1
++#cmakedefine SDL_THREAD_PS3 1
+ #cmakedefine SDL_THREAD_N3DS 1
+ #cmakedefine SDL_THREAD_DOS 1
+ 
+@@ -396,6 +399,7 @@
+ #cmakedefine SDL_TIMER_VITA 1
+ #cmakedefine SDL_TIMER_PSP 1
+ #cmakedefine SDL_TIMER_PS2 1
++#cmakedefine SDL_TIMER_PS3 1
+ #cmakedefine SDL_TIMER_N3DS 1
+ #cmakedefine SDL_TIMER_DOS 1
+ 
+@@ -414,6 +418,7 @@
+ #cmakedefine SDL_VIDEO_DRIVER_NGAGE 1
+ #cmakedefine SDL_VIDEO_DRIVER_OFFSCREEN 1
+ #cmakedefine SDL_VIDEO_DRIVER_PS2 1
++#cmakedefine SDL_VIDEO_DRIVER_PS3 1
+ #cmakedefine SDL_VIDEO_DRIVER_PSP 1
+ #cmakedefine SDL_VIDEO_DRIVER_RISCOS 1
+ #cmakedefine SDL_VIDEO_DRIVER_ROCKCHIP 1
+@@ -469,6 +474,7 @@
+ #cmakedefine SDL_VIDEO_RENDER_OGL_ES2 1
+ #cmakedefine SDL_VIDEO_RENDER_NGAGE 1
+ #cmakedefine SDL_VIDEO_RENDER_PS2 1
++#cmakedefine SDL_VIDEO_RENDER_PS3 1
+ #cmakedefine SDL_VIDEO_RENDER_PSP 1
+ #cmakedefine SDL_VIDEO_RENDER_VITA_GXM 1
+ 
+diff --git a/src/SDL.c b/src/SDL.c
+index 0201ad3e1..bb31615de 100644
+--- a/src/SDL.c
++++ b/src/SDL.c
+@@ -831,6 +831,8 @@ const char *SDL_GetPlatform(void)
+     return "tvOS";
+ #elif defined(SDL_PLATFORM_PS2)
+     return "PlayStation 2";
++#elif defined(SDL_PLATFORM_PS3)
++    return "PlayStation 3";
+ #elif defined(SDL_PLATFORM_PSP)
+     return "PlayStation Portable";
+ #elif defined(SDL_PLATFORM_VITA)
+diff --git a/src/SDL_internal.h b/src/SDL_internal.h
+index d86909e1f..481e70fff 100644
+--- a/src/SDL_internal.h
++++ b/src/SDL_internal.h
+@@ -219,6 +219,7 @@
+ #undef SDL_VIDEO_RENDER_OGL
+ #undef SDL_VIDEO_RENDER_OGL_ES2
+ #undef SDL_VIDEO_RENDER_PS2
++#undef SDL_VIDEO_RENDER_PS3
+ #undef SDL_VIDEO_RENDER_PSP
+ #undef SDL_VIDEO_RENDER_VITA_GXM
+ #undef SDL_VIDEO_RENDER_VULKAN
+diff --git a/src/audio/SDL_audio.c b/src/audio/SDL_audio.c
+index 43a71e653..6e91baca0 100644
+--- a/src/audio/SDL_audio.c
++++ b/src/audio/SDL_audio.c
+@@ -68,6 +68,9 @@ static const AudioBootStrap *const bootstrap[] = {
+ #ifdef SDL_AUDIO_DRIVER_PS2
+     &PS2AUDIO_bootstrap,
+ #endif
++#ifdef SDL_AUDIO_DRIVER_PS3
++    &PS3AUDIO_bootstrap,
++#endif
+ #ifdef SDL_AUDIO_DRIVER_PSP
+     &PSPAUDIO_bootstrap,
+ #endif
+diff --git a/src/audio/SDL_sysaudio.h b/src/audio/SDL_sysaudio.h
+index 858354a9a..589e0790d 100644
+--- a/src/audio/SDL_sysaudio.h
++++ b/src/audio/SDL_sysaudio.h
+@@ -384,6 +384,7 @@ extern AudioBootStrap DUMMYAUDIO_bootstrap;
+ extern AudioBootStrap AAUDIO_bootstrap;
+ extern AudioBootStrap OPENSLES_bootstrap;
+ extern AudioBootStrap PS2AUDIO_bootstrap;
++extern AudioBootStrap PS3AUDIO_bootstrap;
+ extern AudioBootStrap PSPAUDIO_bootstrap;
+ extern AudioBootStrap VITAAUD_bootstrap;
+ extern AudioBootStrap N3DSAUDIO_bootstrap;
+diff --git a/src/audio/ps3/SDL_ps3audio.c b/src/audio/ps3/SDL_ps3audio.c
+new file mode 100644
+index 000000000..044784c6c
+--- /dev/null
++++ b/src/audio/ps3/SDL_ps3audio.c
+@@ -0,0 +1,187 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#ifdef SDL_AUDIO_DRIVER_PS3
++
++#include "../SDL_audiodev_c.h"
++#include "../SDL_sysaudio.h"
++#include "SDL_ps3audio.h"
++#include <lv2/thread.h>
++#include <sys/thread.h>
++
++static bool PS3AUDIO_OpenDevice(SDL_AudioDevice *device)
++{
++    const SDL_AudioFormat *closefmts;
++    SDL_AudioFormat test_format;
++
++    device->hidden = (struct SDL_PrivateAudioData *)
++        SDL_calloc(1, sizeof(*device->hidden));
++    if (!device->hidden) {
++        return SDL_OutOfMemory();
++    }
++
++    // PS3 Libaudio only handles floats
++    closefmts = SDL_ClosestAudioFormats(device->spec.format);
++    while ((test_format = *(closefmts++)) != 0) {
++        if (test_format == SDL_AUDIO_F32BE) {
++            device->spec.format = test_format;
++            break;
++        }
++    }
++
++    if (!test_format) {
++        return SDL_SetError("Unsupported audio format");
++    }
++
++    int ret = audioInit();
++
++    // either 2 or 8 channel
++    device->hidden->params.numChannels = AUDIO_PORT_2CH;
++    // 8 16 or 32 block buffer
++    device->hidden->params.numBlocks = AUDIO_BLOCK_32;
++    // extended attributes
++    device->hidden->params.attrib = 0;
++    // sound level (1 is default)
++    device->hidden->params.level = 1;
++
++    ret = audioPortOpen(&device->hidden->params, &device->hidden->portNum);
++
++    ret = audioGetPortConfig(device->hidden->portNum, &device->hidden->config);
++
++    // create the event queue here — just creation, no thread binding yet
++    if (audioCreateNotifyEventQueue(&device->hidden->snd_queue, &device->hidden->snd_queue_key) != 0) {
++        return SDL_SetError("PS3AUDIO: failed to create notify event queue");
++    }
++
++    ret = audioPortStart(device->hidden->portNum);
++
++    device->hidden->last_filled_buf = 0;
++    device->hidden->next_buffer = 0;
++
++    device->spec.format = test_format;
++    device->spec.freq = 48000;
++    device->spec.channels = device->hidden->config.channelCount;
++
++    // PS3 audio block is always 256 samples
++    device->sample_frames = 256;
++
++    /* Allocate the mixing buffer. Its size and starting address must
++    be a multiple of 64 bytes.  Our sample count is already a multiple of
++    64, so spec->size should be a multiple of 64 as well. */
++    const int mixlen = device->buffer_size * NUM_BUFFERS;
++    device->hidden->rawbuf = (Uint8 *)SDL_aligned_alloc(64, mixlen);
++    if (!device->hidden->rawbuf) {
++        return SDL_SetError("Couldn't allocate mixing buffer");
++    }
++
++    SDL_memset(device->hidden->rawbuf, device->silence_value, mixlen);
++    for (int i = 0; i < NUM_BUFFERS; i++) {
++        device->hidden->mixbufs[i] = &device->hidden->rawbuf[i * device->buffer_size];
++    }
++
++    return ret == 0;
++}
++
++static bool PS3AUDIO_PlayDevice(SDL_AudioDevice *device, const Uint8 *buffer, int buflen)
++{
++    struct SDL_PrivateAudioData *hwdata = (struct SDL_PrivateAudioData *)device->hidden;
++
++    u32 block_index = hwdata->last_filled_buf % hwdata->params.numBlocks;
++
++    float *dst = (float *)hwdata->config.audioDataStart + block_index * device->sample_frames * hwdata->config.channelCount;
++
++    SDL_memcpy(dst, buffer, buflen);
++
++    hwdata->last_filled_buf = (hwdata->last_filled_buf + 1) % hwdata->params.numBlocks;
++
++    return true;
++}
++
++static void PS3AUDIO_CloseDevice(SDL_AudioDevice *device)
++{
++    if (device->hidden) {
++        audioPortStop(device->hidden->portNum);
++        audioRemoveNotifyEventQueue(device->hidden->snd_queue_key);
++        audioPortClose(device->hidden->portNum);
++        sysEventQueueDestroy(device->hidden->snd_queue, 0);
++        audioQuit();
++
++        if (device->hidden->rawbuf) {
++            SDL_aligned_free(device->hidden->rawbuf);
++            device->hidden->rawbuf = NULL;
++        }
++        SDL_free(device->hidden);
++    }
++}
++
++static Uint8 *PS3AUDIO_GetDeviceBuf(SDL_AudioDevice *device, int *buffer_size)
++{
++    struct SDL_PrivateAudioData *hwdata = (struct SDL_PrivateAudioData *)device->hidden;
++
++    *buffer_size = device->buffer_size;
++
++    Uint8 *buf = hwdata->mixbufs[hwdata->next_buffer];
++    hwdata->next_buffer = (hwdata->next_buffer + 1) % NUM_BUFFERS;
++
++    return buf;
++}
++
++static bool PS3AUDIO_WaitDevice(SDL_AudioDevice *device)
++{
++    sys_event_t event;
++    sysEventQueueReceive(device->hidden->snd_queue, &event, UINT64_MAX);
++
++    return true;
++}
++
++static void PS3AUDIO_ThreadInit(SDL_AudioDevice *device)
++{
++    struct SDL_PrivateAudioData *hwdata = (struct SDL_PrivateAudioData *)device->hidden;
++
++    // raise audio thread priority
++    // sys_ppu_thread_t tid;
++    // sysThreadGetId(&tid);
++    // lower number = higher priority on PS3
++    // sysThreadSetPriority(tid, 100);
++
++    // bind the event queue to the audio port from within the audio thread
++    audioSetNotifyEventQueue(hwdata->snd_queue_key);
++}
++
++bool PS3AUDIO_Init(SDL_AudioDriverImpl *impl)
++{
++    impl->OpenDevice = PS3AUDIO_OpenDevice;
++    impl->PlayDevice = PS3AUDIO_PlayDevice;
++    impl->WaitDevice = PS3AUDIO_WaitDevice;
++    impl->CloseDevice = PS3AUDIO_CloseDevice;
++    impl->GetDeviceBuf = PS3AUDIO_GetDeviceBuf;
++    impl->ThreadInit = PS3AUDIO_ThreadInit;
++    impl->OnlyHasDefaultPlaybackDevice = 1;
++
++    return true;
++}
++
++AudioBootStrap PS3AUDIO_bootstrap = {
++    "ps3", "PS3 audio driver", PS3AUDIO_Init, false, false
++};
++
++#endif // SDL_AUDIO_DRIVER_PS3
+diff --git a/src/audio/ps3/SDL_ps3audio.h b/src/audio/ps3/SDL_ps3audio.h
+new file mode 100644
+index 000000000..1696c66bc
+--- /dev/null
++++ b/src/audio/ps3/SDL_ps3audio.h
+@@ -0,0 +1,48 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++
++#ifndef SDL_ps3audio_h_
++#define SDL_ps3audio_h_
++
++#include "../SDL_sysaudio.h"
++
++#include <audio/audio.h>
++
++#define NUM_BUFFERS 8
++
++struct SDL_PrivateAudioData
++{
++    // The file descriptor for the audio device
++    audioPortParam params;
++    audioPortConfig config;
++    u32 portNum;
++    u32 last_filled_buf;
++    sys_event_queue_t snd_queue; // Queue identifier
++    u64 snd_queue_key;           // Queue Key
++    // The raw allocated mixing buffer.
++    Uint8 *rawbuf;
++    // Individual mixing buffers.
++    Uint8 *mixbufs[NUM_BUFFERS];
++    // Index of the next available mixing buffer.
++    int next_buffer;
++};
++
++#endif // SDL_ps3audio_h_
+diff --git a/src/cpuinfo/SDL_cpuinfo.c b/src/cpuinfo/SDL_cpuinfo.c
+index 116c5371c..f66696212 100644
+--- a/src/cpuinfo/SDL_cpuinfo.c
++++ b/src/cpuinfo/SDL_cpuinfo.c
+@@ -1220,6 +1220,12 @@ int SDL_GetSystemRAM(void)
+             SDL_SystemRAM = GetMemorySize();
+         }
+ #endif
++#ifdef SDL_PLATFORM_PS3
++        if (SDL_SystemRAM <= 0) {
++            // PlayStation 3 has 256MiB.
++            SDL_SystemRAM = 268435456;
++        }
++#endif
+ #ifdef SDL_PLATFORM_HAIKU
+         if (SDL_SystemRAM <= 0) {
+             system_info info;
+@@ -1252,6 +1258,9 @@ int SDL_GetSystemPageSize(void)
+ #ifdef SDL_PLATFORM_PS2
+         SDL_SystemPageSize = 4096;  // It's a MIPS R5900 CPU; I assume this is 4K.
+ #endif
++#ifdef SDL_PLATFORM_PS3
++        SDL_SystemPageSize = 4096;  // It's a Cell PowerPC CPU; Default is 4K.
++#endif
+ #if defined(HAVE_SYSCONF) && (defined(_SC_PAGESIZE) || defined(_SC_PAGE_SIZE))
+         if (SDL_SystemPageSize <= 0) {
+             #if defined(_SC_PAGE_SIZE)
+diff --git a/src/dynapi/SDL_dynapi.h b/src/dynapi/SDL_dynapi.h
+index 2713e3f46..fc7503d41 100644
+--- a/src/dynapi/SDL_dynapi.h
++++ b/src/dynapi/SDL_dynapi.h
+@@ -53,6 +53,8 @@
+ #define SDL_DYNAMIC_API 0
+ #elif defined(SDL_PLATFORM_PS2) && SDL_PLATFORM_PS2
+ #define SDL_DYNAMIC_API 0
++#elif defined(SDL_PLATFORM_PS3) && SDL_PLATFORM_PS3
++#define SDL_DYNAMIC_API 0
+ #elif defined(SDL_PLATFORM_PSP) && SDL_PLATFORM_PSP
+ #define SDL_DYNAMIC_API 0
+ #elif defined(SDL_PLATFORM_RISCOS) // probably not useful on RISC OS, since dlopen() can't be used when using static linking.
+diff --git a/src/events/SDL_mouse.c b/src/events/SDL_mouse.c
+index e00e67c64..045944319 100644
+--- a/src/events/SDL_mouse.c
++++ b/src/events/SDL_mouse.c
+@@ -270,6 +270,11 @@ bool SDL_PreInitMouse(void)
+     SDL_AddHintCallback(SDL_HINT_PEN_MOUSE_EVENTS,
+                         SDL_PenMouseEventsChanged, mouse);
+ 
++#ifndef SDL_PLATFORM_PS3
++    SDL_AddHintCallback(SDL_HINT_PEN_TOUCH_EVENTS,
++                        SDL_PenTouchEventsChanged, mouse);
++#endif
++
+     SDL_AddHintCallback(SDL_HINT_MOUSE_AUTO_CAPTURE,
+                         SDL_MouseAutoCaptureChanged, mouse);
+ 
+diff --git a/src/joystick/SDL_gamepad_db.h b/src/joystick/SDL_gamepad_db.h
+index 02dd5fcda..85df3e017 100644
+--- a/src/joystick/SDL_gamepad_db.h
++++ b/src/joystick/SDL_gamepad_db.h
+@@ -874,6 +874,9 @@ static const char *s_GamepadMappings[] = {
+ #ifdef SDL_JOYSTICK_PS2
+     "0000000050533220436f6e74726f6c00,PS2 Controller,crc:ed87,a:b10,b:b9,back:b0,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,leftshoulder:b6,leftstick:b1,lefttrigger:b4,leftx:a0,lefty:a1,rightshoulder:b7,rightstick:b2,righttrigger:b5,rightx:a2,righty:a3,start:b3,x:b11,y:b8,",
+ #endif
++#ifdef SDL_JOYSTICK_PS3
++    "00007a2e50533320436f6e74726f6c00,PS3 Controller,crc:ed87,a:b2,b:b1,x:b3,y:b0,back:b10,start:b11,guide:b16,leftshoulder:b4,rightshoulder:b5,lefttrigger:b12,righttrigger:b13,leftx:a0,lefty:a1,rightx:a2,righty:a3,dpup:b8,dpdown:b6,dpleft:b7,dpright:b9,leftstick:b14,rightstick:b15,",
++#endif
+ #ifdef SDL_JOYSTICK_PSP
+     "00000000505350206275696c74696e00,PSP builtin joypad,crc:bb86,a:b2,b:b1,back:b6,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,leftshoulder:b4,leftx:a0,lefty:a1,rightshoulder:b5,rightx:a2,righty:a3,start:b7,x:b3,y:b0,",
+ #endif
+diff --git a/src/joystick/SDL_joystick.c b/src/joystick/SDL_joystick.c
+index 70e0a08f2..044746095 100644
+--- a/src/joystick/SDL_joystick.c
++++ b/src/joystick/SDL_joystick.c
+@@ -94,6 +94,9 @@ static SDL_JoystickDriver *SDL_joystick_drivers[] = {
+ #ifdef SDL_JOYSTICK_PS2
+     &SDL_PS2_JoystickDriver,
+ #endif
++#ifdef SDL_JOYSTICK_PS3
++    &SDL_PS3_JoystickDriver,
++#endif
+ #ifdef SDL_JOYSTICK_PSP
+     &SDL_PSP_JoystickDriver,
+ #endif
+diff --git a/src/joystick/SDL_sysjoystick.h b/src/joystick/SDL_sysjoystick.h
+index d428d50bd..1a9c5c91a 100644
+--- a/src/joystick/SDL_sysjoystick.h
++++ b/src/joystick/SDL_sysjoystick.h
+@@ -269,6 +269,7 @@ extern SDL_JoystickDriver SDL_WGI_JoystickDriver;
+ extern SDL_JoystickDriver SDL_WINDOWS_JoystickDriver;
+ extern SDL_JoystickDriver SDL_WINMM_JoystickDriver;
+ extern SDL_JoystickDriver SDL_PS2_JoystickDriver;
++extern SDL_JoystickDriver SDL_PS3_JoystickDriver;
+ extern SDL_JoystickDriver SDL_PSP_JoystickDriver;
+ extern SDL_JoystickDriver SDL_VITA_JoystickDriver;
+ extern SDL_JoystickDriver SDL_N3DS_JoystickDriver;
+diff --git a/src/joystick/ps3/SDL_sysjoystick.c b/src/joystick/ps3/SDL_sysjoystick.c
+new file mode 100644
+index 000000000..21a2b7201
+--- /dev/null
++++ b/src/joystick/ps3/SDL_sysjoystick.c
+@@ -0,0 +1,283 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#ifdef SDL_JOYSTICK_PS3
++
++#include "../SDL_joystick_c.h"
++#include "../SDL_sysjoystick.h"
++
++#include <io/pad.h>
++
++#define NAMESIZE 10
++
++typedef struct
++{
++    int word;
++    u16 mask;
++} PS3ButtonDef;
++
++static const PS3ButtonDef ps3_buttons[] = {
++    { PAD_BUTTON_OFFSET_DIGITAL2, PAD_CTRL_TRIANGLE },
++    { PAD_BUTTON_OFFSET_DIGITAL2, PAD_CTRL_CIRCLE },
++    { PAD_BUTTON_OFFSET_DIGITAL2, PAD_CTRL_CROSS },
++    { PAD_BUTTON_OFFSET_DIGITAL2, PAD_CTRL_SQUARE },
++    { PAD_BUTTON_OFFSET_DIGITAL2, PAD_CTRL_L1 },
++    { PAD_BUTTON_OFFSET_DIGITAL2, PAD_CTRL_R1 },
++    { PAD_BUTTON_OFFSET_DIGITAL1, PAD_CTRL_DOWN },
++    { PAD_BUTTON_OFFSET_DIGITAL1, PAD_CTRL_LEFT },
++    { PAD_BUTTON_OFFSET_DIGITAL1, PAD_CTRL_UP },
++    { PAD_BUTTON_OFFSET_DIGITAL1, PAD_CTRL_RIGHT },
++    { PAD_BUTTON_OFFSET_DIGITAL1, PAD_CTRL_SELECT },
++    { PAD_BUTTON_OFFSET_DIGITAL1, PAD_CTRL_START },
++    { PAD_BUTTON_OFFSET_DIGITAL2, PAD_CTRL_L2 },
++    { PAD_BUTTON_OFFSET_DIGITAL2, PAD_CTRL_R2 },
++    { PAD_BUTTON_OFFSET_DIGITAL1, PAD_CTRL_L3 },
++    { PAD_BUTTON_OFFSET_DIGITAL1, PAD_CTRL_R3 },
++};
++
++typedef struct
++{
++    int word;
++} PS3AxisDef;
++
++static const PS3AxisDef ps3_axes[] = {
++    { PAD_BUTTON_OFFSET_ANALOG_LEFT_X },
++    { PAD_BUTTON_OFFSET_ANALOG_LEFT_Y },
++    { PAD_BUTTON_OFFSET_ANALOG_RIGHT_X },
++    { PAD_BUTTON_OFFSET_ANALOG_RIGHT_Y },
++};
++
++struct joystick_hwdata
++{
++    padData old_pad_data;
++};
++
++int numberOfJoysticks = MAX_PORT_NUM;
++
++static bool PS3_JoystickInit(void)
++{
++    int result = ioPadInit(MAX_PORT_NUM);
++
++    // No gamepads present.
++    if (result != 0) {
++        SDL_SetError("PS3_JoystickInit() : Couldn't initialize PS3 pads");
++        return false;
++    }
++
++    SDL_PrivateJoystickAdded(1);
++
++    return true;
++}
++
++static int PS3_JoystickGetCount(void)
++{
++    return numberOfJoysticks;
++}
++
++static void PS3_JoystickDetect(void)
++{
++}
++
++static const char *PS3_JoystickGetDeviceName(int device_index)
++{
++    if (device_index < numberOfJoysticks) {
++        return "PS3 Controller";
++    }
++
++    SDL_SetError("No joystick available with that index");
++    return NULL;
++}
++
++static int PS3_JoystickGetDevicePlayerIndex(int device_index)
++{
++    return -1;
++}
++
++static void PS3_JoystickSetDevicePlayerIndex(int device_index, int player_index)
++{
++}
++
++static SDL_JoystickID PS3_JoystickGetDeviceInstanceID(int device_index)
++{
++    return device_index + 1;
++}
++
++static SDL_GUID PS3_JoystickGetDeviceGUID(int device_index)
++{
++    const char *name = PS3_JoystickGetDeviceName(device_index);
++    return SDL_CreateJoystickGUIDForName(name);
++}
++
++static bool PS3_JoystickOpen(SDL_Joystick *joystick, int device_index)
++{
++    if (!(joystick->hwdata = (struct joystick_hwdata *)SDL_malloc(sizeof(struct joystick_hwdata)))) {
++        return false;
++    }
++
++    joystick->naxes = SDL_arraysize(ps3_axes);
++    joystick->nhats = 0;
++    joystick->nballs = 0;
++    joystick->nbuttons = SDL_arraysize(ps3_buttons);
++
++    // TODO: using padinfo check if rumble available
++
++    SDL_SetBooleanProperty(SDL_GetJoystickProperties(joystick), SDL_PROP_JOYSTICK_CAP_RUMBLE_BOOLEAN, true);
++
++    return true;
++}
++
++static bool PS3_JoystickRumble(SDL_Joystick *joystick, Uint16 low_frequency_rumble, Uint16 high_frequency_rumble)
++{
++    padActParam act = { 0 };
++    int joystickIndex = (int)(joystick->instance_id - 1);
++
++    // low frequency, analog [0x00, 0xFF]
++    act.large_motor = (Uint8)(low_frequency_rumble);
++    // small motor — high frequency, digital on/off only
++    act.small_motor = (high_frequency_rumble > 0) ? 1 : 0;
++
++    int result = ioPadSetActDirect(joystickIndex, &act);
++
++    return (result == 0);
++}
++
++static SDL_INLINE Sint16 PS3_AxisScale(u16 raw)
++{
++    return (Sint16)(((int)(raw & 0xFF) - 128) * 257);
++}
++
++static void PS3_JoystickUpdate(SDL_Joystick *joystick)
++{
++
++    padData new_pad_data;
++    int joystickIndex = (int)(joystick->instance_id - 1);
++    Uint64 timestamp = SDL_GetTicksNS();
++
++    if (ioPadGetData(joystickIndex, (padData *)&new_pad_data) != 0) {
++        return;
++    }
++
++    if (new_pad_data.len >= 8) {
++        // Update buttons
++        for (int i = 0; i < SDL_arraysize(ps3_buttons); i++) {
++            const PS3ButtonDef *b = &ps3_buttons[i];
++            int cur = (new_pad_data.button[b->word] & b->mask) != 0;
++            int prev = (joystick->hwdata->old_pad_data.button[b->word] & b->mask) != 0;
++
++            if (cur != prev) {
++                SDL_SendJoystickButton(timestamp, joystick, i, cur);
++            }
++        }
++
++        // Update axes
++        for (int i = 0; i < SDL_arraysize(ps3_axes); i++) {
++            const PS3AxisDef *a = &ps3_axes[i];
++            u16 cur = new_pad_data.button[a->word];
++            u16 prev = joystick->hwdata->old_pad_data.button[a->word];
++
++            if (cur != prev) {
++                SDL_SendJoystickAxis(timestamp, joystick, i, PS3_AxisScale(cur));
++            }
++        }
++
++        joystick->hwdata->old_pad_data = new_pad_data;
++    }
++}
++
++static void PS3_JoystickClose(SDL_Joystick *joystick)
++{
++    if (joystick->hwdata)
++        SDL_free(joystick->hwdata);
++    ioPadEnd();
++}
++
++static void PS3_JoystickQuit(void)
++{
++    numberOfJoysticks = 0;
++}
++
++static bool PS3_JoystickGetGamepadMapping(int device_index, SDL_GamepadMapping *out)
++{
++    return false;
++}
++
++static bool PS3_JoystickIsDevicePresent(Uint16 vendor_id, Uint16 product_id, Uint16 version, const char *name)
++{
++    // We don't override any other drivers
++    return false;
++}
++
++static const char *PS3_JoystickGetDevicePath(int index)
++{
++    return NULL;
++}
++
++static int PS3_JoystickGetDeviceSteamVirtualGamepadSlot(int device_index)
++{
++    return -1;
++}
++
++static bool PS3_JoystickRumbleTriggers(SDL_Joystick *joystick, Uint16 left_rumble, Uint16 right_rumble)
++{
++    return SDL_Unsupported();
++}
++
++static bool PS3_JoystickSetLED(SDL_Joystick *joystick, Uint8 red, Uint8 green, Uint8 blue)
++{
++    return SDL_Unsupported();
++}
++
++static bool PS3_JoystickSendEffect(SDL_Joystick *joystick, const void *data, int size)
++{
++    return SDL_Unsupported();
++}
++
++static bool PS3_JoystickSetSensorsEnabled(SDL_Joystick *joystick, bool enabled)
++{
++    return SDL_Unsupported();
++}
++
++SDL_JoystickDriver SDL_PS3_JoystickDriver = {
++    PS3_JoystickInit,
++    PS3_JoystickGetCount,
++    PS3_JoystickDetect,
++    PS3_JoystickIsDevicePresent,
++    PS3_JoystickGetDeviceName,
++    PS3_JoystickGetDevicePath,
++    PS3_JoystickGetDeviceSteamVirtualGamepadSlot,
++    PS3_JoystickGetDevicePlayerIndex,
++    PS3_JoystickSetDevicePlayerIndex,
++    PS3_JoystickGetDeviceGUID,
++    PS3_JoystickGetDeviceInstanceID,
++    PS3_JoystickOpen,
++    PS3_JoystickRumble,
++    PS3_JoystickRumbleTriggers,
++    PS3_JoystickSetLED,
++    PS3_JoystickSendEffect,
++    PS3_JoystickSetSensorsEnabled,
++    PS3_JoystickUpdate,
++    PS3_JoystickClose,
++    PS3_JoystickQuit,
++    PS3_JoystickGetGamepadMapping
++};
++
++#endif // SDL_JOYSTICK_PS3
+diff --git a/src/locale/ps3/SDL_syslocale.c b/src/locale/ps3/SDL_syslocale.c
+new file mode 100644
+index 000000000..42ac07b9d
+--- /dev/null
++++ b/src/locale/ps3/SDL_syslocale.c
+@@ -0,0 +1,107 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++
++#include "SDL_internal.h"
++
++#include "../SDL_syslocale.h"
++#include <SDL3/SDL_assert.h>
++
++#include <sysutil/sysutil.h>
++
++bool SDL_SYS_GetPreferredLocales(char *buf, size_t buflen)
++{
++    int current_locale_int = 0;
++
++    SDL_assert(buflen > 0);
++
++    if (sysUtilGetSystemParamInt(SYSUTIL_SYSTEMPARAM_ID_LANG, &current_locale_int) < 0) {
++        // Default to English if call failed
++        SDL_strlcpy(buf, "en_US", buflen);
++        return true;
++    }
++    switch (current_locale_int) {
++    case SYSUTIL_LANG_JAPANESE:
++        SDL_strlcpy(buf, "ja_JP", buflen);
++        break;
++    case SYSUTIL_LANG_ENGLISH_US:
++        SDL_strlcpy(buf, "en_US", buflen);
++        break;
++    case SYSUTIL_LANG_FRENCH:
++        SDL_strlcpy(buf, "fr_FR", buflen);
++        break;
++    case SYSUTIL_LANG_SPANISH:
++        SDL_strlcpy(buf, "es_ES", buflen);
++        break;
++    case SYSUTIL_LANG_GERMAN:
++        SDL_strlcpy(buf, "de_DE", buflen);
++        break;
++    case SYSUTIL_LANG_ITALIAN:
++        SDL_strlcpy(buf, "it_IT", buflen);
++        break;
++    case SYSUTIL_LANG_DUTCH:
++        SDL_strlcpy(buf, "nl_NL", buflen);
++        break;
++    case SYSUTIL_LANG_PORTUGUESE_PT:
++        SDL_strlcpy(buf, "pt_PT", buflen);
++        break;
++    case SYSUTIL_LANG_RUSSIAN:
++        SDL_strlcpy(buf, "ru_RU", buflen);
++        break;
++    case SYSUTIL_LANG_KOREAN:
++        SDL_strlcpy(buf, "ko_KR", buflen);
++        break;
++    case SYSUTIL_LANG_CHINESE_T:
++        SDL_strlcpy(buf, "zh_TW", buflen);
++        break;
++    case SYSUTIL_LANG_CHINESE_S:
++        SDL_strlcpy(buf, "zh_CN", buflen);
++        break;
++    case SYSUTIL_LANG_FINNISH:
++        SDL_strlcpy(buf, "fi_FI", buflen);
++        break;
++    case SYSUTIL_LANG_SWEDISH:
++        SDL_strlcpy(buf, "sv_SE", buflen);
++        break;
++    case SYSUTIL_LANG_DANISH:
++        SDL_strlcpy(buf, "da_DK", buflen);
++        break;
++    case SYSUTIL_LANG_NORWEGIAN:
++        SDL_strlcpy(buf, "no_NO", buflen);
++        break;
++    case SYSUTIL_LANG_POLISH:
++        SDL_strlcpy(buf, "pl_PL", buflen);
++        break;
++    case SYSUTIL_LANG_PORTUGUESE_BR:
++        SDL_strlcpy(buf, "pt_BR", buflen);
++        break;
++    case SYSUTIL_LANG_ENGLISH_GB:
++        SDL_strlcpy(buf, "en_GB", buflen);
++        break;
++    case SYSUTIL_LANG_TURKISH:
++        SDL_strlcpy(buf, "tr_TR", buflen);
++        break;
++    default:
++        SDL_strlcpy(buf, "en_US", buflen);
++        break;
++    }
++
++    return true;
++}
+diff --git a/src/main/SDL_runapp.c b/src/main/SDL_runapp.c
+index 108c4c1a3..9caa414da 100644
+--- a/src/main/SDL_runapp.c
++++ b/src/main/SDL_runapp.c
+@@ -29,6 +29,7 @@
+     !defined(SDL_PLATFORM_EMSCRIPTEN) && \
+     !defined(SDL_PLATFORM_PSP) && \
+     !defined(SDL_PLATFORM_PS2) && \
++    !defined(SDL_PLATFORM_PS3) && \
+     !defined(SDL_PLATFORM_3DS) && \
+     !defined(SDL_PLATFORM_DOS)
+ 
+diff --git a/src/main/ps3/SDL_sysmain_runapp.c b/src/main/ps3/SDL_sysmain_runapp.c
+new file mode 100644
+index 000000000..67fcce6fe
+--- /dev/null
++++ b/src/main/ps3/SDL_sysmain_runapp.c
+@@ -0,0 +1,74 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++
++#include "SDL_internal.h"
++
++#ifdef SDL_PLATFORM_PS3
++
++// SDL_RunApp() code for PS3.
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++#include "../SDL_main_callbacks.h"
++
++#include <lv2/process.h>
++#include <stdio.h>
++#include <sys/stat.h>
++#include <sys/types.h>
++#include <sysutil/sysutil.h>
++#include <unistd.h>
++
++static volatile bool quit_requested = false;
++
++static void program_exit_callback()
++{
++    sysUtilUnregisterCallback(SYSUTIL_EVENT_SLOT0);
++    sysProcessExit(0);
++}
++
++static void sysutil_exit_callback(u64 status, u64 param, void *usrdata)
++{
++    if (status == SYSUTIL_EXIT_GAME) {
++        program_exit_callback();
++    }
++}
++
++#ifdef __cplusplus
++}
++#endif
++
++int SDL_RunApp(int argc, char *argv[], SDL_main_func mainFunction, void *reserved)
++{
++    int result;
++    (void)reserved;
++
++    atexit(program_exit_callback);
++    // Register XMB callbacks.
++    sysUtilRegisterCallback(SYSUTIL_EVENT_SLOT0, sysutil_exit_callback, NULL);
++
++    result = SDL_CallMainFunction(argc, argv, mainFunction);
++
++    return result == SDL_APP_SUCCESS ? 0 : 1;
++}
++
++#endif // SDL_PLATFORM_PS3
+diff --git a/src/render/SDL_render.c b/src/render/SDL_render.c
+index 9dbb2739d..f29e40211 100644
+--- a/src/render/SDL_render.c
++++ b/src/render/SDL_render.c
+@@ -135,6 +135,9 @@ static const SDL_RenderDriver *render_drivers[] = {
+ #ifdef SDL_VIDEO_RENDER_PS2
+     &PS2_RenderDriver,
+ #endif
++#ifdef SDL_VIDEO_RENDER_PS3
++    &PS3_RenderDriver,
++#endif
+ #ifdef SDL_VIDEO_RENDER_PSP
+     &PSP_RenderDriver,
+ #endif
+diff --git a/src/render/SDL_sysrender.h b/src/render/SDL_sysrender.h
+index 87fbbaf35..1fa9910b6 100644
+--- a/src/render/SDL_sysrender.h
++++ b/src/render/SDL_sysrender.h
+@@ -387,6 +387,7 @@ extern SDL_RenderDriver METAL_RenderDriver;
+ extern SDL_RenderDriver NGAGE_RenderDriver;
+ extern SDL_RenderDriver VULKAN_RenderDriver;
+ extern SDL_RenderDriver PS2_RenderDriver;
++extern SDL_RenderDriver PS3_RenderDriver;
+ extern SDL_RenderDriver PSP_RenderDriver;
+ extern SDL_RenderDriver SW_RenderDriver;
+ extern SDL_RenderDriver VITA_GXM_RenderDriver;
+diff --git a/src/render/ps3/SDL_render_ps3.c b/src/render/ps3/SDL_render_ps3.c
+new file mode 100644
+index 000000000..435f024c4
+--- /dev/null
++++ b/src/render/ps3/SDL_render_ps3.c
+@@ -0,0 +1,1156 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#ifdef SDL_VIDEO_RENDER_PS3
++
++#include "../../video/SDL_sysvideo.h"
++#include "../../video/ps3/SDL_ps3video.h"
++#include "../SDL_sysrender.h"
++#include "./ps3_texture_vpo.h"
++#include "./ps3_texture_fpo.h"
++#include "./ps3_color_vpo.h"
++#include "./ps3_color_fpo.h"
++
++#include <assert.h>
++#include <rsx/commands.h>
++#include <rsx/gcm_sys.h>
++#include <rsx/mm.h>
++#include <rsx/rsx.h>
++#include <sys/systime.h>
++#include <sys/event_queue.h>
++
++#define FRAME_BUFFER_COUNT              2
++#define GCM_PREPARED_BUFFER_INDEX       5
++#define GCM_BUFFER_STATUS_INDEX         66
++#define GCM_WAIT_LABEL_INDEX            255
++
++#define MAX_BUFFER_QUEUE_SIZE           1
++
++#define BUFFER_IDLE                     0
++#define BUFFER_BUSY                     1
++
++// Max sprites to be displayed on the screen.
++#define QUAD_RING_SIZE 1024
++
++typedef struct PS3_DrawStateCache
++{
++    const SDL_Rect *viewport;
++    SDL_Rect cliprect;
++    bool cliprect_enabled_dirty;
++    bool cliprect_enabled;
++    bool cliprect_dirty;
++    SDL_Color color;
++} PS3_DrawStateCache;
++
++typedef struct PS3_CopyData
++{
++    SDL_FRect srcRect;
++    SDL_FRect dstRect;
++} PS3_CopyData;
++
++typedef struct TexVertex
++{
++    float x, y, z;
++    float u, v;
++} TexVertex;
++
++typedef struct ColorVertex
++{
++    float x, y, z;
++    float r, g, b, a;
++} ColorVertex;
++
++typedef struct {
++    TexVertex *vbo;
++    u32 offset;
++} QuadSlot;
++
++typedef struct PS3_TextureData
++{
++    SDL_Surface *surface;
++    gcmTexture   rsx_texture;
++    u32          offset;
++} PS3_TextureData;
++
++typedef struct PS3_RenderData
++{
++    gcmSurface surface;
++    u32 fbOnDisplay;
++    u32 fbFlipped;
++    bool fbOnFlip;
++    u32 curr_fb;
++    sys_event_queue_t flipEventQueue;
++    sys_event_port_t flipEventPort;
++    u32 color_offset[FRAME_BUFFER_COUNT];
++    u32 *color_buffer[FRAME_BUFFER_COUNT];
++
++    u32 color_pitch;
++    u32 depth_offset;
++    u32 depth_pitch;
++    u32 screenw, screenh;
++    gcmContextData *context; // Context to keep track of the RSX buffer
++    PS3_DrawStateCache drawstate;
++
++    // Use quads array to handle drawing of
++    // the same texture multiple times.
++    QuadSlot quad_ring[QUAD_RING_SIZE];
++    u32 quad_ring_index;
++
++    // texture
++    rsxVertexProgram   *vpo;
++    rsxFragmentProgram *fpo;
++    void *vp_ucode;
++    u32   vp_ucode_size;
++    u32 fp_ucode_size;
++    void *fp_ucode_rsx;
++    void *fp_ucode_cpu;
++    u32 fp_offset;
++
++    // color
++    rsxVertexProgram   *vpo_color;
++    rsxFragmentProgram *fpo_color;
++    void *vp_ucode_color;
++    u32   vp_ucode_size_color;
++    u32 fp_ucode_size_color;
++    void *fp_ucode_cpu_color;
++    u32 fp_offset_color;
++    void *fp_ucode_rsx_color;
++
++    f32 ortho_matrix[16];
++} PS3_RenderData;
++
++static PS3_RenderData *g_ps3_data;
++
++static void PS3_DrawTexturedQuad(PS3_RenderData *data, PS3_TextureData *tdata,
++                           float dstx, float dsty, float dstw, float dsth,
++                           float srcx, float srcy, float srcw, float srch);
++
++static void PS3_DrawColoredPrimitive(PS3_RenderData *data, u8 primitive_type,
++                               ColorVertex *verts, u32 count,
++                               Uint8 r, Uint8 g, Uint8 b, Uint8 a);
++
++void build_ortho_matrix(float *m, float left, float right, float bottom, float top, float near, float far)
++{
++    memset(m, 0, sizeof(float) * 16);
++    m[0]  = 2.0f / (right - left);
++    m[5]  = 2.0f / (top - bottom);
++    m[10] = -2.0f / (far - near);
++    m[12] = -(right + left) / (right - left);
++    m[13] = -(top + bottom) / (top - bottom);
++    m[14] = -(far + near) / (far - near);
++    m[15] = 1.0f;
++}
++
++static void flipHandler(const u32 head)
++{
++    (void)head;
++    u32 v = g_ps3_data->fbFlipped;
++
++    for (u32 i = g_ps3_data->fbOnDisplay; i != v; i=(i + 1)%FRAME_BUFFER_COUNT) {
++        *((vu32*) gcmGetLabelAddress(GCM_BUFFER_STATUS_INDEX + i)) = BUFFER_IDLE;
++    }
++    g_ps3_data->fbOnDisplay = v;
++    g_ps3_data->fbOnFlip = false;
++
++    sysEventPortSend(g_ps3_data->flipEventPort, 0, 0, 0);
++}
++
++static void vblankHandler(const u32 head)
++{
++    (void)head;
++    u32 data;
++    u32 bufferToFlip;
++    u32 indexToFlip;
++
++    data = *((vu32*) gcmGetLabelAddress(GCM_PREPARED_BUFFER_INDEX));
++    bufferToFlip = (data >> 8);
++    indexToFlip = (data & 0x07);
++
++    if (!g_ps3_data->fbOnFlip) {
++        if (bufferToFlip != g_ps3_data->fbOnDisplay) {
++            s32 ret = gcmSetFlipImmediate(indexToFlip);
++            if (ret != 0) {
++                printf("flip immediate failed\n");
++                return;
++            }
++            g_ps3_data->fbFlipped = bufferToFlip;
++            g_ps3_data->fbOnFlip = true;
++        }
++    }
++}
++
++void setDrawEnv(SDL_Renderer *renderer)
++{
++    PS3_RenderData *data = (PS3_RenderData *)renderer->internal;
++
++    rsxSetColorMask(data->context,GCM_COLOR_MASK_B |
++                            GCM_COLOR_MASK_G |
++                            GCM_COLOR_MASK_R |
++                            GCM_COLOR_MASK_A);
++
++    rsxSetColorMaskMrt(data->context,0);
++
++    u16 x,y,w,h;
++    f32 min, max;
++    f32 scale[4],offset[4];
++
++    x = 0;
++    y = 0;
++    w = data->screenw;
++    h = data->screenh;
++    min = 0.0f;
++    max = 1.0f;
++    scale[0] = w*0.5f;
++    scale[1] = h*-0.5f;
++    scale[2] = (max - min)*0.5f;
++    scale[3] = 0.0f;
++    offset[0] = x + w*0.5f;
++    offset[1] = y + h*0.5f;
++    offset[2] = (max + min)*0.5f;
++    offset[3] = 0.0f;
++
++    rsxSetViewport(data->context,x, y, w, h, min, max, scale, offset);
++    rsxSetScissor(data->context,x,y,w,h);
++
++    // Disable depth for 2D.
++    // rsxSetDepthTestEnable(data->context, GCM_TRUE);
++    rsxSetDepthTestEnable(data->context, GCM_FALSE);
++    rsxSetDepthFunc(data->context, GCM_LESS);
++    rsxSetShadeModel(data->context,GCM_SHADE_MODEL_SMOOTH);
++    // rsxSetDepthWriteEnable(data->context, 1);
++    rsxSetDepthWriteEnable(data->context, 0);
++    rsxSetFrontFace(data->context,GCM_FRONTFACE_CCW);
++}
++
++void PS3_DrawColoredPrimitive(PS3_RenderData *data, u8 primitive_type,
++                               ColorVertex *verts, u32 count,
++                               Uint8 r, Uint8 g, Uint8 b, Uint8 a)
++{
++    ColorVertex *gpu_verts = (ColorVertex *)rsxMemalign(16, count * sizeof(ColorVertex));
++    memcpy(gpu_verts, verts, count * sizeof(ColorVertex));
++
++    u32 vert_offset;
++    rsxAddressToOffset(gpu_verts, &vert_offset);
++
++    rsxLoadVertexProgram(data->context, data->vpo_color, data->vp_ucode_color);
++    rsxLoadFragmentProgramLocation(data->context, data->fpo_color, data->fp_offset_color, GCM_LOCATION_RSX);
++
++    const rsxProgramConst *mvp_const = rsxVertexProgramGetConst(data->vpo_color, "modelViewProj");
++    rsxSetVertexProgramParameter(data->context, data->vpo_color, mvp_const, data->ortho_matrix);
++
++    const rsxProgramAttrib *pos_attr = rsxVertexProgramGetAttrib(data->vpo_color, "position");
++    const rsxProgramAttrib *col_attr = rsxVertexProgramGetAttrib(data->vpo_color, "color");
++
++    rsxBindVertexArrayAttrib(data->context, pos_attr->index, 0,
++        vert_offset + offsetof(ColorVertex, x),
++        sizeof(ColorVertex), 3, GCM_VERTEX_DATA_TYPE_F32, GCM_LOCATION_RSX);
++    rsxBindVertexArrayAttrib(data->context, col_attr->index, 0,
++        vert_offset + offsetof(ColorVertex, r),
++        sizeof(ColorVertex), 4, GCM_VERTEX_DATA_TYPE_F32, GCM_LOCATION_RSX);
++
++    rsxSetBlendFunc(data->context, GCM_SRC_ALPHA, GCM_ONE_MINUS_SRC_ALPHA,
++                                    GCM_SRC_ALPHA, GCM_ONE_MINUS_SRC_ALPHA);
++    rsxSetBlendEquation(data->context, GCM_FUNC_ADD, GCM_FUNC_ADD);
++    // TODO: use blen only when need
++    // rsxSetBlendEnable(data->context, renderer->blendMode == SDL_BLENDMODE_NONE ? GCM_FALSE : GCM_TRUE);
++    rsxSetBlendEnable(data->context, GCM_FALSE);
++    // TODO: control pixel size?
++    // rsxSetPointSize(data->context, 4.0f);
++    rsxDrawVertexArray(data->context, primitive_type, 0, count);
++}
++
++static void PS3_WindowEvent(SDL_Renderer *renderer, const SDL_WindowEvent *event)
++{
++}
++
++static bool PS3_SupportsBlendMode(SDL_Renderer *renderer, SDL_BlendMode blendMode)
++{
++    return false;
++}
++
++static bool PS3_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture, SDL_PropertiesID create_props)
++{
++    int pitch;
++    void *pixels;
++
++    // Allocate GFX memory for textures
++    pitch = texture->w * SDL_BYTESPERPIXEL(texture->format);
++    pixels = rsxMemalign(64, texture->h * pitch);
++    if (!pixels) {
++        return SDL_SetError("rsxMemalign failed");
++    }
++
++    PS3_TextureData *tdata = (PS3_TextureData *)SDL_calloc(1, sizeof(PS3_TextureData));
++    if (!tdata) {
++        return SDL_OutOfMemory();
++    }
++
++    tdata->surface = SDL_CreateSurfaceFrom(texture->w, texture->h, texture->format, pixels, pitch);
++
++    rsxAddressToOffset(pixels, &tdata->offset);
++
++    tdata->rsx_texture.format    = GCM_TEXTURE_FORMAT_A8R8G8B8 | GCM_TEXTURE_FORMAT_LIN;
++    tdata->rsx_texture.mipmap    = 1;
++    tdata->rsx_texture.dimension = GCM_TEXTURE_DIMS_2D;
++    tdata->rsx_texture.cubemap   = GCM_FALSE;
++    tdata->rsx_texture.remap     = ((GCM_TEXTURE_REMAP_TYPE_REMAP << GCM_TEXTURE_REMAP_TYPE_B_SHIFT) |
++                           (GCM_TEXTURE_REMAP_TYPE_REMAP << GCM_TEXTURE_REMAP_TYPE_G_SHIFT) |
++                           (GCM_TEXTURE_REMAP_TYPE_REMAP << GCM_TEXTURE_REMAP_TYPE_R_SHIFT) |
++                           (GCM_TEXTURE_REMAP_TYPE_REMAP << GCM_TEXTURE_REMAP_TYPE_A_SHIFT) |
++                           (GCM_TEXTURE_REMAP_COLOR_B << GCM_TEXTURE_REMAP_COLOR_B_SHIFT) |
++                           (GCM_TEXTURE_REMAP_COLOR_G << GCM_TEXTURE_REMAP_COLOR_G_SHIFT) |
++                           (GCM_TEXTURE_REMAP_COLOR_R << GCM_TEXTURE_REMAP_COLOR_R_SHIFT) |
++                           (GCM_TEXTURE_REMAP_COLOR_A << GCM_TEXTURE_REMAP_COLOR_A_SHIFT));
++    tdata->rsx_texture.width  = texture->w;
++    tdata->rsx_texture.height = texture->h;
++    tdata->rsx_texture.depth  = 1;
++    tdata->rsx_texture.pitch  = pitch;
++    tdata->rsx_texture.offset = tdata->offset;
++
++    texture->internal = (void *)tdata;
++
++    SDL_SetSurfaceColorMod(tdata->surface, (Uint8)texture->color.r, (Uint8)texture->color.g,
++                           (Uint8)texture->color.b);
++    SDL_SetSurfaceAlphaMod(tdata->surface, (Uint8)texture->color.a);
++    SDL_SetSurfaceBlendMode(tdata->surface, texture->blendMode);
++
++    return true;
++}
++
++static bool PS3_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture,
++                              const SDL_Rect *rect, const void *pixels, int pitch)
++{
++    PS3_TextureData *tdata = (PS3_TextureData*)texture->internal;
++    SDL_Surface *surface = (SDL_Surface *)tdata->surface;
++
++    if (SDL_MUSTLOCK(surface))
++        SDL_LockSurface(surface);
++
++    Uint8 *src = (Uint8 *)pixels;
++    Uint8 *dst = (Uint8 *)surface->pixels + rect->y * surface->pitch + rect->x * surface->fmt->bytes_per_pixel;
++    size_t length = rect->w * surface->fmt->bytes_per_pixel;
++    for (int row = 0; row < rect->h; ++row) {
++        SDL_memcpy(dst, src, length);
++        src += pitch;
++        dst += surface->pitch;
++    }
++
++    if (SDL_MUSTLOCK(surface))
++        SDL_UnlockSurface(surface);
++
++    return true;
++}
++
++static bool PS3_UpdateTextureYUV(SDL_Renderer *renderer, SDL_Texture *texture,
++                                 const SDL_Rect *rect,
++                                 const Uint8 *Yplane, int Ypitch,
++                                 const Uint8 *Uplane, int Upitch,
++                                 const Uint8 *Vplane, int Vpitch)
++{
++    return false;
++}
++
++static bool PS3_LockTexture(SDL_Renderer *renderer, SDL_Texture *texture,
++                            const SDL_Rect *rect, void **pixels, int *pitch)
++{
++    PS3_TextureData *tdata = (PS3_TextureData*)texture->internal;
++    SDL_Surface *surface = (SDL_Surface *)tdata->surface;
++
++    *pixels =
++        (void *)((Uint8 *)surface->pixels + rect->y * surface->pitch +
++                 rect->x * surface->fmt->bytes_per_pixel);
++    *pitch = surface->pitch;
++    return true;
++}
++
++static void PS3_UnlockTexture(SDL_Renderer *renderer, SDL_Texture *texture)
++{
++    // TODO: fix me
++}
++
++void PS3_DrawTexturedQuad(PS3_RenderData *data, PS3_TextureData *tdata,
++                           float dstx, float dsty, float dstw, float dsth,
++                           float srcx, float srcy, float srcw, float srch)
++{
++    float x0 = dstx,        y0 = dsty;
++    float x1 = dstx + dstw, y1 = dsty + dsth;
++
++    float u0 = srcx / (float)tdata->rsx_texture.width;
++    float v0 = srcy / (float)tdata->rsx_texture.height;
++    float u1 = (srcx + srcw) / (float)tdata->rsx_texture.width;
++    float v1 = (srcy + srch) / (float)tdata->rsx_texture.height;
++
++    QuadSlot *slot = &data->quad_ring[data->quad_ring_index];
++    data->quad_ring_index = (data->quad_ring_index + 1) % QUAD_RING_SIZE;
++
++    slot->vbo[0] = (TexVertex){ x0, y0, 0.0f, u0, v0 };
++    slot->vbo[1] = (TexVertex){ x1, y0, 0.0f, u1, v0 };
++    slot->vbo[2] = (TexVertex){ x0, y1, 0.0f, u0, v1 };
++    slot->vbo[3] = (TexVertex){ x1, y1, 0.0f, u1, v1 };
++
++    rsxLoadVertexProgram(data->context, data->vpo, data->vp_ucode);
++    rsxLoadFragmentProgramLocation(data->context, data->fpo, data->fp_offset, GCM_LOCATION_RSX);
++
++    rsxBindVertexArrayAttrib(data->context, 0, 0,
++        slot->offset + offsetof(TexVertex, x),
++        sizeof(TexVertex), 3, GCM_VERTEX_DATA_TYPE_F32, GCM_LOCATION_RSX);
++
++    rsxBindVertexArrayAttrib(data->context, 8, 0,
++        slot->offset + offsetof(TexVertex, u),
++        sizeof(TexVertex), 2, GCM_VERTEX_DATA_TYPE_F32, GCM_LOCATION_RSX);
++
++    const rsxProgramConst *mvp_const = rsxVertexProgramGetConst(data->vpo, "modelViewProj");
++    if (!mvp_const) {
++        SDL_Log("modelViewProj constant not found in vertex program!");
++    }
++
++    rsxSetVertexProgramParameter(data->context, data->vpo, mvp_const, data->ortho_matrix);
++
++    // Texture + sampler state
++    rsxLoadTexture(data->context, 0, &tdata->rsx_texture);
++    rsxTextureControl(data->context, 0, GCM_TRUE, 0, 12 << 8, GCM_TEXTURE_MAX_ANISO_1);
++    rsxTextureFilter(data->context, 0, 0, GCM_TEXTURE_LINEAR, GCM_TEXTURE_LINEAR, GCM_TEXTURE_CONVOLUTION_QUINCUNX);
++    rsxTextureWrapMode(data->context, 0, GCM_TEXTURE_CLAMP_TO_EDGE, GCM_TEXTURE_CLAMP_TO_EDGE,
++                        GCM_TEXTURE_CLAMP_TO_EDGE, 0, GCM_TEXTURE_ZFUNC_LESS, 0);
++
++    rsxSetBlendFunc(data->context, GCM_SRC_ALPHA, GCM_ONE_MINUS_SRC_ALPHA,
++                                    GCM_SRC_ALPHA, GCM_ONE_MINUS_SRC_ALPHA);
++    rsxSetBlendEquation(data->context, GCM_FUNC_ADD, GCM_FUNC_ADD);
++    // TODO: use blend only when need.
++    rsxSetBlendEnable(data->context, GCM_TRUE);
++
++    // Draw
++    rsxDrawVertexArray(data->context, GCM_TYPE_TRIANGLE_STRIP, 0, 4);
++}
++
++static bool PS3_SetRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture)
++{
++    return true;
++}
++
++static bool PS3_QueueSetViewport(SDL_Renderer *renderer, SDL_RenderCommand *cmd)
++{
++    return true;
++}
++
++static bool PS3_QueueSetDrawColor(SDL_Renderer *renderer, SDL_RenderCommand *cmd)
++{
++    return true;
++}
++
++static void PS3_SetTextureScaleMode(SDL_ScaleMode scaleMode)
++{
++    // switch (scaleMode) {
++    // case SDL_SCALEMODE_PIXELART:
++    // case SDL_SCALEMODE_NEAREST:
++    //     break;
++    // case SDL_SCALEMODE_LINEAR:
++    //     break;
++    // default:
++    //     break;
++    // }
++}
++
++static bool PS3_QueueDrawPoints(SDL_Renderer *renderer, SDL_RenderCommand *cmd, const SDL_FPoint *points, int count)
++{
++    ColorVertex *verts = (ColorVertex *)SDL_AllocateRenderVertices(renderer, count * sizeof(ColorVertex), 0, &cmd->data.draw.first);
++
++    if (!verts) {
++        return false;
++    }
++
++    float r,g,b,a;
++    r = SDL_clamp(cmd->data.draw.color.r * cmd->data.draw.color_scale, 0.0f, 1.0f) ;
++    g = SDL_clamp(cmd->data.draw.color.g * cmd->data.draw.color_scale, 0.0f, 1.0f);
++    b = SDL_clamp(cmd->data.draw.color.b * cmd->data.draw.color_scale, 0.0f, 1.0f);
++    a = SDL_clamp(cmd->data.draw.color.a, 0.0f, 1.0f);
++
++    cmd->data.draw.count = count;
++    for (int i = 0; i < count; i++, verts++, points++) {
++        verts->x = points->x;
++        verts->y = points->y;
++        verts->z = 0.0f;
++        verts->r = r;
++        verts->g = g;
++        verts->b = b;
++        verts->a = a;
++    }
++
++    return true;
++}
++
++static bool PS3_QueueFillRects(SDL_Renderer *renderer, SDL_RenderCommand *cmd, const SDL_FRect *rects, int count)
++{
++    ColorVertex *verts = (ColorVertex *)SDL_AllocateRenderVertices(renderer, count * 4 * sizeof(ColorVertex), 4, &cmd->data.draw.first);
++
++    if (!verts) {
++        return false;
++    }
++
++    float rf,gf,bf,af;
++    rf = SDL_clamp(cmd->data.draw.color.r * cmd->data.draw.color_scale, 0.0f, 1.0f);
++    gf = SDL_clamp(cmd->data.draw.color.g * cmd->data.draw.color_scale, 0.0f, 1.0f);
++    bf = SDL_clamp(cmd->data.draw.color.b * cmd->data.draw.color_scale, 0.0f, 1.0f);
++    af = SDL_clamp(cmd->data.draw.color.a, 0.0f, 1.0f);
++
++    cmd->data.draw.count = count;
++    for (int i = 0; i < count; i++, rects++) {
++        float x0 = rects->x,             y0 = rects->y;
++        float x1 = rects->x + rects->w,  y1 = rects->y + rects->h;
++
++        verts[0] = (ColorVertex){ x0, y0, 0.0f, rf, gf, bf, af };
++        verts[1] = (ColorVertex){ x1, y0, 0.0f, rf, gf, bf, af };
++        verts[2] = (ColorVertex){ x0, y1, 0.0f, rf, gf, bf, af };
++        verts[3] = (ColorVertex){ x1, y1, 0.0f, rf, gf, bf, af };
++
++        verts += 4;
++    }
++
++    return true;
++}
++
++static bool PS3_QueueGeometry(SDL_Renderer *renderer, SDL_RenderCommand *cmd, SDL_Texture *texture,
++                             const float *xy, int xy_stride, const SDL_FColor *color, int color_stride, const float *uv, int uv_stride,
++                             int num_vertices, const void *indices, int num_indices, int size_indices,
++                             float scale_x, float scale_y)
++{
++    int i;
++    int count = indices ? num_indices : num_vertices;
++    const float color_scale = cmd->data.draw.color_scale;
++
++    cmd->data.draw.count = count;
++    size_indices = indices ? size_indices : 0;
++
++    if (!texture) {
++        ColorVertex *verts = (ColorVertex *)SDL_AllocateRenderVertices(renderer, count * sizeof(ColorVertex), 0, &cmd->data.draw.first);
++        if (!verts) {
++            return false;
++        }
++
++        for (i = 0; i < count; i++) {
++            int j;
++            float *xy_;
++            SDL_FColor *col_;
++            if (size_indices == 4) {
++                j = ((const Uint32 *)indices)[i];
++            } else if (size_indices == 2) {
++                j = ((const Uint16 *)indices)[i];
++            } else if (size_indices == 1) {
++                j = ((const Uint8 *)indices)[i];
++            } else {
++                j = i;
++            }
++
++            xy_ = (float *)((char *)xy + j * xy_stride);
++            col_ = (SDL_FColor *)((char *)color + j * color_stride);
++
++            verts->x = xy_[0] * scale_x;
++            verts->y = xy_[1] * scale_y;
++            verts->z = 0;
++
++            verts->r = (Uint8)SDL_roundf(SDL_clamp(col_->r * color_scale, 0.0f, 1.0f) * 255.0f);
++            verts->g = (Uint8)SDL_roundf(SDL_clamp(col_->g * color_scale, 0.0f, 1.0f) * 255.0f);
++            verts->b = (Uint8)SDL_roundf(SDL_clamp(col_->b * color_scale, 0.0f, 1.0f) * 255.0f);
++            verts->a = (Uint8)SDL_roundf(SDL_clamp(col_->a, 0.0f, 1.0f) * 255.0f);
++
++            verts++;
++        }
++    } else {
++
++    }
++
++    return true;
++}
++
++static bool PS3_QueueCopy(SDL_Renderer *renderer, SDL_RenderCommand *cmd, SDL_Texture *texture, const SDL_FRect *srcrect, const SDL_FRect *dstrect)
++{
++    const size_t outLen = sizeof(PS3_CopyData);
++    PS3_CopyData *outData = (PS3_CopyData *)SDL_AllocateRenderVertices(renderer, outLen, 0, &cmd->data.draw.first);
++
++    if (!outData) {
++        return false;
++    }
++
++    cmd->data.draw.count = 1;
++
++    SDL_memcpy(&outData->srcRect, srcrect, sizeof(SDL_FRect));
++    SDL_memcpy(&outData->dstRect, dstrect, sizeof(SDL_FRect));
++
++    return true;
++}
++
++static bool PS3_QueueCopyEx(SDL_Renderer *renderer, SDL_RenderCommand *cmd, SDL_Texture *texture,
++                            const SDL_FRect *srcrect, const SDL_FRect *dstrect,
++                            const double angle, const SDL_FPoint *center, const SDL_FlipMode flip, float scale_x, float scale_y)
++{
++    const size_t outLen = sizeof(PS3_CopyData);
++    PS3_CopyData *outData = (PS3_CopyData *)SDL_AllocateRenderVertices(renderer, outLen, 0, &cmd->data.draw.first);
++
++    if (!outData) {
++        return false;
++    }
++
++    cmd->data.draw.count = 1;
++
++    SDL_memcpy(&outData->srcRect, srcrect, sizeof(SDL_FRect));
++    SDL_memcpy(&outData->dstRect, dstrect, sizeof(SDL_FRect));
++
++    return true;
++}
++
++static void PS3_RenderClear(SDL_Renderer *renderer, SDL_RenderCommand *cmd)
++{
++    PS3_RenderData *data = (PS3_RenderData *)renderer->internal;
++
++    // Setup screen.
++    rsxSetColorMask(data->context, GCM_COLOR_MASK_B |
++                                    GCM_COLOR_MASK_G |
++                                    GCM_COLOR_MASK_R |
++                                    GCM_COLOR_MASK_A);
++
++    rsxSetColorMaskMrt(data->context,0);
++
++    u16 x,y,w,h;
++    f32 min, max;
++    f32 scale[4],offset[4];
++
++    x = 0;
++    y = 0;
++    w = data->screenw;
++    h = data->screenh;
++    min = 0.0f;
++    max = 1.0f;
++    scale[0] = w*0.5f;
++    scale[1] = h*-0.5f;
++    scale[2] = (max - min)*0.5f;
++    scale[3] = 0.0f;
++    offset[0] = x + w*0.5f;
++    offset[1] = y + h*0.5f;
++    offset[2] = (max + min)*0.5f;
++    offset[3] = 0.0f;
++
++    rsxSetViewport(data->context,x, y, w, h, min, max, scale, offset);
++    rsxSetScissor(data->context,x,y,w,h);
++
++    // Disable depth for 2D.
++    // rsxSetDepthTestEnable(data->context, GCM_TRUE);
++    rsxSetDepthTestEnable(data->context, GCM_FALSE);
++    rsxSetDepthFunc(data->context, GCM_LESS);
++    rsxSetShadeModel(data->context,GCM_SHADE_MODEL_SMOOTH);
++    // rsxSetDepthWriteEnable(data->context, 1);
++    rsxSetDepthWriteEnable(data->context, 0);
++    rsxSetFrontFace(data->context,GCM_FRONTFACE_CCW);
++
++    // Clear screen.
++    Uint8 cr = (Uint8)SDL_roundf(SDL_clamp(cmd->data.color.color.r * cmd->data.color.color_scale, 0.0f, 1.0f) * 255.0f);
++    Uint8 cg = (Uint8)SDL_roundf(SDL_clamp(cmd->data.color.color.g * cmd->data.color.color_scale, 0.0f, 1.0f) * 255.0f);
++    Uint8 cb = (Uint8)SDL_roundf(SDL_clamp(cmd->data.color.color.b * cmd->data.color.color_scale, 0.0f, 1.0f) * 255.0f);
++    Uint8 ca = (Uint8)SDL_roundf(SDL_clamp(cmd->data.color.color.a, 0.0f, 1.0f) * 255.0f);
++
++    u32 clear_color = ((u32)ca << 24) | ((u32)cr << 16) | ((u32)cg << 8) | (u32)cb;
++    rsxSetClearColor(data->context, clear_color);
++
++    rsxSetClearDepthStencil(data->context, 0xffff);
++    rsxClearSurface(data->context, GCM_CLEAR_R |
++                                GCM_CLEAR_G |
++                                GCM_CLEAR_B |
++                                GCM_CLEAR_A |
++                                GCM_CLEAR_S |
++                                GCM_CLEAR_Z);
++
++    rsxSetZMinMaxControl(data->context,GCM_FALSE, GCM_TRUE, GCM_FALSE);
++}
++
++static bool PS3_RunCommandQueue(SDL_Renderer *renderer, SDL_RenderCommand *cmd, void *vertices, size_t vertsize)
++{
++    PS3_RenderData *data = (PS3_RenderData *)renderer->internal;
++
++    Uint8 r, g, b, a;
++    while (cmd) {
++        r = data->drawstate.color.r;
++        g = data->drawstate.color.g;
++        b = data->drawstate.color.b;
++        a = data->drawstate.color.a;
++
++        switch (cmd->command) {
++        case SDL_RENDERCMD_GEOMETRY:
++            break;
++
++        case SDL_RENDERCMD_SETDRAWCOLOR:
++        {
++            data->drawstate.color = (SDL_Color){
++                (Uint8)SDL_roundf(SDL_clamp(cmd->data.color.color.r * cmd->data.color.color_scale, 0.0f, 1.0f) * 255.0f),
++                (Uint8)SDL_roundf(SDL_clamp(cmd->data.color.color.g * cmd->data.color.color_scale, 0.0f, 1.0f) * 255.0f),
++                (Uint8)SDL_roundf(SDL_clamp(cmd->data.color.color.b * cmd->data.color.color_scale, 0.0f, 1.0f) * 255.0f),
++                (Uint8)SDL_roundf(SDL_clamp(cmd->data.color.color.a, 0.0f, 1.0f) * 255.0f)
++            };
++            break;
++        }
++
++        case SDL_RENDERCMD_SETVIEWPORT:
++            data->drawstate.viewport = &cmd->data.viewport.rect;
++            break;
++
++        case SDL_RENDERCMD_SETCLIPRECT:
++        {
++            if (data->drawstate.cliprect_enabled != cmd->data.cliprect.enabled) {
++                data->drawstate.cliprect_enabled = cmd->data.cliprect.enabled;
++                data->drawstate.cliprect_enabled_dirty = true;
++            }
++
++            const SDL_Rect *rect = &cmd->data.cliprect.rect;
++            if (SDL_memcmp(&data->drawstate.cliprect, rect, sizeof(*rect)) != 0) {
++                SDL_copyp(&data->drawstate.cliprect, rect);
++                data->drawstate.cliprect_dirty = true;
++            }
++            break;
++        }
++        case SDL_RENDERCMD_CLEAR:
++        {
++            PS3_RenderClear(renderer, cmd);
++            break;
++        }
++
++        case SDL_RENDERCMD_DRAW_POINTS:
++        {
++            ColorVertex *verts = (ColorVertex *)(((Uint8 *)vertices) + cmd->data.draw.first);
++            const int count = cmd->data.draw.count;
++
++            // Apply viewport.
++            if (data->drawstate.viewport && (data->drawstate.viewport->x || data->drawstate.viewport->y)) {
++                for (int i = 0; i < count; i++) {
++                    verts[i].x += data->drawstate.viewport->x;
++                    verts[i].y += data->drawstate.viewport->y;
++                }
++            }
++
++            PS3_DrawColoredPrimitive(data, GCM_TYPE_POINTS, verts, count, r, g, b, a);
++            break;
++        }
++
++        case SDL_RENDERCMD_DRAW_LINES:
++        {
++            ColorVertex *verts = (ColorVertex *)(((Uint8 *)vertices) + cmd->data.draw.first);
++            const int count = cmd->data.draw.count;
++
++            // Apply viewport.
++            if (data->drawstate.viewport && (data->drawstate.viewport->x || data->drawstate.viewport->y)) {
++                for (int i = 0; i < count; i++) {
++                    verts[i].x += data->drawstate.viewport->x;
++                    verts[i].y += data->drawstate.viewport->y;
++                }
++            }
++
++            PS3_DrawColoredPrimitive(data, GCM_TYPE_LINE_STRIP, verts, count, r, g, b, a);
++            break;
++        }
++
++        case SDL_RENDERCMD_FILL_RECTS:
++        {
++            ColorVertex *verts = (ColorVertex *)(((Uint8 *)vertices) + cmd->data.draw.first);
++            const int count = cmd->data.draw.count;
++
++            for (int i = 0; i < count; i++) {
++                // Apply viewport.
++                if (data->drawstate.viewport && (data->drawstate.viewport->x || data->drawstate.viewport->y)) {
++                    for (int j = i; j < (i+1)*4 ; j++) {
++                        verts[j].x += data->drawstate.viewport->x;
++                        verts[j].y += data->drawstate.viewport->y;
++                    }
++                }
++                PS3_DrawColoredPrimitive(data, GCM_TYPE_TRIANGLE_STRIP, verts + (i * 4), 4, r, g, b, a);
++            }
++            break;
++        }
++
++        case SDL_RENDERCMD_COPY:
++        case SDL_RENDERCMD_COPY_EX:
++        {
++            PS3_TextureData *tdata = (PS3_TextureData*)cmd->data.draw.texture->internal;
++
++            PS3_CopyData copyData;
++            SDL_memcpy(&copyData, ((Uint8 *)vertices) + cmd->data.draw.first, sizeof(PS3_CopyData));
++
++            SDL_FRect *srcrect = &copyData.srcRect;
++            SDL_FRect *dstrect = &copyData.dstRect;
++
++            // Apply viewport
++            if (data->drawstate.viewport && (data->drawstate.viewport->x || data->drawstate.viewport->y)) {
++                dstrect->x += data->drawstate.viewport->x;
++                dstrect->y += data->drawstate.viewport->y;
++            }
++
++            PS3_DrawTexturedQuad(data, tdata,
++                dstrect->x, dstrect->y, dstrect->w, dstrect->h,
++                srcrect->x, srcrect->y, srcrect->w, srcrect->h
++            );
++            break;
++        }
++
++        case SDL_RENDERCMD_NO_OP:
++            break;
++        }
++
++        cmd = cmd->next;
++    }
++
++    return true;
++}
++
++static SDL_Surface *PS3_RenderReadPixels(SDL_Renderer *renderer, const SDL_Rect *rect)
++{
++    return NULL;
++
++    // SDL_Surface *surface = PS3_ActivateRenderer(renderer);
++    SDL_Surface *surface = NULL;
++    SDL_Rect final_rect;
++
++    if (!surface) {
++        return NULL;
++    }
++
++    if (renderer->last_queued_viewport.x || renderer->last_queued_viewport.y) {
++        final_rect.x = renderer->last_queued_viewport.x + rect->x;
++        final_rect.y = renderer->last_queued_viewport.y + rect->y;
++        final_rect.w = rect->w;
++        final_rect.h = rect->h;
++        rect = &final_rect;
++    }
++
++    if (rect->x < 0 || rect->x + rect->w > surface->w ||
++        rect->y < 0 || rect->y + rect->h > surface->h) {
++        SDL_SetError("Tried to read outside of surface bounds");
++        return NULL;
++    }
++
++    SDL_PixelFormat src_format = surface->format;
++    void *src_pixels = (void *)((Uint8 *)surface->pixels +
++                                rect->y * surface->pitch +
++                                rect->x * surface->fmt->bits_per_pixel);
++
++    // TODO: fix me
++    // SDL_ConvertPixels(rect->w, rect->h,
++    //                          src_format, src_pixels, surface->pitch,
++    //                          format, pixels, pitch);
++
++    return surface;
++}
++
++static bool PS3_RenderPresent(SDL_Renderer *renderer)
++{
++    // flip(renderer);
++    PS3_RenderData *data = (PS3_RenderData *)renderer->internal;
++
++    s32 qid = gcmSetPrepareFlip(data->context, data->curr_fb);
++    while (qid < 0) {
++        sysUsleep(100);
++        qid = gcmSetPrepareFlip(data->context, data->curr_fb);
++    }
++
++    rsxSetWriteBackendLabel(data->context, GCM_PREPARED_BUFFER_INDEX, ((data->curr_fb << 8) | qid));
++    rsxFlushBuffer(data->context);
++
++    // syncPPUGPU();
++    vu32 *label = (vu32*) gcmGetLabelAddress(GCM_PREPARED_BUFFER_INDEX);
++    while(((data->curr_fb + FRAME_BUFFER_COUNT - ((*label)>>8))%FRAME_BUFFER_COUNT) > MAX_BUFFER_QUEUE_SIZE) {
++        sys_event_t event;
++
++        sysEventQueueReceive(data->flipEventQueue, &event, 0);
++        sysEventQueueDrain(data->flipEventQueue);
++    }
++
++    data->curr_fb = (data->curr_fb + 1)%FRAME_BUFFER_COUNT;
++
++    rsxSetWaitLabel(data->context, GCM_BUFFER_STATUS_INDEX + data->curr_fb, BUFFER_IDLE);
++    rsxSetWriteCommandLabel(data->context, GCM_BUFFER_STATUS_INDEX + data->curr_fb, BUFFER_BUSY);
++
++    // setRenderTarget(data->curr_fb);
++    // Set render target
++    data->surface.colorOffset[0]    = data->color_offset[data->curr_fb];
++    rsxSetSurface(data->context,&data->surface);
++
++    return true;
++}
++
++static void PS3_DestroyTexture(SDL_Renderer *renderer, SDL_Texture *texture)
++{
++    PS3_TextureData *tdata = (PS3_TextureData*)texture->internal;
++    SDL_Surface *surface = (SDL_Surface *)tdata->surface;
++
++    if (!surface) {
++        return;
++    }
++
++    PS3_RenderData *data = (PS3_RenderData *)renderer->internal;
++
++    rsxFinish(data->context, 1);
++    rsxFree(surface->pixels);
++    SDL_DestroySurface(surface);
++}
++
++static void PS3_DestroyRenderer(SDL_Renderer *renderer)
++{
++    PS3_RenderData *data = (PS3_RenderData *)renderer->internal;
++
++    // Stop RSX before exit
++    gcmSetWaitFlip(data->context);
++    rsxFinish(data->context, 1);
++
++    u32 dataBuffer = *((vu32*) gcmGetLabelAddress(GCM_PREPARED_BUFFER_INDEX));
++    u32 lastBuffer = (dataBuffer >> 8);
++    while (lastBuffer != data->fbOnDisplay) {
++        sysUsleep(100);
++    }
++
++    if (data) {
++        rsxFree(data->fp_ucode_rsx);
++        rsxFree(data->fp_ucode_rsx_color);
++        SDL_free(data);
++    }
++    SDL_free(renderer);
++}
++
++static bool PS3_CreateRenderer(SDL_Renderer *renderer, SDL_Window *window, SDL_PropertiesID create_props)
++{
++    PS3_RenderData *data;
++
++    SDL_DisplayID displayID = SDL_GetDisplayForWindow(window);
++    if (displayID == 0) {
++        return SDL_SetError("PS3_CreateRenderer: could not get display for window");
++    }
++
++    const SDL_DisplayMode *displayMode = SDL_GetCurrentDisplayMode(displayID);
++
++    int bpp;
++    // int pitch;
++    Uint32 Rmask, Gmask, Bmask, Amask;
++
++    if (!displayMode) {
++        bpp = 32;
++        Rmask = 0x00FF0000;
++        Gmask = 0x0000FF00;
++        Bmask = 0x000000FF;
++        Amask = 0xFF000000;
++    } else {
++        SDL_GetMasksForPixelFormat(displayMode->format, &bpp, &Rmask, &Gmask, &Bmask, &Amask);
++    }
++
++    data = (PS3_RenderData *)SDL_calloc(1, sizeof(*data));
++    if (!data) {
++        PS3_DestroyRenderer(renderer);
++        SDL_OutOfMemory();
++        return false;
++    }
++
++    SDL_zerop(data);
++    rsxHeapInit();
++
++    g_ps3_data = data;
++
++    SDL_VideoDevice *videoDevice = SDL_GetVideoDevice();
++    if (!videoDevice || !videoDevice->internal) {
++        SDL_free(data);
++        return false;
++    }
++
++    SDL_VideoData *devdata = (SDL_VideoData *)videoDevice->internal;
++
++    if (!devdata->_CommandBuffer) {
++        SDL_free(data);
++        return false;
++    }
++
++    // Get a copy of the command buffer
++    data->context = devdata->_CommandBuffer;
++    data->color_pitch = displayMode->w * SDL_BYTESPERPIXEL(displayMode->format);
++    data->screenw = displayMode->w;
++    data->screenh = displayMode->h;
++
++    data->fbOnDisplay = 0;
++    data->fbFlipped = 0;
++    data->fbOnFlip = false;
++
++    u32 zs_depth = 4;
++    u32 color_depth = 4;
++
++    data->color_pitch = data->screenw*color_depth;
++    data->depth_pitch = data->screenw*zs_depth;
++
++    // Wait RSX idle
++    u32 sLabelVal = 1;
++    rsxSetWriteBackendLabel(data->context,GCM_WAIT_LABEL_INDEX,sLabelVal);
++    rsxSetWaitLabel(data->context,GCM_WAIT_LABEL_INDEX,sLabelVal);
++
++    ++sLabelVal;
++
++    // Wait RSX finish.
++    rsxSetWriteBackendLabel(data->context,GCM_WAIT_LABEL_INDEX,sLabelVal);
++    rsxFlushBuffer(data->context);
++
++    while(*(vu32*)gcmGetLabelAddress(GCM_WAIT_LABEL_INDEX)!=sLabelVal)
++        sysUsleep(30);
++
++    ++sLabelVal;
++
++    gcmSetFlipMode(GCM_FLIP_HSYNC);
++
++    void *buffer;
++    for (u32 i=0;i < FRAME_BUFFER_COUNT;i++) {
++        buffer = rsxMemalign(64, data->screenh*data->color_pitch);
++        rsxAddressToOffset(buffer, &data->color_offset[i]);
++        printf("fb[%d]: %p (%08x) [%dx%d] %d\n", i, buffer, data->color_offset[i], data->screenw, data->screenh, data->color_pitch);
++        gcmSetDisplayBuffer(i, data->color_offset[i], data->color_pitch, data->screenw, data->screenh);
++    }
++
++    buffer = rsxMemalign(64, (data->screenh*data->depth_pitch) * 2);
++    rsxAddressToOffset(buffer, &data->depth_offset);
++
++    for (u32 i=0;i < FRAME_BUFFER_COUNT;i++) {
++        *((vu32*) gcmGetLabelAddress(GCM_BUFFER_STATUS_INDEX + i)) = BUFFER_IDLE;
++    }
++    *((vu32*) gcmGetLabelAddress(GCM_PREPARED_BUFFER_INDEX)) = (data->fbOnDisplay << 8);
++    *((vu32*) gcmGetLabelAddress(GCM_BUFFER_STATUS_INDEX + data->fbOnDisplay)) = BUFFER_BUSY;
++
++    data->curr_fb = (data->fbOnDisplay + 1)%FRAME_BUFFER_COUNT;
++
++    // Init flip event.
++    sys_event_queue_attr_t queueAttr = { SYS_EVENT_QUEUE_PRIO, SYS_EVENT_QUEUE_PPU, "\0" };
++
++    sysEventQueueCreate(&data->flipEventQueue, &queueAttr, SYS_EVENT_QUEUE_KEY_LOCAL, 32);
++    sysEventPortCreate(&data->flipEventPort, SYS_EVENT_PORT_LOCAL, SYS_EVENT_PORT_NO_NAME);
++    sysEventPortConnectLocal(data->flipEventPort, data->flipEventQueue);
++
++    gcmSetFlipHandler(flipHandler);
++    gcmSetVBlankHandler(vblankHandler);
++
++    // Init render target.
++    memset(&data->surface, 0, sizeof(gcmSurface));
++
++    data->surface.colorFormat        = GCM_SURFACE_X8R8G8B8;
++    data->surface.colorTarget        = GCM_SURFACE_TARGET_0;
++    data->surface.colorLocation[0]    = GCM_LOCATION_RSX;
++    data->surface.colorOffset[0]    = data->color_offset[data->curr_fb];
++    data->surface.colorPitch[0]    = data->color_pitch;
++
++    for(u32 i=1; i< GCM_MAX_MRT_COUNT;i++) {
++        data->surface.colorLocation[i]    = GCM_LOCATION_RSX;
++        data->surface.colorOffset[i]        = data->color_offset[data->curr_fb];
++        data->surface.colorPitch[i]        = 64;
++    }
++
++    data->surface.depthFormat        = GCM_SURFACE_ZETA_Z16;
++    data->surface.depthLocation    = GCM_LOCATION_RSX;
++    data->surface.depthOffset        = data->depth_offset;
++    data->surface.depthPitch        = data->depth_pitch;
++
++    data->surface.type                = GCM_SURFACE_TYPE_LINEAR;
++    data->surface.antiAlias        = GCM_SURFACE_CENTER_1;
++
++    data->surface.width            = data->screenw;
++    data->surface.height            = data->screenh;
++    data->surface.x                = 0;
++    data->surface.y                = 0;
++
++    rsxSetWriteCommandLabel(data->context, GCM_BUFFER_STATUS_INDEX + data->curr_fb, BUFFER_BUSY);
++
++    // VPO / FPO
++    data->vpo = (rsxVertexProgram *)ps3_texture_vpo;
++    data->fpo = (rsxFragmentProgram *)ps3_texture_fpo;
++
++    rsxVertexProgramGetUCode(data->vpo, &data->vp_ucode, &data->vp_ucode_size);
++    rsxLoadVertexProgram(data->context, data->vpo, data->vp_ucode);
++
++    rsxFragmentProgramGetUCode(data->fpo, &data->fp_ucode_cpu, &data->fp_ucode_size);
++
++    data->fp_ucode_rsx = rsxMemalign(64, data->fp_ucode_size);
++    memcpy(data->fp_ucode_rsx, data->fp_ucode_cpu, data->fp_ucode_size);
++
++    rsxAddressToOffset(data->fp_ucode_rsx, &data->fp_offset);
++
++    rsxLoadFragmentProgramLocation(data->context, data->fpo, data->fp_offset, GCM_LOCATION_RSX);
++
++    // VPO / FPO COLOR
++    data->vpo_color = (rsxVertexProgram *)ps3_color_vpo;
++    data->fpo_color = (rsxFragmentProgram *)ps3_color_fpo;
++
++    rsxVertexProgramGetUCode(data->vpo_color, &data->vp_ucode_color, &data->vp_ucode_size_color);
++    rsxLoadVertexProgram(data->context, data->vpo_color, data->vp_ucode_color);
++
++    rsxFragmentProgramGetUCode(data->fpo_color, &data->fp_ucode_cpu_color, &data->fp_ucode_size_color);
++
++    data->fp_ucode_rsx_color = rsxMemalign(64, data->fp_ucode_size_color);
++    memcpy(data->fp_ucode_rsx_color, data->fp_ucode_cpu_color, data->fp_ucode_size_color);
++
++    rsxAddressToOffset(data->fp_ucode_rsx_color, &data->fp_offset_color);
++
++    rsxLoadFragmentProgramLocation(data->context, data->fpo_color, data->fp_offset_color, GCM_LOCATION_RSX);
++
++    // Init quad
++    for (int i = 0; i < QUAD_RING_SIZE; i++) {
++        data->quad_ring[i].vbo = (TexVertex *)rsxMemalign(16, 4 * sizeof(TexVertex));
++        rsxAddressToOffset(data->quad_ring[i].vbo, &data->quad_ring[i].offset);
++    }
++    data->quad_ring_index = 0;
++
++    // Build matrix for textures
++    build_ortho_matrix(data->ortho_matrix, 0.0f, data->screenw, data->screenh, 0.0f, -1.0f, 1.0f);
++
++    renderer->name = PS3_RenderDriver.name;
++    renderer->npot_texture_wrap_unsupported = false;
++    renderer->internal = data;
++    renderer->window = window;
++    renderer->WindowEvent = PS3_WindowEvent;
++    renderer->SupportsBlendMode = PS3_SupportsBlendMode;
++    renderer->CreateTexture = PS3_CreateTexture;
++    renderer->UpdateTexture = PS3_UpdateTexture;
++    renderer->UpdateTextureYUV = PS3_UpdateTextureYUV;
++    renderer->LockTexture = PS3_LockTexture;
++    renderer->UnlockTexture = PS3_UnlockTexture;
++    renderer->SetRenderTarget = PS3_SetRenderTarget;
++    renderer->QueueSetViewport = PS3_QueueSetViewport;
++    renderer->QueueSetDrawColor = PS3_QueueSetDrawColor;
++    renderer->QueueDrawPoints = PS3_QueueDrawPoints;
++    renderer->QueueDrawLines = PS3_QueueDrawPoints;
++    renderer->QueueFillRects = PS3_QueueFillRects;
++    renderer->QueueGeometry = PS3_QueueGeometry;
++    renderer->QueueCopy = PS3_QueueCopy;
++    renderer->QueueCopyEx = PS3_QueueCopyEx;
++    renderer->RunCommandQueue = PS3_RunCommandQueue;
++    renderer->RenderReadPixels = PS3_RenderReadPixels;
++    renderer->RenderPresent = PS3_RenderPresent;
++    renderer->DestroyTexture = PS3_DestroyTexture;
++    renderer->DestroyRenderer = PS3_DestroyRenderer;
++
++    // Use Lines instead of rects.
++    SDL_SetHintWithPriority(SDL_HINT_RENDER_LINE_METHOD, "2", SDL_HINT_OVERRIDE);
++
++    SDL_AddSupportedTextureFormat(renderer, SDL_PIXELFORMAT_ARGB8888);
++    SDL_SetNumberProperty(SDL_GetRendererProperties(renderer), SDL_PROP_RENDERER_MAX_TEXTURE_SIZE_NUMBER, 1024);
++
++    return true;
++}
++
++SDL_RenderDriver PS3_RenderDriver = {
++    PS3_CreateRenderer, "PS3"
++};
++
++#endif // SDL_VIDEO_RENDER_PS3
+diff --git a/src/render/ps3/color.fsh b/src/render/ps3/color.fsh
+new file mode 100644
+index 000000000..4364344ef
+--- /dev/null
++++ b/src/render/ps3/color.fsh
+@@ -0,0 +1,7 @@
++void main(
++    float4 color : COLOR0,
++    out float4 oColor : COLOR
++)
++{
++    oColor = color;
++}
+\ No newline at end of file
+diff --git a/src/render/ps3/color.vsh b/src/render/ps3/color.vsh
+new file mode 100644
+index 000000000..871be1be2
+--- /dev/null
++++ b/src/render/ps3/color.vsh
+@@ -0,0 +1,13 @@
++void main(
++    float3 position : POSITION,
++    float4 color    : COLOR0,
++
++    uniform float4x4 modelViewProj,
++
++    out float4 oPosition : POSITION,
++    out float4 oColor    : COLOR0
++)
++{
++    oPosition = mul(float4(position, 1.0), modelViewProj);
++    oColor = color;
++}
+\ No newline at end of file
+diff --git a/src/render/ps3/ps3_color_fpo.h b/src/render/ps3/ps3_color_fpo.h
+new file mode 100644
+index 000000000..8c114cc35
+--- /dev/null
++++ b/src/render/ps3/ps3_color_fpo.h
+@@ -0,0 +1,10 @@
++unsigned char ps3_color_fpo[] = {
++  0x46, 0x50, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
++  0x00, 0x00, 0x00, 0x24, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x40,
++  0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x01, 0x09, 0x00, 0x00, 0x00,
++  0x63, 0x6f, 0x6c, 0x6f, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0x00, 0x3e, 0x01, 0x01, 0x40, 0xc8, 0x01, 0x1c, 0x9d,
++  0xc8, 0x00, 0x00, 0x01, 0xc8, 0x00, 0x00, 0x01
++};
++unsigned int ps3_color_fpo_len = 80;
+diff --git a/src/render/ps3/ps3_color_vpo.h b/src/render/ps3/ps3_color_vpo.h
+new file mode 100644
+index 000000000..8a8f63669
+--- /dev/null
++++ b/src/render/ps3/ps3_color_vpo.h
+@@ -0,0 +1,27 @@
++unsigned char ps3_color_vpo[] = {
++  0x56, 0x50, 0x00, 0x00, 0x00, 0x01, 0x00, 0x02, 0x00, 0x04, 0x00, 0x05,
++  0x00, 0x00, 0x00, 0x24, 0x00, 0x00, 0x00, 0x3c, 0x00, 0x00, 0x00, 0xd0,
++  0x00, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0xac, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0xb5, 0x00, 0x00, 0x00, 0x03, 0x09, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x0b, 0x00, 0x04, 0x00,
++  0x3f, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
++  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f, 0x80, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0x00, 0x3f, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++  0x3f, 0x80, 0x00, 0x00, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e,
++  0x00, 0x63, 0x6f, 0x6c, 0x6f, 0x72, 0x00, 0x6d, 0x6f, 0x64, 0x65, 0x6c,
++  0x56, 0x69, 0x65, 0x77, 0x50, 0x72, 0x6f, 0x6a, 0x00, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1c, 0x6c, 0x00, 0x80, 0x10, 0x2a,
++  0x81, 0x06, 0xc0, 0xc3, 0x60, 0x41, 0xff, 0xfc, 0x00, 0x00, 0x1c, 0x6c,
++  0x01, 0x00, 0x00, 0x00, 0x01, 0x06, 0xc0, 0xc3, 0x60, 0x21, 0xff, 0xfc,
++  0x00, 0x00, 0x1c, 0x6c, 0x01, 0x00, 0x20, 0x55, 0x01, 0x06, 0xc0, 0xc3,
++  0x60, 0x21, 0xff, 0xfc, 0x40, 0x1f, 0x9c, 0x6c, 0x00, 0xc0, 0x30, 0x0d,
++  0x81, 0x86, 0xc0, 0x83, 0x60, 0x21, 0xff, 0x80, 0x40, 0x1f, 0x9c, 0x6c,
++  0x00, 0x40, 0x03, 0x0d, 0x81, 0x06, 0xc0, 0x83, 0x60, 0x41, 0xff, 0x85
++};
++unsigned int ps3_color_vpo_len = 288;
+diff --git a/src/render/ps3/ps3_texture_fpo.h b/src/render/ps3/ps3_texture_fpo.h
+new file mode 100644
+index 000000000..7eb7c5dad
+--- /dev/null
++++ b/src/render/ps3/ps3_texture_fpo.h
+@@ -0,0 +1,11 @@
++unsigned char ps3_texture_fpo[] = {
++  0x46, 0x50, 0x00, 0x00, 0x00, 0x02, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01,
++  0x00, 0x00, 0x00, 0x24, 0x00, 0x00, 0x00, 0x3c, 0x00, 0x00, 0x00, 0x50,
++  0x00, 0x00, 0x00, 0x40, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0x3c, 0x00, 0x00, 0x00, 0x04, 0x07, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0x45, 0x00, 0x00, 0x00, 0x00, 0x0f, 0x00, 0x00, 0x00,
++  0x74, 0x65, 0x78, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x00, 0x74, 0x65, 0x78,
++  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x9e, 0x01, 0x17, 0x00,
++  0xc8, 0x01, 0x1c, 0x9d, 0xc8, 0x00, 0x00, 0x01, 0xc8, 0x00, 0x3f, 0xe1
++};
++unsigned int ps3_texture_fpo_len = 96;
+diff --git a/src/render/ps3/ps3_texture_vpo.h b/src/render/ps3/ps3_texture_vpo.h
+new file mode 100644
+index 000000000..9b49e994f
+--- /dev/null
++++ b/src/render/ps3/ps3_texture_vpo.h
+@@ -0,0 +1,27 @@
++unsigned char ps3_texture_vpo[] = {
++  0x56, 0x50, 0x00, 0x00, 0x00, 0x01, 0x00, 0x02, 0x00, 0x04, 0x00, 0x05,
++  0x00, 0x00, 0x00, 0x24, 0x00, 0x00, 0x00, 0x3c, 0x00, 0x00, 0x00, 0xd0,
++  0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0xac, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0xb5, 0x00, 0x00, 0x00, 0x08, 0x07, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0xbe, 0x00, 0x00, 0x00, 0x00, 0x0b, 0x00, 0x04, 0x00,
++  0x3f, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
++  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f, 0x80, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0x00, 0x3f, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00,
++  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++  0x3f, 0x80, 0x00, 0x00, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e,
++  0x00, 0x74, 0x65, 0x78, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x00, 0x6d, 0x6f,
++  0x64, 0x65, 0x6c, 0x56, 0x69, 0x65, 0x77, 0x50, 0x72, 0x6f, 0x6a, 0x00,
++  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1c, 0x6c, 0x00, 0x80, 0x10, 0x2a,
++  0x81, 0x06, 0xc0, 0xc3, 0x60, 0x41, 0xff, 0xfc, 0x00, 0x00, 0x1c, 0x6c,
++  0x01, 0x00, 0x00, 0x00, 0x01, 0x06, 0xc0, 0xc3, 0x60, 0x21, 0xff, 0xfc,
++  0x00, 0x00, 0x1c, 0x6c, 0x01, 0x00, 0x20, 0x55, 0x01, 0x06, 0xc0, 0xc3,
++  0x60, 0x21, 0xff, 0xfc, 0x40, 0x1f, 0x9c, 0x6c, 0x00, 0xc0, 0x30, 0x0d,
++  0x81, 0x86, 0xc0, 0x83, 0x60, 0x21, 0xff, 0x80, 0x40, 0x1f, 0x9c, 0x6c,
++  0x00, 0x40, 0x08, 0x0d, 0x81, 0x06, 0xc0, 0x83, 0x60, 0x41, 0x9f, 0x9d
++};
++unsigned int ps3_texture_vpo_len = 288;
+diff --git a/src/render/ps3/texture.fsh b/src/render/ps3/texture.fsh
+new file mode 100644
+index 000000000..e7c5b1aeb
+--- /dev/null
++++ b/src/render/ps3/texture.fsh
+@@ -0,0 +1,12 @@
++void main(
++    float2 texcoord : TEXCOORD0,
++
++    uniform sampler2D tex : TEXUNIT0,
++
++    out float4 color : COLOR
++)
++{
++    color = tex2D(tex, texcoord);
++   // color = float4(1.0, 0.0, 0.0, 1.0);  // hardcoded red, ignore texture sampling entirely
++
++}
+diff --git a/src/render/ps3/texture.vsh b/src/render/ps3/texture.vsh
+new file mode 100644
+index 000000000..64407ba98
+--- /dev/null
++++ b/src/render/ps3/texture.vsh
+@@ -0,0 +1,14 @@
++void main(
++    float3 position : POSITION,
++    float2 texcoord : TEXCOORD0,
++
++    uniform float4x4 modelViewProj,
++
++    out float4 oPosition : POSITION,
++    out float2 oTexcoord : TEXCOORD0
++)
++{
++    // oPosition = mul(modelViewProj, float4(position, 1.0));
++    oPosition = mul(float4(position, 1.0), modelViewProj);   // <-- v * M instead of M * v
++    oTexcoord = texcoord;
++}
+diff --git a/src/thread/SDL_thread_c.h b/src/thread/SDL_thread_c.h
+index 4f35e1351..930113d45 100644
+--- a/src/thread/SDL_thread_c.h
++++ b/src/thread/SDL_thread_c.h
+@@ -32,6 +32,8 @@
+ #include "windows/SDL_systhread_c.h"
+ #elif defined(SDL_THREAD_PS2)
+ #include "ps2/SDL_systhread_c.h"
++#elif defined(SDL_THREAD_PS3)
++#include "ps3/SDL_systhread_c.h"
+ #elif defined(SDL_THREAD_PSP)
+ #include "psp/SDL_systhread_c.h"
+ #elif defined(SDL_THREAD_VITA)
+diff --git a/src/thread/ps3/SDL_sysmutex.c b/src/thread/ps3/SDL_sysmutex.c
+new file mode 100644
+index 000000000..b154c0f1f
+--- /dev/null
++++ b/src/thread/ps3/SDL_sysmutex.c
+@@ -0,0 +1,77 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#ifdef SDL_THREAD_PS3
++
++// An implementation of mutexes using semaphores
++
++#include <sys/mutex.h>
++
++struct SDL_Mutex
++{
++    sys_mutex_t id;
++};
++
++SDL_Mutex *SDL_CreateMutex(void)
++{
++
++    SDL_Mutex *mutex = (SDL_Mutex *)SDL_malloc(sizeof(*mutex));
++    if (!mutex)
++        return NULL;
++
++    sys_mutex_attr_t attr;
++    sysMutexAttrInitialize(attr);
++    attr.attr_recursive = SYS_MUTEX_ATTR_RECURSIVE;
++
++    int ret = sysMutexCreate(&mutex->id, &attr);
++    if (ret != 0) {
++        SDL_free(mutex);
++        return NULL;
++    }
++
++    return mutex;
++}
++
++void SDL_DestroyMutex(SDL_Mutex *mutex)
++{
++    if (mutex) {
++        sysMutexDestroy(mutex->id);
++        SDL_free(mutex);
++    }
++}
++
++void SDL_LockMutex(SDL_Mutex *mutex)
++{
++    sysMutexLock(mutex->id, 0);
++}
++
++void SDL_UnlockMutex(SDL_Mutex *mutex)
++{
++    sysMutexUnlock(mutex->id);
++}
++
++bool SDL_TryLockMutex(SDL_Mutex *mutex)
++{
++    return sysMutexTryLock(mutex->id) == 0;
++}
++
++#endif // SDL_THREAD_PS3
+diff --git a/src/thread/ps3/SDL_sysmutex_c.h b/src/thread/ps3/SDL_sysmutex_c.h
+new file mode 100644
+index 000000000..b2b446f54
+--- /dev/null
++++ b/src/thread/ps3/SDL_sysmutex_c.h
+@@ -0,0 +1,21 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
+diff --git a/src/thread/ps3/SDL_sysrwlock.c b/src/thread/ps3/SDL_sysrwlock.c
+new file mode 100644
+index 000000000..4fdba9e70
+--- /dev/null
++++ b/src/thread/ps3/SDL_sysrwlock.c
+@@ -0,0 +1,93 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#ifdef SDL_THREAD_PS3
++
++#include <sys/mutex.h>
++
++// Simple mutex-based rwlock for PS3
++
++struct SDL_RWLock
++{
++    sys_mutex_t id;
++};
++
++SDL_RWLock *SDL_CreateRWLock(void)
++{
++    SDL_RWLock *rwlock = (SDL_RWLock *)SDL_malloc(sizeof(*rwlock));
++    if (!rwlock)
++        return NULL;
++
++    sys_mutex_attr_t attr;
++    sysMutexAttrInitialize(attr);
++    attr.attr_recursive = SYS_MUTEX_ATTR_RECURSIVE;
++
++    int ret = sysMutexCreate(&rwlock->id, &attr);
++    if (ret != 0) {
++        SDL_free(rwlock);
++        return NULL;
++    }
++
++    return rwlock;
++}
++
++void SDL_DestroyRWLock(SDL_RWLock *rwlock)
++{
++    if (rwlock) {
++        sysMutexDestroy(rwlock->id);
++        SDL_free(rwlock);
++    }
++}
++
++void SDL_LockRWLockForReading(SDL_RWLock *rwlock)
++{
++    if (rwlock)
++        sysMutexLock(rwlock->id, 0);
++}
++
++void SDL_LockRWLockForWriting(SDL_RWLock *rwlock)
++{
++    if (rwlock)
++        sysMutexLock(rwlock->id, 0);
++}
++
++bool SDL_TryLockRWLockForReading(SDL_RWLock *rwlock)
++{
++    if (!rwlock)
++        return true;
++    return sysMutexTryLock(rwlock->id) == 0;
++}
++
++bool SDL_TryLockRWLockForWriting(SDL_RWLock *rwlock)
++{
++    if (!rwlock)
++        return true;
++    return sysMutexTryLock(rwlock->id) == 0;
++}
++
++void SDL_UnlockRWLock(SDL_RWLock *rwlock)
++{
++    if (rwlock)
++        sysMutexUnlock(rwlock->id);
++}
++
++#endif // SDL_THREAD_PS3
+diff --git a/src/thread/ps3/SDL_syssem.c b/src/thread/ps3/SDL_syssem.c
+new file mode 100644
+index 000000000..e0459fe9f
+--- /dev/null
++++ b/src/thread/ps3/SDL_syssem.c
+@@ -0,0 +1,154 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#ifdef SDL_THREAD_PS3
++
++// Semaphores in the PS3 environment
++
++#include "SDL3/SDL_mutex.h"
++#include <ppu-types.h>
++#include <sys/sem.h>
++#include <sys/systime.h>
++
++// PS3 LV2 timeout error code
++#ifndef ETIMEDOUT
++#define ETIMEDOUT 0x80010006
++#endif
++
++#ifndef SYS_SEM_NAME_MAX
++#define SYS_SEM_NAME_MAX 0x08
++#endif
++
++#ifndef SYS_SEM_ID_INVALID
++#define SYS_SEM_ID_INVALID 0
++#endif
++
++struct SDL_Semaphore
++{
++    sys_sem_t id;
++};
++
++// Create a counting semaphore
++SDL_Semaphore *SDL_CreateSemaphore(Uint32 initial_value)
++{
++    SDL_Semaphore *sem = (SDL_Semaphore *)SDL_malloc(sizeof(*sem));
++    if (!sem) {
++        return NULL;
++    }
++
++    sys_sem_attr_t attr;
++    memset(&attr, 0, sizeof(attr));
++    attr.attr_protocol = SYS_SEM_ATTR_PROTOCOL;
++    attr.attr_pshared = SYS_SEM_ATTR_PSHARED;
++    attr.key = 0;
++    attr.flags = 0;
++    strncpy(attr.name, "SDLsem", SYS_SEM_NAME_MAX);
++    // sysSemAttrInitialize(attr);
++
++    int ret = sysSemCreate(&sem->id, &attr, initial_value, 255);
++    if (ret != 0) {
++        SDL_free(sem);
++        return NULL;
++    }
++
++    return sem;
++}
++
++// Free the semaphore
++void SDL_DestroySemaphore(SDL_Semaphore *sem)
++{
++    if (sem) {
++        sysSemDestroy(sem->id);
++        SDL_free(sem);
++    }
++}
++
++bool SDL_WaitSemaphoreTimeoutNS(SDL_Semaphore *sem, Sint64 timeoutNS)
++{
++    if (!sem || sem->id == 0) {
++        return false;
++    }
++
++    // No timeout — block forever
++    if (timeoutNS < 0) {
++        sysSemWait(sem->id, 0);
++        return true;
++    }
++
++    // Try without blocking
++    if (timeoutNS == 0) {
++        return sysSemTryWait(sem->id) == 0;
++    }
++
++    // PS3 sys_sem_wait timeout is in microseconds
++    u64 timeoutUS = (u64)(timeoutNS / 1000);
++
++    // Clamp to at least 1us to avoid accidental non-blocking call
++    if (timeoutUS == 0) {
++        timeoutUS = 1;
++    }
++
++    int ret = sysSemWait(sem->id, timeoutUS);
++
++    switch (ret) {
++    case 0:
++        return true; // acquired
++    case ETIMEDOUT:
++        return false; // timed out
++    default:
++        SDL_SetError("sys_sem_wait() failed: %d", ret);
++        return false;
++    }
++}
++
++// Returns the current count of the semaphore
++Uint32 SDL_GetSemaphoreValue(SDL_Semaphore *sem)
++{
++    s32 val = 0;
++    sysSemGetValue(sem->id, &val);
++    return (Uint32)val;
++}
++
++// Atomically increases the semaphore's count (not blocking)
++void SDL_SignalSemaphore(SDL_Semaphore *sem)
++{
++    if (!sem) {
++        return;
++    }
++
++    sysSemPost(sem->id, 1);
++}
++
++void SDL_PostSemaphore(SDL_Semaphore *sem)
++{
++    if (!sem) {
++        return;
++    }
++
++    if (sem->id == SYS_SEM_ID_INVALID) {
++        return;
++    }
++
++    sysSemPost(sem->id, 0);
++}
++
++#endif // SDL_THREAD_PS3
+diff --git a/src/thread/ps3/SDL_systhread.c b/src/thread/ps3/SDL_systhread.c
+new file mode 100644
+index 000000000..79924f88e
+--- /dev/null
++++ b/src/thread/ps3/SDL_systhread.c
+@@ -0,0 +1,135 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#ifdef SDL_THREAD_PS3
++
++#include "../SDL_systhread.h"
++#include "../SDL_thread_c.h"
++
++// PS3 thread management routines for SDL
++
++#include <ppu-lv2.h>
++#include <signal.h>
++#include <sys/thread.h>
++
++static int sig_list[] = {
++    SIGHUP, SIGINT, SIGQUIT, SIGPIPE, SIGALRM, SIGTERM, SIGWINCH, 0
++};
++
++void SDL_MaskSignals(sigset_t *omask)
++{
++    sigset_t mask;
++    int i;
++
++    sigemptyset(&mask);
++    for (i = 0; sig_list[i]; ++i) {
++        sigaddset(&mask, sig_list[i]);
++    }
++    // FIXME as soon as signal are implemented
++    // sigprocmask(SIG_BLOCK, &mask, omask);
++}
++
++void SDL_UnmaskSignals(sigset_t *omask)
++{
++    // FIXME as soom as signal are implemented
++    // sigprocmask(SIG_SETMASK, omask, NULL);
++}
++
++static void RunThread(void *arg)
++{
++    SDL_Thread *thread = (SDL_Thread *)arg;
++    SDL_RunThread(thread);
++    sysThreadExit(0);
++}
++
++bool SDL_SYS_CreateThread(SDL_Thread *thread, SDL_FunctionPointer pfnBeginThread,
++                          SDL_FunctionPointer pfnEndThread)
++{
++    size_t stack_size = 0x4000;
++    u64 priority = 1500;
++
++    int ret = sysThreadCreate(&thread->handle, RunThread, (void *)thread, priority, stack_size, THREAD_JOINABLE, thread->name);
++
++    if (ret != 0) {
++        return SDL_SetError("Not enough resources to create thread");
++    }
++
++    return true;
++}
++
++SDL_ThreadID SDL_GetCurrentThreadID(void)
++{
++    SDL_ThreadID id;
++    sysThreadGetId(&id);
++    return id;
++}
++
++void SDL_SYS_SetupThread(const char *name)
++{
++    // Mask asynchronous signals for this thread
++    SDL_MaskSignals(NULL);
++    (void)name;
++}
++
++void SDL_SYS_WaitThread(SDL_Thread *thread)
++{
++    u64 exit_code;
++    sysThreadJoin(thread->handle, &exit_code);
++}
++
++void SDL_SYS_DetachThread(SDL_Thread *thread)
++{
++    sysThreadDetach(thread->handle);
++}
++
++bool SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
++{
++    s32 ps3_priority;
++
++    switch (priority) {
++    case SDL_THREAD_PRIORITY_LOW:
++        ps3_priority = 3000;
++        break;
++    case SDL_THREAD_PRIORITY_NORMAL:
++        ps3_priority = 1000;
++        break;
++    case SDL_THREAD_PRIORITY_HIGH:
++        ps3_priority = 300;
++        break;
++    case SDL_THREAD_PRIORITY_TIME_CRITICAL:
++        ps3_priority = 100;
++        break;
++    default:
++        ps3_priority = 1000;
++        break;
++    }
++
++    sys_ppu_thread_t tid;
++    sysThreadGetId(&tid);
++    int ret = sysThreadSetPriority(tid, ps3_priority);
++    if (ret != 0) {
++        return SDL_SetError("sysThreadSetPrio() failed: %d", ret);
++    }
++    return true;
++}
++
++#endif // SDL_THREAD_PS3
+diff --git a/src/thread/ps3/SDL_systhread_c.h b/src/thread/ps3/SDL_systhread_c.h
+new file mode 100644
+index 000000000..4018ffae5
+--- /dev/null
++++ b/src/thread/ps3/SDL_systhread_c.h
+@@ -0,0 +1,32 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#include <lv2/thread.h>
++#include <signal.h>
++
++typedef sys_ppu_thread_t SYS_ThreadHandle;
++
++#include <signal.h>
++
++// Functions needed to work with system threads in other portions of SDL
++extern void SDL_MaskSignals(sigset_t *omask);
++extern void SDL_UnmaskSignals(sigset_t *omask);
+diff --git a/src/timer/ps3/SDL_systimer.c b/src/timer/ps3/SDL_systimer.c
+new file mode 100644
+index 000000000..82025bed8
+--- /dev/null
++++ b/src/timer/ps3/SDL_systimer.c
+@@ -0,0 +1,86 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#ifdef SDL_TIMER_PS3
++
++#include "../SDL_timer_c.h"
++
++#include <sys/systime.h>
++#include <sys/time.h>
++#include <time.h>
++#include <unistd.h>
++
++static struct timeval start;
++static bool ticks_started = false;
++
++int gettimeofday(struct timeval *tv, void *unused)
++{
++    u64 sec;
++    u64 nsec;
++    int rv = -1;
++
++    rv = sysGetCurrentTime(&sec, &nsec);
++    if (rv < 0) {
++        return -1;
++    }
++
++    tv->tv_sec = sec;
++    tv->tv_usec = nsec / 1000;
++
++    return 0;
++}
++
++void SDL_TicksInit(void)
++{
++    if (ticks_started) {
++        return;
++    }
++    ticks_started = true;
++
++    gettimeofday(&start, NULL);
++}
++
++void SDL_TicksQuit(void)
++{
++    ticks_started = false;
++}
++
++Uint64 SDL_GetPerformanceCounter(void)
++{
++    u64 sec;
++    u64 nsec;
++    sysGetCurrentTime(&sec, &nsec);
++    return (Uint64)sec * 1000000000ULL + nsec;
++}
++
++Uint64 SDL_GetPerformanceFrequency(void)
++{
++    return 1000000000ULL; // nanoseconds
++}
++
++void SDL_SYS_DelayNS(Uint64 ns)
++{
++    // Convert nanoseconds to microseconds.
++    sysUsleep(ns / 1000);
++}
++
++#endif /* SDL_TIMER_PS3 */
+diff --git a/src/video/SDL_sysvideo.h b/src/video/SDL_sysvideo.h
+index 76d924c25..ff465d7bb 100644
+--- a/src/video/SDL_sysvideo.h
++++ b/src/video/SDL_sysvideo.h
+@@ -530,6 +530,7 @@ extern VideoBootStrap HAIKU_bootstrap;
+ extern VideoBootStrap UIKIT_bootstrap;
+ extern VideoBootStrap Android_bootstrap;
+ extern VideoBootStrap PS2_bootstrap;
++extern VideoBootStrap PS3_bootstrap;
+ extern VideoBootStrap PSP_bootstrap;
+ extern VideoBootStrap VITA_bootstrap;
+ extern VideoBootStrap RISCOS_bootstrap;
+diff --git a/src/video/SDL_video.c b/src/video/SDL_video.c
+index 4c8611828..19420a991 100644
+--- a/src/video/SDL_video.c
++++ b/src/video/SDL_video.c
+@@ -113,6 +113,9 @@ static VideoBootStrap *bootstrap[] = {
+ #ifdef SDL_VIDEO_DRIVER_PS2
+     &PS2_bootstrap,
+ #endif
++#ifdef SDL_VIDEO_DRIVER_PS3
++    &PS3_bootstrap,
++#endif
+ #ifdef SDL_VIDEO_DRIVER_PSP
+     &PSP_bootstrap,
+ #endif
+diff --git a/src/video/ps3/SDL_ps3events.c b/src/video/ps3/SDL_ps3events.c
+new file mode 100644
+index 000000000..edf381ca5
+--- /dev/null
++++ b/src/video/ps3/SDL_ps3events.c
+@@ -0,0 +1,107 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#ifdef SDL_VIDEO_DRIVER_PS3
++
++#include "../../events/SDL_events_c.h"
++#include "SDL_ps3events_c.h"
++#include "SDL_ps3keyboard_c.h"
++#include "SDL_ps3mouse_c.h"
++#include "SDL_ps3video.h"
++
++#include <sysutil/sysutil.h>
++
++static void sysWindowCallback(u64 event, u64 param, void *userdata)
++{
++    SDL_VideoDevice *_this = (SDL_VideoDevice *)userdata;
++    SDL_Window *window = NULL;
++
++    // There should only be one window
++    if (_this->num_displays == 1) {
++        if (_this->displays[0]->fullscreen_window != NULL) {
++            window = _this->displays[0]->fullscreen_window;
++        }
++    }
++
++    switch (event) {
++    case SYSUTIL_MENU_OPEN:
++        // XMB opened
++        if (window) {
++            SDL_SendWindowEvent(window, SDL_EVENT_WINDOW_MOUSE_LEAVE, 0, 0);
++        }
++        break;
++    case SYSUTIL_MENU_CLOSE:
++        // XMB closed
++        if (window) {
++            SDL_SendWindowEvent(window, SDL_EVENT_WINDOW_MOUSE_ENTER, 0, 0);
++        }
++        break;
++    case SYSUTIL_DRAW_BEGIN:
++        break;
++    case SYSUTIL_DRAW_END:
++        break;
++    default:
++        break;
++    }
++}
++
++// static void videoOutHandler(u32 slot, u32 videoOut, u32 deviceIndex, u32 event, videoDeviceInfo *info, void *userData)
++// {
++    // SDL_VideoDevice *_this = (SDL_VideoDevice*)userData;
++
++    // // Process event
++    // switch (event) {
++    //     default:
++    //         break;
++    // }
++// }
++
++void PS3_PumpEvents(SDL_VideoDevice *_this)
++{
++    sysUtilCheckCallback();
++    // PS3_PumpKeyboard(_this);
++    // PS3_PumpMouse();
++}
++
++void PS3_InitSysEvent(SDL_VideoDevice *_this)
++{
++    // This callbach register should be used when application will
++    // change resoulution.
++    // videoOutRegisterCallback(0, videoOutHandler, _this);
++
++    // Init window events handler.
++    sysUtilRegisterCallback(SYSUTIL_EVENT_SLOT1, sysWindowCallback, _this);
++
++    // PS3_InitKeyboard(_this);
++    // PS3_InitMouse();
++}
++
++void PS3_QuitSysEvent(SDL_VideoDevice *_this)
++{
++    sysUtilUnregisterCallback(SYSUTIL_EVENT_SLOT1);
++    // videoOutUnregisterCallback(0);
++    videoConfigure(0, NULL, NULL, 0); // reset video output
++    // PS3_QuitKeyboard(_this);
++    // PS3_QuitMouse();
++}
++
++#endif // SDL_VIDEO_DRIVER_PS3
+diff --git a/src/video/ps3/SDL_ps3events_c.h b/src/video/ps3/SDL_ps3events_c.h
+new file mode 100644
+index 000000000..e02b08c8b
+--- /dev/null
++++ b/src/video/ps3/SDL_ps3events_c.h
+@@ -0,0 +1,32 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#ifndef _SDL_ps3events_h
++#define _SDL_ps3events_h
++
++#include "SDL_ps3video.h"
++
++extern void PS3_PumpEvents(SDL_VideoDevice *_this);
++extern void PS3_InitSysEvent(SDL_VideoDevice *_this);
++extern void PS3_QuitSysEvent(SDL_VideoDevice *_this);
++
++#endif
+diff --git a/src/video/ps3/SDL_ps3keyboard.c b/src/video/ps3/SDL_ps3keyboard.c
+new file mode 100644
+index 000000000..0f9345b81
+--- /dev/null
++++ b/src/video/ps3/SDL_ps3keyboard.c
+@@ -0,0 +1,229 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#ifdef SDL_VIDEO_DRIVER_PS3
++
++#include <io/kb.h>
++
++#include "SDL_ps3keyboard_c.h"
++#include "SDL_ps3video.h"
++
++static void unicodeToUtf8(Uint16 w, char *utf8buf)
++{
++    unsigned char *utf8s = (unsigned char *)utf8buf;
++
++    if (w < 0x0080) {
++        utf8s[0] = (unsigned char)w;
++        utf8s[1] = 0;
++    } else if (w < 0x0800) {
++        utf8s[0] = 0xc0 | ((w) >> 6);
++        utf8s[1] = 0x80 | ((w) & 0x3f);
++        utf8s[2] = 0;
++    } else {
++        utf8s[0] = 0xe0 | ((w) >> 12);
++        utf8s[1] = 0x80 | (((w) >> 6) & 0x3f);
++        utf8s[2] = 0x80 | ((w) & 0x3f);
++        utf8s[3] = 0;
++    }
++}
++
++static void updateKeymap(SDL_VideoDevice *_this)
++{
++    SDL_VideoData *data =
++        (SDL_VideoData *)_this->internal;
++
++    SDL_Scancode scancode;
++    SDL_Keycode keymap[SDL_SCANCODE_COUNT];
++    KbConfig kbConfig;
++    KbMkey kbMkey;
++    KbLed kbLed;
++    Uint16 unicode;
++
++    // TODO: fix me
++    // SDL_GetDefaultKeymap(keymap);
++
++    ioKbGetConfiguration(0, &kbConfig);
++
++    data->_keyboardMapping = kbConfig.mapping;
++
++    kbMkey._KbMkeyU.mkeys = 0;
++    kbLed._KbLedU.leds = 1; // Num lock
++
++    // Update SDL keycodes according to the keymap
++    for (scancode = 0; scancode < SDL_SCANCODE_COUNT; ++scancode) {
++
++        // Make sure this scancode is a valid character scancode
++        if (scancode == SDL_SCANCODE_UNKNOWN ||
++            scancode == SDL_SCANCODE_ESCAPE ||
++            scancode == SDL_SCANCODE_RETURN ||
++            (keymap[scancode] & SDLK_SCANCODE_MASK)) {
++            continue;
++        }
++
++        unicode = ioKbCnvRawCode(data->_keyboardMapping, kbMkey, kbLed, scancode);
++
++        // Ignore Keypad flag
++        unicode &= ~KB_KEYPAD;
++
++        // Exclude raw keys
++        if (unicode != 0 && unicode < KB_RAWDAT) {
++            keymap[scancode] = unicode;
++        }
++    }
++    // TODO: fix me
++    // SDL_SetKeymap(keymap, SDL_NUM_SCANCODES);
++}
++
++static void checkKeyboardConnected(SDL_VideoDevice *_this)
++{
++    SDL_VideoData *data = (SDL_VideoData *)_this->internal;
++
++    KbInfo kbInfo;
++    ioKbGetInfo(&kbInfo);
++
++    if (kbInfo.status[0] == 1 && !data->_keyboardConnected) // Connected
++    {
++        data->_keyboardConnected = true;
++
++        // Old events in the queue are discarded
++        ioKbClearBuf(0);
++
++        // Set raw keyboard code types to get scan codes
++        ioKbSetCodeType(0, KB_CODETYPE_RAW);
++        ioKbSetReadMode(0, KB_RMODE_INPUTCHAR);
++
++        updateKeymap(_this);
++    } else if (kbInfo.status[0] != 1 && data->_keyboardConnected) // Disconnected
++    {
++        data->_keyboardConnected = false;
++
++        SDL_ResetKeyboard();
++    }
++}
++
++static void updateModifierKey(bool oldState, bool newState, SDL_Scancode scancode)
++{
++    if (!oldState ^ !newState) {
++        // SDL_SendKeyboardKey(newState ? true : false, scancode);
++        // SDL_SendKeyboardKey(0, SDL_DEFAULT_KEYBOARD_ID, keycode, TranslateKeycode(keycode), true);
++    }
++}
++
++static void updateModifiers(SDL_VideoDevice *_this, const KbData *Keys)
++{
++    SDL_Keymod modstate = SDL_GetModState();
++
++    updateModifierKey(modstate & SDL_KMOD_LSHIFT, ((KbMkey *)(&Keys->mkey))->_KbMkeyU._KbMkeyS.l_shift, SDL_SCANCODE_LSHIFT);
++    updateModifierKey(modstate & SDL_KMOD_RSHIFT, ((KbMkey *)(&Keys->mkey))->_KbMkeyU._KbMkeyS.r_shift, SDL_SCANCODE_RSHIFT);
++    updateModifierKey(modstate & SDL_KMOD_LCTRL, ((KbMkey *)(&Keys->mkey))->_KbMkeyU._KbMkeyS.l_ctrl, SDL_SCANCODE_LCTRL);
++    updateModifierKey(modstate & SDL_KMOD_RCTRL, ((KbMkey *)(&Keys->mkey))->_KbMkeyU._KbMkeyS.r_ctrl, SDL_SCANCODE_RCTRL);
++    updateModifierKey(modstate & SDL_KMOD_LALT, ((KbMkey *)(&Keys->mkey))->_KbMkeyU._KbMkeyS.l_alt, SDL_SCANCODE_LALT);
++    updateModifierKey(modstate & SDL_KMOD_RALT, ((KbMkey *)(&Keys->mkey))->_KbMkeyU._KbMkeyS.r_alt, SDL_SCANCODE_RALT);
++    updateModifierKey(modstate & SDL_KMOD_LGUI, ((KbMkey *)(&Keys->mkey))->_KbMkeyU._KbMkeyS.l_win, SDL_SCANCODE_LGUI);
++    updateModifierKey(modstate & SDL_KMOD_RGUI, ((KbMkey *)(&Keys->mkey))->_KbMkeyU._KbMkeyS.r_win, SDL_SCANCODE_RGUI);
++}
++
++static void updateKeys(SDL_VideoDevice *_this, const KbData *Keys)
++{
++    SDL_VideoData *data = (SDL_VideoData *)_this->internal;
++
++    int x = 0;
++    int numKeys = 0;
++    Uint8 newkeystate[SDL_SCANCODE_COUNT];
++    const bool *keystate = SDL_GetKeyboardState(&numKeys);
++    Uint16 unicode;
++    SDL_Scancode scancode;
++
++    for (scancode = 0; scancode < SDL_SCANCODE_COUNT; ++scancode) {
++        newkeystate[scancode] = false; // SDL_RELEASED
++    }
++
++    // for (x = 0; x < Keys->led; x++) {
++    for (x = 0; x < MAX_KEYCODES; x++) {
++        if (Keys->keycode[0] != 0)
++            newkeystate[Keys->keycode[x]] = true;
++    }
++
++    for (scancode = 0; scancode < SDL_SCANCODE_COUNT; ++scancode) {
++        if ((newkeystate[scancode] != keystate[scancode]) && (scancode < SDL_SCANCODE_LCTRL || scancode > SDL_SCANCODE_RGUI)) {
++
++            // TODO: fix me
++            // Send new key state
++            // SDL_SendKeyboardKey(newkeystate[scancode], scancode);
++            // SDL_SendKeyboardKey(newkeystate[scancode], SDL_DEFAULT_KEYBOARD_ID, scancode, TranslateKeycode(scancode), true);
++
++            // Send the text corresponding to the keypress
++            if (newkeystate[scancode] == true) {
++                // Convert scancode
++                unicode = ioKbCnvRawCode(data->_keyboardMapping, Keys->mkey, Keys->led, scancode);
++
++                // Ignore Keypad flag
++                unicode &= ~KB_RAWDAT;
++
++                // Exclude raw keys
++                if (unicode != 0 && unicode < KB_RAWDAT) {
++                    char utf8[SDL_TEXTINPUT_TYPE_TEXT_NAME];
++
++                    // Convert from Unicode to UTF-8
++                    unicodeToUtf8(unicode, utf8);
++                    // TODO: replace with correct function
++                    // SDL_SendKeyboardText(utf8);
++                }
++            }
++        }
++    }
++}
++
++void PS3_PumpKeyboard(SDL_VideoDevice *_this)
++{
++    SDL_VideoData *data = (SDL_VideoData *)_this->internal;
++
++    checkKeyboardConnected(_this);
++
++    if (data->_keyboardConnected) {
++        // KbData Keys;
++
++        // TODO: fix me.
++        // Read data from the keyboard buffer
++        // if (ioKbRead(0, &Keys) == 0 && Keys.led > 0) {
++        //     updateModifiers(_this, &Keys);
++        //     updateKeys(_this, &Keys);
++        // }
++    }
++}
++
++void PS3_InitKeyboard(SDL_VideoDevice *_this)
++{
++    SDL_VideoData *data = (SDL_VideoData *)_this->internal;
++
++    // Init the PS3 Keyboard
++    ioKbInit(1);
++
++    data->_keyboardConnected = false;
++}
++
++void PS3_QuitKeyboard(SDL_VideoDevice *_this)
++{
++    ioKbEnd();
++}
++
++#endif // SDL_VIDEO_DRIVER_PS3
+diff --git a/src/video/ps3/SDL_ps3keyboard_c.h b/src/video/ps3/SDL_ps3keyboard_c.h
+new file mode 100644
+index 000000000..b6ba5e09a
+--- /dev/null
++++ b/src/video/ps3/SDL_ps3keyboard_c.h
+@@ -0,0 +1,32 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#ifndef _SDL_ps3keyboard_h
++#define _SDL_ps3keyboard_h
++
++#include "SDL_ps3video.h"
++
++extern void PS3_PumpKeyboard(SDL_VideoDevice *_this);
++extern void PS3_InitKeyboard(SDL_VideoDevice *_this);
++extern void PS3_QuitKeyboard(SDL_VideoDevice *_this);
++
++#endif
+diff --git a/src/video/ps3/SDL_ps3modes.c b/src/video/ps3/SDL_ps3modes.c
+new file mode 100644
+index 000000000..5e84a0bad
+--- /dev/null
++++ b/src/video/ps3/SDL_ps3modes.c
+@@ -0,0 +1,153 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#ifdef SDL_VIDEO_DRIVER_PS3
++
++#include "../SDL_sysvideo.h"
++#include "SDL_ps3video.h"
++
++
++bool PS3_InitModes(SDL_VideoDevice *_this)
++{
++    SDL_DisplayMode mode;
++    PS3_DisplayModeData *modedata;
++    videoState state;
++
++    modedata = (PS3_DisplayModeData *)SDL_malloc(sizeof(*modedata));
++    if (!modedata) {
++        return false;
++    }
++    s32 res = videoGetState(0, 0, &state);
++    // Make sure display is enabled
++    if (res != 0 || state.state != 0) {
++        return SDL_SetError("PS3 video state setup");
++    }
++
++    // Get the current resolution
++    videoResolution resolution;
++    res = videoGetResolution(state.displayMode.resolution, &resolution);
++    if (res != 0) {
++        return SDL_SetError("PS3 video resolution setup");
++    }
++
++    // Setting up the DisplayMode based on current settings
++    mode.format = SDL_PIXELFORMAT_ARGB8888;
++    mode.refresh_rate = 0;
++    mode.w = resolution.width;
++    mode.h = resolution.height;
++
++    modedata->vconfig.resolution = state.displayMode.resolution;
++    modedata->vconfig.format = VIDEO_BUFFER_FORMAT_XRGB;
++    modedata->vconfig.pitch = resolution.width * 4;
++    mode.internal = modedata;
++
++    res = videoConfigure(VIDEO_PRIMARY, &modedata->vconfig, NULL, 0);
++    if (res != 0) {
++        return SDL_SetError("PS3 video configure setup");
++    }
++
++    // Wait until RSX is ready
++    do {
++        SDL_Delay(10);
++        videoGetState(0, 0, &state);
++    } while (state.state == 3);
++
++    SDL_AddBasicVideoDisplay(&mode);
++
++    return true;
++}
++
++// DisplayModes available on the PS3
++static SDL_DisplayMode ps3fb_modedb[] = {
++    // Native resolutions (progressive, "fullscreen")
++    { SDL_PIXELFORMAT_ARGB8888, 1920, 1080, 0, 0 }, // 1080p
++    { SDL_PIXELFORMAT_ARGB8888, 1280, 720, 0, 0 },  // 720p
++    { SDL_PIXELFORMAT_ARGB8888, 720, 480, 0, 0 },   // 480p
++    { SDL_PIXELFORMAT_ARGB8888, 720, 576, 0, 0 },   // 576p
++};
++
++static PS3_DisplayModeData ps3fb_data[] = {
++    // { resolution, format, aspect, padding, pitch }
++    { { VIDEO_RESOLUTION_1080,
++        VIDEO_BUFFER_FORMAT_XRGB,
++        VIDEO_ASPECT_16_9,
++        { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
++        1920 * 4 } },
++    { { VIDEO_RESOLUTION_720,
++        VIDEO_BUFFER_FORMAT_XRGB,
++        VIDEO_ASPECT_16_9,
++        { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
++        1280 * 4 } },
++    { { VIDEO_RESOLUTION_480,
++        VIDEO_BUFFER_FORMAT_XRGB,
++        VIDEO_ASPECT_16_9,
++        { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
++        720 * 4 } },
++    { { VIDEO_RESOLUTION_576,
++        VIDEO_BUFFER_FORMAT_XRGB,
++        VIDEO_ASPECT_16_9,
++        { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
++        720 * 4 } },
++};
++
++bool PS3_GetDisplayModes(SDL_VideoDevice *_this, SDL_VideoDisplay *display)
++{
++    unsigned int nummodes = sizeof(ps3fb_modedb) / sizeof(SDL_DisplayMode);
++
++    for (int n = 0; n < nummodes; ++n) {
++        PS3_DisplayModeData *data = (PS3_DisplayModeData *)malloc(sizeof(PS3_DisplayModeData));
++        *data = ps3fb_data[n];
++        // Get driver specific mode data
++        ps3fb_modedb[n].internal = data;
++
++        // Add DisplayMode to the list
++        SDL_AddFullscreenDisplayMode(display, &ps3fb_modedb[n]);
++    }
++    return true;
++}
++
++bool PS3_SetDisplayMode(SDL_VideoDevice *_this, SDL_VideoDisplay *display, SDL_DisplayMode *mode)
++{
++    PS3_DisplayModeData *dispdata = (PS3_DisplayModeData *)mode->internal;
++    videoState state;
++
++    // Set the new DisplayMode
++    if (videoConfigure(0, &dispdata->vconfig, NULL, 0) != 0) {
++        return SDL_SetError("PS3 video configure display");
++    }
++
++    // Wait until RSX is ready
++    do {
++        SDL_Delay(10);
++        videoGetState(0, 0, &state);
++    } while (state.state == 3);
++
++    return true;
++}
++
++void PS3_QuitModes(SDL_VideoDevice *_this)
++{
++    // No need to do anything here.
++    // SDL_ResetFullscreenDisplayModes will be called on SDL_Quit.
++}
++
++#endif // SDL_VIDEO_DRIVER_PS3
+diff --git a/src/video/ps3/SDL_ps3modes_c.h b/src/video/ps3/SDL_ps3modes_c.h
+new file mode 100644
+index 000000000..00d9a7415
+--- /dev/null
++++ b/src/video/ps3/SDL_ps3modes_c.h
+@@ -0,0 +1,31 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#ifndef _SDL_ps3modes_h
++#define _SDL_ps3modes_h
++
++extern bool PS3_InitModes(SDL_VideoDevice *_this);
++extern bool PS3_GetDisplayModes(SDL_VideoDevice *_this, SDL_VideoDisplay *display);
++extern bool PS3_SetDisplayMode(SDL_VideoDevice *_this, SDL_VideoDisplay *display, SDL_DisplayMode *mode);
++extern void PS3_QuitModes(SDL_VideoDevice *_this);
++
++#endif // SDL_ps3modes_h
+diff --git a/src/video/ps3/SDL_ps3mouse.c b/src/video/ps3/SDL_ps3mouse.c
+new file mode 100644
+index 000000000..f796bd75e
+--- /dev/null
++++ b/src/video/ps3/SDL_ps3mouse.c
+@@ -0,0 +1,145 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#ifdef SDL_VIDEO_DRIVER_PS3
++
++#include "../../events/SDL_mouse_c.h"
++
++#include <io/mouse.h>
++
++#include "SDL_ps3mouse_c.h"
++
++// void checkMouseConnected(_THIS) {
++//     SDL_DeviceData *data =
++//         (SDL_DeviceData *) _this->driverdata;
++
++//     CellMouseInfo mouseinfo;
++//     cellMouseGetInfo(&mouseinfo);
++
++//     if (mouseinfo.status[0] == 1 && !data->_mouseConnected) // Connected
++//     {
++//         data->_mouseConnected = true;
++//         data->_mouseButtons = 0;
++
++//         // Old events in the queue are discarded
++//         cellMouseClearBuf(0);
++//     }
++//     else if (mouseinfo.status[0] != 1 && data->_mouseConnected) // Disconnected
++//     {
++//         data->_mouseConnected = false;
++//         data->_mouseButtons = 0;
++//     }
++// }
++
++// void updateMouseButtons(_THIS, const CellMouseData *mouse) {
++//     SDL_DeviceData *data =
++//         (SDL_DeviceData *) _this->driverdata;
++//     // There should only be one window
++//     SDL_Window *window = _this->windows;
++
++//     // Check left mouse button changes
++//     bool oldLMB = data->_mouseButtons & 1;
++//     bool newLMB = mouse->buttons & 1;
++//     if (newLMB != oldLMB) {
++//         SDL_SendMouseButton(window, 0, newLMB ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_LEFT);
++//     }
++
++//     // Check rigth mouse button changes
++//     bool oldRMB = data->_mouseButtons & 2;
++//     bool newRMB = mouse->buttons & 2;
++//     if (newRMB != oldRMB) {
++//         SDL_SendMouseButton(window, 0, newRMB ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_RIGHT);
++//     }
++
++//     // Check middle mouse button changes
++//     bool oldMMB = data->_mouseButtons & 4;
++//     bool newMMB = mouse->buttons & 4;
++//     if (newMMB != oldMMB) {
++//         SDL_SendMouseButton(window, 0, newMMB ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_MIDDLE);
++//     }
++
++//     data->_mouseButtons = mouse->buttons;
++// }
++
++// void updateMousePosition(_THIS, const CellMouseData *mouse) {
++//     // There should only be one window
++//     SDL_Window *window = _this->windows;
++
++//     // Mouse movement is relative
++//     SDL_SendMouseMotion(window, 0, 1, mouse->x_axis, mouse->y_axis);
++// }
++
++// void updateMouseWheel(_THIS, const CellMouseData *mouse) {
++//     // There should only be one window
++//     SDL_Window *window = _this->windows;
++
++//     SDL_SendMouseWheel(window, 0, mouse->tilt, mouse->wheel, SDL_MOUSEWHEEL_NORMAL);
++// }
++
++void PS3_PumpMouse(void)
++{
++    // SDL_DeviceData *data =
++    //     (SDL_DeviceData *) _this->driverdata;
++
++    // // Check if a mouse has been connected / disconnected
++    // checkMouseConnected(_this);
++
++    // if (data->_mouseConnected)
++    // {
++    //     CellMouseDataList datalist;
++    //     cellMouseGetDataList(0, &datalist);
++
++    //     int i;
++    //     for (i = 0; i < datalist.list_num; i++) {
++    //         // Send SDL events
++    //         updateMouseButtons(_this, &datalist.list[i]);
++    //         updateMousePosition(_this, &datalist.list[i]);
++    //         updateMouseWheel(_this, &datalist.list[i]);
++    //     }
++    // }
++}
++
++void PS3_InitMouse(void)
++{
++    SDL_Mouse *mouse = SDL_GetMouse();
++
++    // mouse->CreateCursor = Emscripten_CreateCursor;
++    // mouse->ShowCursor = Emscripten_ShowCursor;
++    // mouse->FreeCursor = Emscripten_FreeCursor;
++    // mouse->CreateSystemCursor = Emscripten_CreateSystemCursor;
++    // mouse->SetRelativeMouseMode = Emscripten_SetRelativeMouseMode;
++
++    // SDL_DeviceData *data =
++    //     (SDL_DeviceData *) _this->driverdata;
++
++    // Support only one mouse for now.
++    ioMouseInit(1);
++
++    // data->_mouseConnected = false;
++}
++
++void PS3_QuitMouse(void)
++{
++    ioMouseEnd();
++}
++
++#endif // SDL_VIDEO_DRIVER_PS3
+diff --git a/src/video/ps3/SDL_ps3mouse_c.h b/src/video/ps3/SDL_ps3mouse_c.h
+new file mode 100644
+index 000000000..55dabe8c0
+--- /dev/null
++++ b/src/video/ps3/SDL_ps3mouse_c.h
+@@ -0,0 +1,32 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#ifndef _SDL_ps3mouse_h
++#define _SDL_ps3mouse_h
++
++#include "SDL_ps3video.h"
++
++extern void PS3_PumpMouse(void);
++extern void PS3_InitMouse(void);
++extern void PS3_QuitMouse(void);
++
++#endif
+diff --git a/src/video/ps3/SDL_ps3video.c b/src/video/ps3/SDL_ps3video.c
+new file mode 100644
+index 000000000..cc4e8286e
+--- /dev/null
++++ b/src/video/ps3/SDL_ps3video.c
+@@ -0,0 +1,227 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#ifdef SDL_VIDEO_DRIVER_PS3
++
++/* PS3 SDL video driver implementation, Based on PSL1GHT implementation,
++ * itself based on dummy driver.
++ *
++ * Initial work by Ryan C. Gordon (icculus@icculus.org). A good portion
++ *  of this was cut-and-pasted from Stephane Peter's work in the AAlib
++ *  SDL video driver.  Renamed to "DUMMY" by Sam Lantinga.
++ */
++
++#include "../../events/SDL_events_c.h"
++#include "../SDL_pixels_c.h"
++#include "../SDL_sysvideo.h"
++
++#include "SDL_ps3events_c.h"
++#include "SDL_ps3modes_c.h"
++#include "SDL_ps3video.h"
++
++#include <stdlib.h>
++
++#include <rsx/gcm_sys.h>
++#include <rsx/mm.h>
++#include <rsx/resc.h>
++#include <rsx/rsx.h>
++
++#define PS3VID_DRIVER_NAME "ps3"
++
++#define CB_SIZE         0x200000  // 2MB command buffer
++#define RSX_BUFFER_SIZE 0x1000000 // 16MB — must be power of 2
++
++bool PS3_VideoInit(SDL_VideoDevice *_this)
++{
++    PS3_InitSysEvent(_this);
++
++    bool ret = PS3_InitModes(_this);
++    if (!ret) {
++        return SDL_SetError("PS3 video init");
++    }
++
++    // Wait for VSYNC to flip
++    gcmSetFlipMode(RESC_DISPLAY_VSYNC);
++
++    return true;
++}
++
++void PS3_VideoQuit(SDL_VideoDevice *_this)
++{
++    PS3_QuitModes(_this);
++    PS3_QuitSysEvent(_this);
++    SDL_free(_this->internal);
++}
++
++static void PS3_DeleteDevice(SDL_VideoDevice *device)
++{
++    SDL_free(device);
++}
++
++bool PS3_CreateWindow(SDL_VideoDevice *_this, SDL_Window *window, SDL_PropertiesID create_props)
++{
++    SDL_WindowData *wdata;
++
++    // Allocate window internal data
++    wdata = (SDL_WindowData *)SDL_calloc(1, sizeof(SDL_WindowData));
++    if (wdata == NULL) {
++        return false;
++    }
++
++    // Setup driver data for this window
++    window->internal = wdata;
++    SDL_SetKeyboardFocus(window);
++
++    return true;
++}
++
++int PS3_CreateWindowFrom(SDL_VideoDevice *_this, SDL_Window *window, const void *data)
++{
++    return SDL_Unsupported();
++}
++
++void PS3_SetWindowTitle(SDL_VideoDevice *_this, SDL_Window *window)
++{
++}
++
++bool PS3_SetWindowPosition(SDL_VideoDevice *_this, SDL_Window *window)
++{
++    return true;
++}
++
++void PS3_SetWindowSize(SDL_VideoDevice *_this, SDL_Window *window)
++{
++}
++
++void PS3_ShowWindow(SDL_VideoDevice *_this, SDL_Window *window)
++{
++}
++
++void PS3_HideWindow(SDL_VideoDevice *_this, SDL_Window *window)
++{
++}
++
++void PS3_RaiseWindow(SDL_VideoDevice *_this, SDL_Window *window)
++{
++}
++
++void PS3_MaximizeWindow(SDL_VideoDevice *_this, SDL_Window *window)
++{
++}
++
++void PS3_MinimizeWindow(SDL_VideoDevice *_this, SDL_Window *window)
++{
++}
++
++void PS3_RestoreWindow(SDL_VideoDevice *_this, SDL_Window *window)
++{
++}
++
++void PS3_DestroyWindow(SDL_VideoDevice *_this, SDL_Window *window)
++{
++}
++
++bool PS3_HasScreenKeyboardSupport(SDL_VideoDevice *_this)
++{
++    return false;
++}
++
++void PS3_ShowScreenKeyboard(SDL_VideoDevice *_this, SDL_Window *window, SDL_PropertiesID props)
++{
++}
++
++void PS3_HideScreenKeyboard(SDL_VideoDevice *_this, SDL_Window *window)
++{
++}
++
++static SDL_VideoDevice *PS3_CreateDevice(void)
++{
++    SDL_VideoDevice *device;
++
++    // Initialize all variables that we clean on shutdown
++    device = (SDL_VideoDevice *)SDL_calloc(1, sizeof(SDL_VideoDevice));
++    if (device) {
++        SDL_memset(device, 0, (sizeof *device));
++    } else {
++        SDL_OutOfMemory();
++        SDL_free(device);
++        return (0);
++    }
++
++    SDL_VideoData *devdata = (SDL_VideoData *)SDL_calloc(1, sizeof(SDL_VideoData));
++    if (!devdata) {
++        SDL_OutOfMemory();
++        return false;
++    }
++
++    // Initialize GPU before any videoOut calls
++    gcmInitDefaultFifoMode(GCM_DEFAULT_FIFO_MODE_CONDITIONAL);
++
++    u32 bufferSize = rsxAlign(HOST_ADDR_ALIGNMENT, (DEFAULT_CB_SIZE + HOST_SIZE));
++    void *hostAddr = memalign(HOST_ADDR_ALIGNMENT, bufferSize);
++    devdata->_CommandBuffer = NULL;
++
++    s32 ret = rsxInit(
++        &devdata->_CommandBuffer,
++        DEFAULT_CB_SIZE,
++        bufferSize,
++        hostAddr
++    );
++
++    if (ret != 0 || devdata->_CommandBuffer == NULL) {
++        return false;
++    }
++
++    device->internal = (SDL_VideoData *)devdata;
++    device->VideoInit = PS3_VideoInit;
++    device->VideoQuit = PS3_VideoQuit;
++    device->GetDisplayModes = PS3_GetDisplayModes;
++    device->SetDisplayMode = PS3_SetDisplayMode;
++    device->CreateSDLWindow = PS3_CreateWindow;
++    device->SetWindowTitle = PS3_SetWindowTitle;
++    device->SetWindowPosition = PS3_SetWindowPosition;
++    device->SetWindowSize = PS3_SetWindowSize;
++    device->ShowWindow = PS3_ShowWindow;
++    device->HideWindow = PS3_HideWindow;
++    device->RaiseWindow = PS3_RaiseWindow;
++    device->MaximizeWindow = PS3_MaximizeWindow;
++    device->MinimizeWindow = PS3_MinimizeWindow;
++    device->RestoreWindow = PS3_RestoreWindow;
++    device->DestroyWindow = PS3_DestroyWindow;
++    device->HasScreenKeyboardSupport = PS3_HasScreenKeyboardSupport;
++    device->ShowScreenKeyboard = PS3_ShowScreenKeyboard;
++    device->HideScreenKeyboard = PS3_HideScreenKeyboard;
++    device->PumpEvents = PS3_PumpEvents;
++    device->free = PS3_DeleteDevice;
++
++    return device;
++}
++
++VideoBootStrap PS3_bootstrap = {
++    PS3VID_DRIVER_NAME,
++    "SDL ps3 video driver",
++    PS3_CreateDevice,
++    NULL,
++    false
++};
++
++#endif // SDL_VIDEO_DRIVER_PS3
+diff --git a/src/video/ps3/SDL_ps3video.h b/src/video/ps3/SDL_ps3video.h
+new file mode 100644
+index 000000000..205a6486a
+--- /dev/null
++++ b/src/video/ps3/SDL_ps3video.h
+@@ -0,0 +1,101 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2026 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "SDL_internal.h"
++
++#ifndef _SDL_ps3video_h
++#define _SDL_ps3video_h
++
++#include "../SDL_sysvideo.h"
++
++#include <rsx/gcm_sys.h>
++#include <sysutil/video.h>
++
++#ifndef CELL_OK
++#define CELL_OK 0
++#endif
++#ifndef CELL_EINVAL
++#define CELL_EINVAL 0x80010002
++#endif
++#ifndef CELL_EBUSY
++#define CELL_EBUSY 0x8001000B
++#endif
++#ifndef CELL_ETIMEDOUT
++#define CELL_ETIMEDOUT 0x80010006
++#endif
++#ifndef CELL_ENOMEM
++#define CELL_ENOMEM 0x80010004
++#endif
++#ifndef CELL_EPERM
++#define CELL_EPERM 0x80010001
++#endif
++
++#define DEFAULT_CB_SIZE                      0x80000        // 512Kb default command buffer size
++#define HOST_ADDR_ALIGNMENT                  (1024*1024)
++#define HOST_SIZE                            (32*1024*1024)
++
++/* Debugging
++ * 0: No debug messages
++ * 1: Video debug messages
++ * 2: SPE debug messages
++ * 3: Memory adresses
++ */
++#if defined(DEBUG) || defined(_DEBUG)
++#define VIDEO_DEBUG_LEVEL 1
++#else
++#define VIDEO_DEBUG_LEVEL 0
++#endif
++
++#ifdef VIDEO_DEBUG_LEVEL
++#define deprintf(level, fmt, args...)                 \
++    do {                                              \
++        if ((unsigned)(level) <= VIDEO_DEBUG_LEVEL) { \
++            fprintf(stdout, fmt, ##args);             \
++            fflush(stdout);                           \
++        }                                             \
++    } while (0)
++#else
++#define deprintf(level, fmt, args...)
++#endif
++
++/* Private RSX data */
++typedef struct SDL_VideoData
++{
++    // Context to keep track of the RSX buffer.
++    gcmContextData *_CommandBuffer;
++
++    bool _keyboardConnected;
++    Uint32 _keyboardMapping;
++
++    bool _mouseConnected;
++    Uint8 _mouseButtons;
++} SDL_VideoData;
++
++typedef struct SDL_DisplayModeData
++{
++    videoConfiguration vconfig;
++} PS3_DisplayModeData;
++
++typedef struct SDL_WindowData
++{
++
++} SDL_WindowData;
++
++#endif // _SDL_ps3video_h

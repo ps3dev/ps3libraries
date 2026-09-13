@@ -1,35 +1,37 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-SDL2_MIXER="SDL2_mixer-2.0.4"
+# SDL_mixer-1.2.11.sh
+SDL_MIXER="SDL_mixer-1.2.11"
 
 ## Source util functions
 source ../utils/utils.sh
 
 ## Download the source code.
-../download.sh ${SDL2_MIXER}.tar.gz
+../download.sh ${SDL_MIXER}.tar.gz
 
 ## Fetch config.guess and config.sub, falling back to copies if Savannah is unavailable
 ../config/get-config-scripts.sh
 
 ## Unpack the source code.
-rm -Rf ${SDL2_MIXER}
-echo "Unpacking ${SDL2_MIXER}"
-extract ../archives/${SDL2_MIXER}.tar.gz
-cd ${SDL2_MIXER}
+rm -Rf ${SDL_MIXER}
+echo "Unpacking ${SDL_MIXER}"
+extract ../archives/${SDL_MIXER}.tar.gz
+cd ${SDL_MIXER}
 
 ## Replace config.guess and config.sub
+cp ../../archives/config.guess ../../archives/config.sub .
 cp ../../archives/config.guess ../../archives/config.sub build-scripts/
 
-## Create the build directory.
-mkdir build-ppu && cd build-ppu
+## Patch the source code.
+cat ../../patches/${SDL_MIXER}.patch | patch -p1
 
 ## Configure the build.
-CFLAGS="-I$PSL1GHT/ppu/include -I$PS3DEV/portlibs/ppu/include" \
+CFLAGS="-I$PSL1GHT/ppu/include -I$PSL1GHT/ppu/include/SDL -I$PS3DEV/portlibs/ppu/include -I$PS3DEV/portlibs/ppu/include/SDL" \
 LDFLAGS="-L$PSL1GHT/ppu/lib -L$PS3DEV/portlibs/ppu/lib -lrt -llv2" \
-PKG_CONFIG_LIBDIR="$PS3DEV/portlibs/ppu/lib/pkgconfig" \
+PKG_CONFIG_PATH="$PS3DEV/portlibs/ppu/lib/pkgconfig" \
 LIBMIKMOD_CONFIG="$PS3DEV/portlibs/ppu/bin/libmikmod-config" \
-../configure --prefix="$PS3DEV/portlibs/ppu" --host="powerpc64-ps3-elf" \
+./configure --prefix="$PS3DEV/portlibs/ppu" --host="powerpc64-ps3-elf" \
     --disable-sdltest \
     --with-sdl-exec-prefix="$PS3DEV/portlibs/ppu" \
     --disable-shared \
@@ -37,8 +39,7 @@ LIBMIKMOD_CONFIG="$PS3DEV/portlibs/ppu/bin/libmikmod-config" \
     --disable-music-ogg-shared \
     --disable-music-mp3 \
     --disable-music-flac \
-    --disable-music-mod-modplug \
-    --enable-music-mod-mikmod
+    --enable-static
 
 ## Compile and install.
 jobs=$(nproc 2>/dev/null || sysctl -n hw.ncpu)

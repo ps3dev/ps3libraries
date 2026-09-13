@@ -1,0 +1,4476 @@
+diff -Nru SDL2-2.30.1/CMakeLists.txt SDL2-2.30.1/CMakeLists.txt
+--- SDL2-2.30.1/CMakeLists.txt	2024-03-05 19:37:32
++++ SDL2-2.30.1/CMakeLists.txt	2026-09-05 18:29:55
+@@ -6,7 +6,7 @@
+ set(CMAKE_POLICY_DEFAULT_CMP0091 NEW)
+ 
+ cmake_minimum_required(VERSION 3.0.0...3.5)
+-project(SDL2 C CXX)
++project(SDL2 C)
+ 
+ if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+   set(SDL2_SUBPROJECT OFF)
+@@ -15,6 +15,7 @@
+ endif()
+ 
+ if (HAIKU)
++  enable_language(CXX)
+   set(LINKER_LANGUAGE CXX)
+ endif()
+ 
+@@ -86,8 +87,8 @@
+ 
+ # See docs/release_checklist.md
+ set(SDL_MAJOR_VERSION 2)
+-set(SDL_MINOR_VERSION 30)
+-set(SDL_MICRO_VERSION 1)
++set(SDL_MINOR_VERSION 31)
++set(SDL_MICRO_VERSION 0)
+ set(SDL_VERSION "${SDL_MAJOR_VERSION}.${SDL_MINOR_VERSION}.${SDL_MICRO_VERSION}")
+ 
+ # Set defaults preventing destination file conflicts
+@@ -1787,6 +1788,7 @@
+   list(APPEND SOURCE_FILES ${CORE_SOURCES})
+ 
+   if(WINDOWS_STORE)
++    enable_language(CXX)
+     file(GLOB WINRT_SOURCE_FILES ${SDL2_SOURCE_DIR}/src/core/winrt/*.c ${SDL2_SOURCE_DIR}/src/core/winrt/*.cpp)
+     list(APPEND SOURCE_FILES ${WINRT_SOURCE_FILES})
+   endif()
+diff -Nru SDL2-2.30.1/Makefile.os2 SDL2-2.30.1/Makefile.os2
+--- SDL2-2.30.1/Makefile.os2	2024-03-05 19:37:32
++++ SDL2-2.30.1/Makefile.os2	2026-09-05 18:29:55
+@@ -14,8 +14,8 @@
+ 
+ LIBNAME = SDL2
+ MAJOR_VERSION = 2
+-MINOR_VERSION = 30
+-MICRO_VERSION = 1
++MINOR_VERSION = 31
++MICRO_VERSION = 0
+ VERSION = $(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
+ DESCRIPTION = Simple DirectMedia Layer 2
+ 
+diff -Nru SDL2-2.30.1/Makefile.w32 SDL2-2.30.1/Makefile.w32
+--- SDL2-2.30.1/Makefile.w32	2024-03-05 19:37:32
++++ SDL2-2.30.1/Makefile.w32	2026-09-05 18:29:55
+@@ -5,8 +5,8 @@
+ 
+ LIBNAME = SDL2
+ MAJOR_VERSION = 2
+-MINOR_VERSION = 30
+-MICRO_VERSION = 1
++MINOR_VERSION = 31
++MICRO_VERSION = 0
+ VERSION = $(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
+ 
+ LIBHOME = .
+diff -Nru SDL2-2.30.1/SDL2.spec SDL2-2.30.1/SDL2.spec
+--- SDL2-2.30.1/SDL2.spec	2024-03-05 19:37:53
++++ SDL2-2.30.1/SDL2.spec	1969-12-31 21:00:00
+@@ -1,119 +0,0 @@
+-Summary: Simple DirectMedia Layer
+-Name: SDL2
+-Version: 2.30.1
+-Release: 2
+-Source: http://www.libsdl.org/release/%{name}-%{version}.tar.gz
+-URL: http://www.libsdl.org/
+-License: zlib
+-Group: System Environment/Libraries
+-BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
+-Prefix: %{_prefix}
+-%ifos linux
+-Provides: libSDL2-2.0.so.0
+-%endif
+-
+-%define __defattr %defattr(-,root,root)
+-%define __soext so
+-
+-%description
+-This is the Simple DirectMedia Layer, a generic API that provides low
+-level access to audio, keyboard, mouse, and display framebuffer across
+-multiple platforms.
+-
+-%package devel
+-Summary: Libraries, includes and more to develop SDL applications.
+-Group: Development/Libraries
+-Requires: %{name} = %{version}
+-
+-%description devel
+-This is the Simple DirectMedia Layer, a generic API that provides low
+-level access to audio, keyboard, mouse, and display framebuffer across
+-multiple platforms.
+-
+-This is the libraries, include files and other resources you can use
+-to develop SDL applications.
+-
+-
+-%prep
+-%setup -q 
+-
+-%build
+-%ifos linux
+-CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%{prefix} --disable-video-directfb
+-%else
+-%configure
+-%endif
+-make
+-
+-%install
+-rm -rf $RPM_BUILD_ROOT
+-%ifos linux
+-make install prefix=$RPM_BUILD_ROOT%{prefix} \
+-             bindir=$RPM_BUILD_ROOT%{_bindir} \
+-             libdir=$RPM_BUILD_ROOT%{_libdir} \
+-             includedir=$RPM_BUILD_ROOT%{_includedir} \
+-             datadir=$RPM_BUILD_ROOT%{_datadir} \
+-             mandir=$RPM_BUILD_ROOT%{_mandir}
+-%else
+-%makeinstall
+-%endif
+-
+-%clean
+-rm -rf $RPM_BUILD_ROOT
+-
+-%files
+-%{__defattr}
+-%doc README*.txt LICENSE.txt CREDITS.txt BUGS.txt
+-%{_libdir}/lib*.%{__soext}.*
+-
+-%files devel
+-%{__defattr}
+-%doc docs/README*.md
+-%{_bindir}/*-config
+-%{_libdir}/lib*.a
+-%{_libdir}/lib*.la
+-%{_libdir}/lib*.%{__soext}
+-%{_includedir}/*/*.h
+-%{_libdir}/cmake/*
+-%{_libdir}/pkgconfig/SDL2/*
+-%{_datadir}/aclocal/*
+-
+-%changelog
+-* Thu Jun 04 2015 Ryan C. Gordon <icculus@icculus.org>
+-- Fixed README paths.
+-
+-* Sun Dec 07 2014 Simone Contini <s.contini@oltrelinux.com>
+-- Fixed changelog date issue and docs filenames
+-
+-* Sun Jan 22 2012 Sam Lantinga <slouken@libsdl.org>
+-- Updated for SDL 2.0
+-
+-* Tue May 16 2006 Sam Lantinga <slouken@libsdl.org>
+-- Removed support for Darwin, due to build problems on ps2linux
+-
+-* Sat Jan 03 2004 Anders Bjorklund <afb@algonet.se>
+-- Added support for Darwin, updated spec file
+-
+-* Wed Jan 19 2000 Sam Lantinga <slouken@libsdl.org>
+-- Re-integrated spec file into SDL distribution
+-- 'name' and 'version' come from configure 
+-- Some of the documentation is devel specific
+-- Removed SMP support from %build - it doesn't work with libtool anyway
+-
+-* Tue Jan 18 2000 Hakan Tandogan <hakan@iconsult.com>
+-- Hacked Mandrake sdl spec to build 1.1
+-
+-* Sun Dec 19 1999 John Buswell <johnb@mandrakesoft.com>
+-- Build Release
+-
+-* Sat Dec 18 1999 John Buswell <johnb@mandrakesoft.com>
+-- Add symlink for libSDL-1.0.so.0 required by sdlbomber
+-- Added docs
+-
+-* Thu Dec 09 1999 Lenny Cartier <lenny@mandrakesoft.com>
+-- v 1.0.0
+-
+-* Mon Nov  1 1999 Chmouel Boudjnah <chmouel@mandrakesoft.com>
+-- First spec file for Mandrake distribution.
+-
+-# end of file
+diff -Nru SDL2-2.30.1/VERSION.txt SDL2-2.30.1/VERSION.txt
+--- SDL2-2.30.1/VERSION.txt	2024-03-05 19:37:54
++++ SDL2-2.30.1/VERSION.txt	1969-12-31 21:00:00
+@@ -1 +0,0 @@
+-release-2.30.1-0-g5adbf3765
+diff -Nru SDL2-2.30.1/build-scripts/androidbuild.sh SDL2-2.30.1/build-scripts/androidbuild.sh
+--- SDL2-2.30.1/build-scripts/androidbuild.sh	2024-03-05 19:37:32
++++ SDL2-2.30.1/build-scripts/androidbuild.sh	2026-09-05 18:29:55
+@@ -80,7 +80,8 @@
+     cd $folder
+ done
+ 
+-ACTIVITY="${folder}Activity"
++# Uppercase the first char in the activity class name because it's Java
++ACTIVITY="$(echo $folder | awk '{$1=toupper(substr($1,0,1))substr($1,2)}1')Activity"
+ sed -i -e "s|\"SDLActivity\"|\"$ACTIVITY\"|g" $BUILDPATH/app/src/main/AndroidManifest.xml
+ 
+ # Fill in a default Activity
+diff -Nru SDL2-2.30.1/cmake/sdlchecks.cmake SDL2-2.30.1/cmake/sdlchecks.cmake
+--- SDL2-2.30.1/cmake/sdlchecks.cmake	2024-03-05 19:37:32
++++ SDL2-2.30.1/cmake/sdlchecks.cmake	2026-09-05 18:29:55
+@@ -1249,6 +1249,7 @@
+ 
+     if(HAVE_HIDAPI)
+       if(ANDROID)
++        enable_language(CXX)
+         list(APPEND SOURCE_FILES ${SDL2_SOURCE_DIR}/src/hidapi/android/hid.cpp)
+       endif()
+       if(IOS OR TVOS)
+diff -Nru SDL2-2.30.1/configure.ac SDL2-2.30.1/configure.ac
+--- SDL2-2.30.1/configure.ac	2024-03-05 19:37:32
++++ SDL2-2.30.1/configure.ac	2026-09-05 18:29:55
+@@ -12,8 +12,8 @@
+ dnl Set various version strings - taken gratefully from the GTk sources
+ # See docs/release_checklist.md
+ SDL_MAJOR_VERSION=2
+-SDL_MINOR_VERSION=30
+-SDL_MICRO_VERSION=1
++SDL_MINOR_VERSION=31
++SDL_MICRO_VERSION=0
+ SDL_VERSION=$SDL_MAJOR_VERSION.$SDL_MINOR_VERSION.$SDL_MICRO_VERSION
+ 
+ SDL_BINARY_AGE=`expr $SDL_MINOR_VERSION \* 100 + $SDL_MICRO_VERSION`
+@@ -2510,6 +2510,20 @@
+     fi
+ }
+ 
++dnl Set up the Null video driver.
++CheckPSL1GHTVideo()
++{
++    AC_ARG_ENABLE(video-psl1ght,
++AC_HELP_STRING([--enable-video-psl1ght], [use PSL1GHT video driver [[default=yes]]]),
++                  , enable_video_psl1ght=yes)
++    if test x$enable_video_psl1ght = xyes; then
++        AC_DEFINE(SDL_VIDEO_DRIVER_PSL1GHT, 1, [ ])
++        AC_DEFINE(SDL_VIDEO_RENDER_PSL1GHT, 1, [ ])
++        SOURCES="$SOURCES $srcdir/src/video/psl1ght/*.c $srcdir/src/render/psl1ght/*.c"
++        have_video=yes
++    fi
++}
++
+ dnl Set up the QNX video driver if enabled
+ CheckQNXVideo()
+ {
+@@ -2699,6 +2713,16 @@
+     fi
+ }
+ 
++dnl Check for PSL1GHT OpenGL
++CheckPSL1GHTGL()
++{
++    if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
++        AC_DEFINE(SDL_VIDEO_OPENGL, 1, [ ])
++        AC_DEFINE(SDL_VIDEO_RENDER_OGL, 1, [ ])
++        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lEGL -lGL -lstdc++ -lm"
++    fi
++}
++
+ dnl Check for MacOS OpenGL
+ CheckMacGL()
+ {
+@@ -4484,6 +4508,45 @@
+ 
+         if test x$enable_video_metal = xyes -o x$enable_video_vulkan = xyes; then
+             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal"
++        fi
++        ;;
++    powerpc64-ps3-elf)
++        ARCH=psl1ght
++        EXTRA_CFLAGS="$EXTRA_CFLAGS -D__PSL1GHT__ -DHAVE_POW -DHAVE_MMAP=0 -DDEBUG_ERROR"
++        EXTRA_CFLAGS="$EXTRA_CFLAGS -I\"$PSL1GHT/ppu/include\" -mcpu=cell "
++        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lgcm_sys -lrsx -lsysutil -lio -laudio -lrt -llv2"
++        CheckPSL1GHTVideo
++        CheckDummyAudio
++        #CheckPSL1GHTGL
++
++        # Set up files for the thread library
++        if test x$enable_threads = xyes; then
++            AC_DEFINE(SDL_THREAD_PSL1GHT)
++            SOURCES="$SOURCES $srcdir/src/thread/psl1ght/*.c"
++            SOURCES="$SOURCES $srcdir/src/thread/generic/SDL_sysmutex.c"
++            SOURCES="$SOURCES $srcdir/src/thread/generic/SDL_syscond.c"
++            SOURCES="$SOURCES $srcdir/src/thread/generic/SDL_systls.c"
++            have_threads=yes
++        fi
++        # Set up files for the joystick library
++        if test x$enable_joystick = xyes; then
++            AC_DEFINE(SDL_JOYSTICK_PSL1GHT)
++            SOURCES="$SOURCES $srcdir/src/joystick/psl1ght/*.c"
++            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lio"
++            have_joystick=yes
++        fi
++        # Set up files for the timer library
++        if test x$enable_timers = xyes; then
++            AC_DEFINE(SDL_TIMER_PSL1GHT)
++            SOURCES="$SOURCES $srcdir/src/timer/psl1ght/*.c"
++            have_timers=yes
++        fi
++        # Set up files for the audio library
++        if test x$enable_audio = xyes; then
++            AC_DEFINE(SDL_AUDIO_DRIVER_PSL1GHT)
++            SOURCES="$SOURCES $srcdir/src/audio/psl1ght/*.c"
++            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -laudio"
++            have_audio=yes
+         fi
+         ;;
+     *-nacl|*-pnacl)
+diff -Nru SDL2-2.30.1/include/SDL_config.h SDL2-2.30.1/include/SDL_config.h
+--- SDL2-2.30.1/include/SDL_config.h	2024-03-05 19:37:32
++++ SDL2-2.30.1/include/SDL_config.h	2026-09-05 18:29:55
+@@ -1,3 +1,4 @@
++/* include/SDL_config.h.  Generated from SDL_config.h.in by configure.  */
+ /*
+   Simple DirectMedia Layer
+   Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
+@@ -22,40 +23,483 @@
+ #ifndef SDL_config_h_
+ #define SDL_config_h_
+ 
+-#include "SDL_platform.h"
+-
+ /**
+- *  \file SDL_config.h
++ *  \file SDL_config.h.in
++ *
++ *  This is a set of defines to configure the SDL features
+  */
+ 
+-/* Add any platform that doesn't build using the configure system. */
+-#if defined(__WIN32__)
+-#include "SDL_config_windows.h"
+-#elif defined(__WINRT__)
+-#include "SDL_config_winrt.h"
+-#elif defined(__WINGDK__)
+-#include "SDL_config_wingdk.h"
+-#elif defined(__XBOXONE__) || defined(__XBOXSERIES__)
+-#include "SDL_config_xbox.h"
+-#elif defined(__MACOSX__)
+-#include "SDL_config_macosx.h"
+-#elif defined(__IPHONEOS__)
+-#include "SDL_config_iphoneos.h"
+-#elif defined(__ANDROID__)
+-#include "SDL_config_android.h"
+-#elif defined(__OS2__)
+-#include "SDL_config_os2.h"
+-#elif defined(__EMSCRIPTEN__)
+-#include "SDL_config_emscripten.h"
+-#elif defined(__NGAGE__)
+-#include "SDL_config_ngage.h"
++/* General platform specific identifiers */
++#include "SDL_platform.h"
++
++/* Make sure that this isn't included by Visual C++ */
++#ifdef _MSC_VER
++#error You should run git checkout -f include/SDL_config.h
++#endif
++
++/* C language features */
++/* #undef const */
++/* #undef inline */
++/* #undef volatile */
++
++/* C datatypes */
++#if defined(__LP64__) || defined(_LP64) || defined(_WIN64)
++#define SIZEOF_VOIDP 8
+ #else
+-/* This is a minimal configuration just to get SDL running on new platforms. */
+-#include "SDL_config_minimal.h"
+-#endif /* platform config */
++#define SIZEOF_VOIDP 4
++#endif
+ 
+-#ifdef USING_GENERATED_CONFIG_H
+-#error Wrong SDL_config.h, check your include path?
++#define HAVE_GCC_ATOMICS 1
++/* #undef HAVE_GCC_SYNC_LOCK_TEST_AND_SET */
++
++/* Comment this if you want to build without any C library requirements */
++#define HAVE_LIBC 1
++#ifdef HAVE_LIBC
++
++/* Useful headers */
++#define STDC_HEADERS 1
++#define HAVE_ALLOCA_H 1
++#define HAVE_CTYPE_H 1
++#define HAVE_FLOAT_H 1
++#define HAVE_ICONV_H 1
++#define HAVE_INTTYPES_H 1
++#define HAVE_LIMITS_H 1
++#define HAVE_MALLOC_H 1
++#define HAVE_MATH_H 1
++/* #undef HAVE_MEMORY_H */
++#define HAVE_SIGNAL_H 1
++#define HAVE_STDARG_H 1
++#define HAVE_STDINT_H 1
++#define HAVE_STDIO_H 1
++#define HAVE_STDLIB_H 1
++#define HAVE_STRINGS_H 1
++#define HAVE_STRING_H 1
++#define HAVE_SYS_TYPES_H 1
++#define HAVE_WCHAR_H 1
++/* #undef HAVE_LINUX_INPUT_H */
++/* #undef HAVE_PTHREAD_NP_H */
++/* #undef HAVE_LIBUNWIND_H */
++
++/* C library functions */
++/* #undef HAVE_DLOPEN */
++#define HAVE_MALLOC 1
++#define HAVE_CALLOC 1
++#define HAVE_REALLOC 1
++#define HAVE_FREE 1
++#define HAVE_ALLOCA 1
++#ifndef __WIN32__ /* Don't use C runtime versions of these on Windows */
++#define HAVE_GETENV 1
++#define HAVE_SETENV 1
++#define HAVE_PUTENV 1
++#define HAVE_UNSETENV 1
+ #endif
++#define HAVE_QSORT 1
++#define HAVE_BSEARCH 1
++#define HAVE_ABS 1
++#define HAVE_BCOPY 1
++#define HAVE_MEMSET 1
++#define HAVE_MEMCPY 1
++#define HAVE_MEMMOVE 1
++#define HAVE_MEMCMP 1
++#define HAVE_WCSLEN 1
++#define HAVE_WCSLCPY 1
++#define HAVE_WCSLCAT 1
++/* #undef HAVE__WCSDUP */
++#define HAVE_WCSDUP 1
++#define HAVE_WCSSTR 1
++#define HAVE_WCSCMP 1
++#define HAVE_WCSNCMP 1
++#define HAVE_WCSCASECMP 1
++/* #undef HAVE__WCSICMP */
++#define HAVE_WCSNCASECMP 1
++/* #undef HAVE__WCSNICMP */
++#define HAVE_STRLEN 1
++#define HAVE_STRLCPY 1
++#define HAVE_STRLCAT 1
++/* #undef HAVE__STRREV */
++/* #undef HAVE__STRUPR */
++/* #undef HAVE__STRLWR */
++#define HAVE_INDEX 1
++#define HAVE_RINDEX 1
++#define HAVE_STRCHR 1
++#define HAVE_STRRCHR 1
++#define HAVE_STRSTR 1
++#define HAVE_STRTOK_R 1
++/* #undef HAVE_ITOA */
++/* #undef HAVE__LTOA */
++/* #undef HAVE__UITOA */
++/* #undef HAVE__ULTOA */
++#define HAVE_STRTOL 1
++#define HAVE_STRTOUL 1
++/* #undef HAVE__I64TOA */
++/* #undef HAVE__UI64TOA */
++#define HAVE_STRTOLL 1
++#define HAVE_STRTOULL 1
++#define HAVE_STRTOD 1
++#define HAVE_ATOI 1
++#define HAVE_ATOF 1
++#define HAVE_STRCMP 1
++#define HAVE_STRNCMP 1
++/* #undef HAVE__STRICMP */
++#define HAVE_STRCASECMP 1
++/* #undef HAVE__STRNICMP */
++#define HAVE_STRNCASECMP 1
++#define HAVE_STRCASESTR 1
++/* #undef HAVE_SSCANF */
++#define HAVE_VSSCANF 1
++/* #undef HAVE_SNPRINTF */
++#define HAVE_VSNPRINTF 1
++#define HAVE_M_PI /**/
++#define HAVE_ACOS 1
++#define HAVE_ACOSF 1
++#define HAVE_ASIN 1
++#define HAVE_ASINF 1
++#define HAVE_ATAN 1
++#define HAVE_ATANF 1
++#define HAVE_ATAN2 1
++#define HAVE_ATAN2F 1
++#define HAVE_CEIL 1
++#define HAVE_CEILF 1
++#define HAVE_COPYSIGN 1
++#define HAVE_COPYSIGNF 1
++#define HAVE_COS 1
++#define HAVE_COSF 1
++#define HAVE_EXP 1
++#define HAVE_EXPF 1
++#define HAVE_FABS 1
++#define HAVE_FABSF 1
++#define HAVE_FLOOR 1
++#define HAVE_FLOORF 1
++#define HAVE_FMOD 1
++#define HAVE_FMODF 1
++#define HAVE_LOG 1
++#define HAVE_LOGF 1
++#define HAVE_LOG10 1
++#define HAVE_LOG10F 1
++#define HAVE_LROUND 1
++#define HAVE_LROUNDF 1
++#define HAVE_POW 1
++#define HAVE_POWF 1
++#define HAVE_ROUND 1
++#define HAVE_ROUNDF 1
++#define HAVE_SCALBN 1
++#define HAVE_SCALBNF 1
++#define HAVE_SIN 1
++#define HAVE_SINF 1
++#define HAVE_SQRT 1
++#define HAVE_SQRTF 1
++#define HAVE_TAN 1
++#define HAVE_TANF 1
++#define HAVE_TRUNC 1
++#define HAVE_TRUNCF 1
++/* #undef HAVE_FOPEN64 */
++#define HAVE_FSEEKO 1
++/* #undef HAVE_FSEEKO64 */
++/* #undef HAVE_SIGACTION */
++/* #undef HAVE_SA_SIGACTION */
++#define HAVE_SETJMP 1
++/* #undef HAVE_NANOSLEEP */
++#ifndef __PSL1GHT__ // Yeah PSL1GHT hasn't sysconf
++/* #undef HAVE_SYSCONF */
++#endif
++/* #undef HAVE_SYSCTLBYNAME */
++/* #undef HAVE_CLOCK_GETTIME */
++/* #undef HAVE_GETPAGESIZE */
++/* #undef HAVE_MPROTECT */
++/* #undef HAVE_ICONV */
++/* #undef SDL_USE_LIBICONV */
++/* #undef HAVE_PTHREAD_SETNAME_NP */
++/* #undef HAVE_PTHREAD_SET_NAME_NP */
++/* #undef HAVE_SEM_TIMEDWAIT */
++/* #undef HAVE_GETAUXVAL */
++/* #undef HAVE_ELF_AUX_INFO */
++/* #undef HAVE_POLL */
++#define HAVE__EXIT 1
++
++#else
++#define HAVE_STDARG_H 1
++#define HAVE_STDDEF_H 1
++#define HAVE_STDINT_H 1
++#endif /* HAVE_LIBC */
++
++/* #undef HAVE_O_CLOEXEC */
++#define HAVE_ALTIVEC_H 1
++/* #undef HAVE_DBUS_DBUS_H */
++/* #undef HAVE_FCITX */
++/* #undef HAVE_SYS_INOTIFY_H */
++/* #undef HAVE_INOTIFY_INIT */
++/* #undef HAVE_INOTIFY_INIT1 */
++/* #undef HAVE_INOTIFY */
++/* #undef HAVE_IBUS_IBUS_H */
++/* #undef HAVE_IMMINTRIN_H */
++/* #undef HAVE_LIBUDEV_H */
++/* #undef HAVE_LIBUSB */
++/* #undef HAVE_LIBSAMPLERATE_H */
++/* #undef HAVE_LIBDECOR_H */
++/* #undef HAVE_LSXINTRIN_H */
++/* #undef HAVE_LASXINTRIN_H */
++
++/* #undef HAVE_DDRAW_H */
++/* #undef HAVE_DINPUT_H */
++/* #undef HAVE_DSOUND_H */
++/* #undef HAVE_DXGI_H */
++/* #undef HAVE_WINDOWS_GAMING_INPUT_H */
++/* #undef HAVE_XINPUT_H */
++
++/* #undef HAVE_MMDEVICEAPI_H */
++/* #undef HAVE_AUDIOCLIENT_H */
++/* #undef HAVE_TPCSHRD_H */
++/* #undef HAVE_SENSORSAPI_H */
++/* #undef HAVE_ROAPI_H */
++/* #undef HAVE_SHELLSCALINGAPI_H */
++
++/* SDL internal assertion support */
++/* #undef SDL_DEFAULT_ASSERT_LEVEL */
++
++/* Allow disabling of core subsystems */
++/* #undef SDL_ATOMIC_DISABLED */
++/* #undef SDL_AUDIO_DISABLED */
++/* #undef SDL_CPUINFO_DISABLED */
++/* #undef SDL_EVENTS_DISABLED */
++/* #undef SDL_FILE_DISABLED */
++/* #undef SDL_JOYSTICK_DISABLED */
++/* #undef SDL_HAPTIC_DISABLED */
++/* #undef SDL_HIDAPI_DISABLED */
++/* #undef SDL_SENSOR_DISABLED */
++/* #undef SDL_LOADSO_DISABLED */
++/* #undef SDL_RENDER_DISABLED */
++/* #undef SDL_THREADS_DISABLED */
++/* #undef SDL_TIMERS_DISABLED */
++/* #undef SDL_VIDEO_DISABLED */
++/* #undef SDL_POWER_DISABLED */
++/* #undef SDL_FILESYSTEM_DISABLED */
++/* #undef SDL_LOCALE_DISABLED */
++/* #undef SDL_MISC_DISABLED */
++
++/* Enable various audio drivers */
++/* #undef SDL_AUDIO_DRIVER_AAUDIO */
++/* #undef SDL_AUDIO_DRIVER_ALSA */
++/* #undef SDL_AUDIO_DRIVER_ALSA_DYNAMIC */
++/* #undef SDL_AUDIO_DRIVER_ANDROID */
++/* #undef SDL_AUDIO_DRIVER_ARTS */
++/* #undef SDL_AUDIO_DRIVER_ARTS_DYNAMIC */
++/* #undef SDL_AUDIO_DRIVER_COREAUDIO */
++/* #undef SDL_AUDIO_DRIVER_DISK */
++/* #undef SDL_AUDIO_DRIVER_DSOUND */
++#define SDL_AUDIO_DRIVER_DUMMY 1
++/* #undef SDL_AUDIO_DRIVER_EMSCRIPTEN */
++/* #undef SDL_AUDIO_DRIVER_ESD */
++/* #undef SDL_AUDIO_DRIVER_ESD_DYNAMIC */
++/* #undef SDL_AUDIO_DRIVER_FUSIONSOUND */
++/* #undef SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC */
++/* #undef SDL_AUDIO_DRIVER_HAIKU */
++/* #undef SDL_AUDIO_DRIVER_JACK */
++/* #undef SDL_AUDIO_DRIVER_JACK_DYNAMIC */
++/* #undef SDL_AUDIO_DRIVER_NACL */
++/* #undef SDL_AUDIO_DRIVER_NAS */
++/* #undef SDL_AUDIO_DRIVER_NAS_DYNAMIC */
++/* #undef SDL_AUDIO_DRIVER_NETBSD */
++/* #undef SDL_AUDIO_DRIVER_OPENSLES */
++/* #undef SDL_AUDIO_DRIVER_OSS */
++/* #undef SDL_AUDIO_DRIVER_PAUDIO */
++/* #undef SDL_AUDIO_DRIVER_PIPEWIRE */
++/* #undef SDL_AUDIO_DRIVER_PIPEWIRE_DYNAMIC */
++/* #undef SDL_AUDIO_DRIVER_PULSEAUDIO */
++/* #undef SDL_AUDIO_DRIVER_PULSEAUDIO_DYNAMIC */
++#define SDL_AUDIO_DRIVER_PSL1GHT 1
++/* #undef SDL_AUDIO_DRIVER_QSA */
++/* #undef SDL_AUDIO_DRIVER_SNDIO */
++/* #undef SDL_AUDIO_DRIVER_SNDIO_DYNAMIC */
++/* #undef SDL_AUDIO_DRIVER_SUNAUDIO */
++/* #undef SDL_AUDIO_DRIVER_WASAPI */
++/* #undef SDL_AUDIO_DRIVER_WINMM */
++/* #undef SDL_AUDIO_DRIVER_OS2 */
++
++/* Enable various input drivers */
++/* #undef SDL_INPUT_LINUXEV */
++/* #undef SDL_INPUT_FBSDKBIO */
++/* #undef SDL_INPUT_LINUXKD */
++/* #undef SDL_INPUT_WSCONS */
++/* #undef SDL_JOYSTICK_HAIKU */
++/* #undef SDL_JOYSTICK_DINPUT */
++/* #undef SDL_JOYSTICK_WGI */
++/* #undef SDL_JOYSTICK_XINPUT */
++/* #undef SDL_JOYSTICK_DUMMY */
++/* #undef SDL_JOYSTICK_IOKIT */
++/* #undef SDL_JOYSTICK_MFI */
++/* #undef SDL_JOYSTICK_LINUX */
++/* #undef SDL_JOYSTICK_ANDROID */
++/* #undef SDL_JOYSTICK_OS2 */
++/* #undef SDL_JOYSTICK_USBHID */
++/* #undef SDL_HAVE_MACHINE_JOYSTICK_H */
++/* #undef SDL_JOYSTICK_HIDAPI */
++/* #undef SDL_JOYSTICK_RAWINPUT */
++/* #undef SDL_JOYSTICK_EMSCRIPTEN */
++#define SDL_JOYSTICK_VIRTUAL 1
++#define SDL_JOYSTICK_PSL1GHT 1
++#define SDL_HAPTIC_DUMMY 1
++/* #undef SDL_HAPTIC_ANDROID */
++/* #undef SDL_HAPTIC_LINUX */
++/* #undef SDL_HAPTIC_IOKIT */
++/* #undef SDL_HAPTIC_DINPUT */
++/* #undef SDL_HAPTIC_XINPUT */
++
++/* Enable various sensor drivers */
++/* #undef SDL_SENSOR_ANDROID */
++/* #undef SDL_SENSOR_COREMOTION */
++/* #undef SDL_SENSOR_WINDOWS */
++#define SDL_SENSOR_DUMMY 1
++
++/* Enable various shared object loading systems */
++/* #undef SDL_LOADSO_DLOPEN */
++#define SDL_LOADSO_DUMMY 1
++/* #undef SDL_LOADSO_LDG */
++/* #undef SDL_LOADSO_WINDOWS */
++/* #undef SDL_LOADSO_OS2 */
++
++/* Enable various threading systems */
++/* #undef SDL_THREAD_GENERIC_COND_SUFFIX */
++/* #undef SDL_THREAD_PTHREAD */
++/* #undef SDL_THREAD_PTHREAD_RECURSIVE_MUTEX */
++/* #undef SDL_THREAD_PTHREAD_RECURSIVE_MUTEX_NP */
++/* #undef SDL_THREAD_WINDOWS */
++/* #undef SDL_THREAD_OS2 */
++#define SDL_THREAD_PSL1GHT 1
++
++/* Enable various timer systems */
++/* #undef SDL_TIMER_HAIKU */
++/* #undef SDL_TIMER_DUMMY */
++#define SDL_TIMER_PSL1GHT 1
++/* #undef SDL_TIMER_UNIX */
++/* #undef SDL_TIMER_WINDOWS */
++/* #undef SDL_TIMER_OS2 */
++
++/* Enable various video drivers */
++/* #undef SDL_VIDEO_DRIVER_HAIKU */
++/* #undef SDL_VIDEO_DRIVER_COCOA */
++/* #undef SDL_VIDEO_DRIVER_DIRECTFB */
++/* #undef SDL_VIDEO_DRIVER_DIRECTFB_DYNAMIC */
++/* #undef SDL_VIDEO_DRIVER_DUMMY */
++/* #undef SDL_VIDEO_DRIVER_WINDOWS */
++/* #undef SDL_VIDEO_DRIVER_WAYLAND */
++/* #undef SDL_VIDEO_DRIVER_WAYLAND_QT_TOUCH */
++/* #undef SDL_VIDEO_DRIVER_WAYLAND_DYNAMIC */
++/* #undef SDL_VIDEO_DRIVER_WAYLAND_DYNAMIC_EGL */
++/* #undef SDL_VIDEO_DRIVER_WAYLAND_DYNAMIC_CURSOR */
++/* #undef SDL_VIDEO_DRIVER_WAYLAND_DYNAMIC_XKBCOMMON */
++/* #undef SDL_VIDEO_DRIVER_WAYLAND_DYNAMIC_LIBDECOR */
++/* #undef SDL_VIDEO_DRIVER_X11 */
++/* #undef SDL_VIDEO_DRIVER_RPI */
++/* #undef SDL_VIDEO_DRIVER_KMSDRM */
++/* #undef SDL_VIDEO_DRIVER_KMSDRM_DYNAMIC */
++/* #undef SDL_VIDEO_DRIVER_KMSDRM_DYNAMIC_GBM */
++/* #undef SDL_VIDEO_DRIVER_ANDROID */
++/* #undef SDL_VIDEO_DRIVER_EMSCRIPTEN */
++/* #undef SDL_VIDEO_DRIVER_OFFSCREEN */
++/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC */
++/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT */
++/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XCURSOR */
++/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XINPUT2 */
++/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XFIXES */
++/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR */
++/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XSS */
++/* #undef SDL_VIDEO_DRIVER_X11_XCURSOR */
++/* #undef SDL_VIDEO_DRIVER_X11_XDBE */
++/* #undef SDL_VIDEO_DRIVER_X11_XINPUT2 */
++/* #undef SDL_VIDEO_DRIVER_X11_XINPUT2_SUPPORTS_MULTITOUCH */
++/* #undef SDL_VIDEO_DRIVER_X11_XFIXES */
++/* #undef SDL_VIDEO_DRIVER_X11_XRANDR */
++/* #undef SDL_VIDEO_DRIVER_X11_XSCRNSAVER */
++/* #undef SDL_VIDEO_DRIVER_X11_XSHAPE */
++/* #undef SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS */
++/* #undef SDL_VIDEO_DRIVER_X11_HAS_XKBKEYCODETOKEYSYM */
++/* #undef SDL_VIDEO_DRIVER_NACL */
++/* #undef SDL_VIDEO_DRIVER_VIVANTE */
++/* #undef SDL_VIDEO_DRIVER_VIVANTE_VDK */
++/* #undef SDL_VIDEO_DRIVER_OS2 */
++/* #undef SDL_VIDEO_DRIVER_QNX */
++/* #undef SDL_VIDEO_DRIVER_RISCOS */
++#define SDL_VIDEO_DRIVER_PSL1GHT 1
++
++/* #undef SDL_VIDEO_RENDER_D3D */
++/* #undef SDL_VIDEO_RENDER_D3D11 */
++/* #undef SDL_VIDEO_RENDER_D3D12 */
++/* #undef SDL_VIDEO_RENDER_OGL */
++/* #undef SDL_VIDEO_RENDER_OGL_ES */
++/* #undef SDL_VIDEO_RENDER_OGL_ES2 */
++/* #undef SDL_VIDEO_RENDER_DIRECTFB */
++/* #undef SDL_VIDEO_RENDER_METAL */
++#define SDL_VIDEO_RENDER_PSL1GHT 1
++
++/* Enable OpenGL support */
++/* #undef SDL_VIDEO_OPENGL */
++/* #undef SDL_VIDEO_OPENGL_ES */
++/* #undef SDL_VIDEO_OPENGL_ES2 */
++/* #undef SDL_VIDEO_OPENGL_BGL */
++/* #undef SDL_VIDEO_OPENGL_CGL */
++/* #undef SDL_VIDEO_OPENGL_EGL */
++/* #undef SDL_VIDEO_OPENGL_GLX */
++/* #undef SDL_VIDEO_OPENGL_WGL */
++/* #undef SDL_VIDEO_OPENGL_OSMESA */
++/* #undef SDL_VIDEO_OPENGL_OSMESA_DYNAMIC */
++
++/* Enable Vulkan support */
++/* #undef SDL_VIDEO_VULKAN */
++
++/* Enable Metal support */
++/* #undef SDL_VIDEO_METAL */
++
++/* Enable system power support */
++/* #undef SDL_POWER_LINUX */
++/* #undef SDL_POWER_WINDOWS */
++/* #undef SDL_POWER_MACOSX */
++/* #undef SDL_POWER_HAIKU */
++/* #undef SDL_POWER_ANDROID */
++/* #undef SDL_POWER_EMSCRIPTEN */
++/* #undef SDL_POWER_HARDWIRED */
++
++/* Enable system filesystem support */
++/* #undef SDL_FILESYSTEM_ANDROID */
++/* #undef SDL_FILESYSTEM_HAIKU */
++/* #undef SDL_FILESYSTEM_COCOA */
++#define SDL_FILESYSTEM_DUMMY 1
++/* #undef SDL_FILESYSTEM_RISCOS */
++/* #undef SDL_FILESYSTEM_UNIX */
++/* #undef SDL_FILESYSTEM_WINDOWS */
++/* #undef SDL_FILESYSTEM_NACL */
++/* #undef SDL_FILESYSTEM_EMSCRIPTEN */
++/* #undef SDL_FILESYSTEM_OS2 */
++/* #undef SDL_FILESYSTEM_VITA */
++/* #undef SDL_FILESYSTEM_PSP */
++/* #undef SDL_FILESYSTEM_PS2 */
++
++/* Enable misc subsystem */
++#define SDL_MISC_DUMMY 1
++
++/* Enable locale subsystem */
++#define SDL_LOCALE_DUMMY 1
++
++/* Enable assembly routines */
++#define SDL_ALTIVEC_BLITTERS 1
++/* #undef SDL_ARM_SIMD_BLITTERS */
++/* #undef SDL_ARM_NEON_BLITTERS */
++
++/* Whether SDL_DYNAMIC_API needs dlopen() */
++/* #undef DYNAPI_NEEDS_DLOPEN */
++
++/* Enable ime support */
++/* #undef SDL_USE_IME */
++
++/* Enable dynamic udev support */
++/* #undef SDL_UDEV_DYNAMIC */
++
++/* Enable dynamic libusb support */
++/* #undef SDL_LIBUSB_DYNAMIC */
++
++/* Enable dynamic libsamplerate support */
++/* #undef SDL_LIBSAMPLERATE_DYNAMIC */
++
++/* Libdecor get min/max content size functions */
++/* #undef SDL_HAVE_LIBDECOR_GET_MIN_MAX */
+ 
+ #endif /* SDL_config_h_ */
+diff -Nru SDL2-2.30.1/include/SDL_config.h.cmake SDL2-2.30.1/include/SDL_config.h.cmake
+--- SDL2-2.30.1/include/SDL_config.h.cmake	2024-03-05 19:37:32
++++ SDL2-2.30.1/include/SDL_config.h.cmake	2026-09-05 18:29:55
+@@ -388,6 +388,7 @@
+ #cmakedefine SDL_THREAD_PSP @SDL_THREAD_PSP@
+ #cmakedefine SDL_THREAD_PS2 @SDL_THREAD_PS2@
+ #cmakedefine SDL_THREAD_N3DS @SDL_THREAD_N3DS@
++#cmakedefine SDL_THREAD_PSL1GHT @SDL_THREAD_PSL1GHT@
+ 
+ /* Enable various timer systems */
+ #cmakedefine SDL_TIMER_HAIKU @SDL_TIMER_HAIKU@
+@@ -399,6 +400,7 @@
+ #cmakedefine SDL_TIMER_PSP @SDL_TIMER_PSP@
+ #cmakedefine SDL_TIMER_PS2 @SDL_TIMER_PS2@
+ #cmakedefine SDL_TIMER_N3DS @SDL_TIMER_N3DS@
++#cmakedefine SDL_TIMER_PSL1GHT @SDL_TIMER_PSL1GHT@
+ 
+ /* Enable various video drivers */
+ #cmakedefine SDL_VIDEO_DRIVER_ANDROID @SDL_VIDEO_DRIVER_ANDROID@
+@@ -421,6 +423,7 @@
+ #cmakedefine SDL_VIDEO_DRIVER_RISCOS @SDL_VIDEO_DRIVER_RISCOS@
+ #cmakedefine SDL_VIDEO_DRIVER_PSP @SDL_VIDEO_DRIVER_PSP@
+ #cmakedefine SDL_VIDEO_DRIVER_PS2 @SDL_VIDEO_DRIVER_PS2@
++#cmakedefine SDL_VIDEO_DRIVER_PSL1GHT @SDL_VIDEO_DRIVER_PSL1GHT@
+ 
+ #cmakedefine SDL_VIDEO_DRIVER_KMSDRM @SDL_VIDEO_DRIVER_KMSDRM@
+ #cmakedefine SDL_VIDEO_DRIVER_KMSDRM_DYNAMIC @SDL_VIDEO_DRIVER_KMSDRM_DYNAMIC@
+diff -Nru SDL2-2.30.1/include/SDL_config.h.in SDL2-2.30.1/include/SDL_config.h.in
+--- SDL2-2.30.1/include/SDL_config.h.in	2024-03-05 19:37:32
++++ SDL2-2.30.1/include/SDL_config.h.in	2026-09-05 18:29:55
+@@ -198,7 +198,9 @@
+ #undef HAVE_SA_SIGACTION
+ #undef HAVE_SETJMP
+ #undef HAVE_NANOSLEEP
++#ifndef __PSL1GHT__ // Yeah PSL1GHT hasn't sysconf
+ #undef HAVE_SYSCONF
++#endif
+ #undef HAVE_SYSCTLBYNAME
+ #undef HAVE_CLOCK_GETTIME
+ #undef HAVE_GETPAGESIZE
+@@ -303,6 +305,7 @@
+ #undef SDL_AUDIO_DRIVER_PIPEWIRE_DYNAMIC
+ #undef SDL_AUDIO_DRIVER_PULSEAUDIO
+ #undef SDL_AUDIO_DRIVER_PULSEAUDIO_DYNAMIC
++#undef SDL_AUDIO_DRIVER_PSL1GHT
+ #undef SDL_AUDIO_DRIVER_QSA
+ #undef SDL_AUDIO_DRIVER_SNDIO
+ #undef SDL_AUDIO_DRIVER_SNDIO_DYNAMIC
+@@ -332,6 +335,7 @@
+ #undef SDL_JOYSTICK_RAWINPUT
+ #undef SDL_JOYSTICK_EMSCRIPTEN
+ #undef SDL_JOYSTICK_VIRTUAL
++#undef SDL_JOYSTICK_PSL1GHT
+ #undef SDL_HAPTIC_DUMMY
+ #undef SDL_HAPTIC_ANDROID
+ #undef SDL_HAPTIC_LINUX
+@@ -359,10 +363,12 @@
+ #undef SDL_THREAD_PTHREAD_RECURSIVE_MUTEX_NP
+ #undef SDL_THREAD_WINDOWS
+ #undef SDL_THREAD_OS2
++#undef SDL_THREAD_PSL1GHT
+ 
+ /* Enable various timer systems */
+ #undef SDL_TIMER_HAIKU
+ #undef SDL_TIMER_DUMMY
++#undef SDL_TIMER_PSL1GHT
+ #undef SDL_TIMER_UNIX
+ #undef SDL_TIMER_WINDOWS
+ #undef SDL_TIMER_OS2
+@@ -412,6 +418,7 @@
+ #undef SDL_VIDEO_DRIVER_OS2
+ #undef SDL_VIDEO_DRIVER_QNX
+ #undef SDL_VIDEO_DRIVER_RISCOS
++#undef SDL_VIDEO_DRIVER_PSL1GHT
+ 
+ #undef SDL_VIDEO_RENDER_D3D
+ #undef SDL_VIDEO_RENDER_D3D11
+@@ -421,6 +428,7 @@
+ #undef SDL_VIDEO_RENDER_OGL_ES2
+ #undef SDL_VIDEO_RENDER_DIRECTFB
+ #undef SDL_VIDEO_RENDER_METAL
++#undef SDL_VIDEO_RENDER_PSL1GHT
+ 
+ /* Enable OpenGL support */
+ #undef SDL_VIDEO_OPENGL
+diff -Nru SDL2-2.30.1/include/SDL_config_psl1ght.h SDL2-2.30.1/include/SDL_config_psl1ght.h
+--- SDL2-2.30.1/include/SDL_config_psl1ght.h	1969-12-31 21:00:00
++++ SDL2-2.30.1/include/SDL_config_psl1ght.h	2026-09-05 18:29:55
+@@ -0,0 +1,89 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++
++#ifndef SDL_config_psl1ght_h_
++#define SDL_config_psl1ght_h_
++#define SDL_config_h_
++
++#include "SDL_platform.h"
++
++typedef signed char        int8_t;
++typedef unsigned char      uint8_t;
++typedef signed short       int16_t;
++typedef unsigned short     uint16_t;
++typedef signed int         int32_t;
++typedef unsigned int       uint32_t;
++typedef signed long long   int64_t;
++typedef unsigned long long uint64_t;
++typedef unsigned long      uintptr_t;
++
++#define HAVE_STDARG_H    1
++#define HAVE_STDDEF_H    1
++#define HAVE_STDIO_H     1
++#define HAVE_STDLIB_H    1
++#define HAVE_MATH_H      1
++#define HAVE_CEIL        1
++#define HAVE_COPYSIGN    1
++#define HAVE_COS         1
++#define HAVE_EXP         1
++#define HAVE_FABS        1
++#define HAVE_FLOOR       1
++#define HAVE_LOG         1
++#define HAVE_LOG10       1
++#define HAVE_SCALBN      1
++#define HAVE_SIN         1
++#define HAVE_SQRT        1
++#define HAVE_TAN         1
++#define HAVE_MALLOC      1
++#define SDL_MAIN_NEEDED  1
++#define LACKS_SYS_MMAN_H 1
++
++/* Enable the N-Gage thread support (src/thread/psl1ght/\*.c) */
++#define SDL_THREAD_PSL1GHT 1
++
++/* Enable the N-Gage timer support (src/timer/psl1ght/\*.c) */
++#define SDL_TIMER_PSL1GHT 1
++
++/* Enable the N-Gage video driver (src/video/psl1ght/\*.c) */
++#define SDL_VIDEO_DRIVER_PSL1GHT 1
++
++/* Enable the dummy audio driver (src/audio/dummy/\*.c) */
++#define SDL_AUDIO_DRIVER_DUMMY  1
++
++/* Enable the stub joystick driver (src/joystick/dummy/\*.c) */
++#define SDL_JOYSTICK_DISABLED   1
++
++/* Enable the stub haptic driver (src/haptic/dummy/\*.c) */
++#define SDL_HAPTIC_DISABLED 1
++
++/* Enable the stub HIDAPI */
++#define SDL_HIDAPI_DISABLED 1
++
++/* Enable the stub sensor driver (src/sensor/dummy/\*.c) */
++#define SDL_SENSOR_DISABLED 1
++
++/* Enable the stub shared object loader (src/loadso/dummy/\*.c) */
++#define SDL_LOADSO_DISABLED 1
++
++/* Enable the dummy filesystem driver (src/filesystem/dummy/\*.c) */
++#define SDL_FILESYSTEM_DUMMY 1
++
++#endif /* SDL_config_psl1ght_h_ */
+diff -Nru SDL2-2.30.1/include/SDL_endian.h SDL2-2.30.1/include/SDL_endian.h
+--- SDL2-2.30.1/include/SDL_endian.h	2024-03-05 19:37:32
++++ SDL2-2.30.1/include/SDL_endian.h	2026-09-05 18:29:55
+@@ -79,7 +79,7 @@
+     defined(__m68k__) || defined(mc68000) || defined(_M_M68K) || \
+     (defined(__MIPS__) && defined(__MIPSEB__)) || \
+     defined(__ppc__) || defined(__POWERPC__) || defined(__powerpc__) || defined(__PPC__) || \
+-    defined(__sparc__)
++    defined(__powerpc__) || defined(__sparc__)
+ #define SDL_BYTEORDER   SDL_BIG_ENDIAN
+ #else
+ #define SDL_BYTEORDER   SDL_LIL_ENDIAN
+diff -Nru SDL2-2.30.1/include/SDL_platform.h SDL2-2.30.1/include/SDL_platform.h
+--- SDL2-2.30.1/include/SDL_platform.h	2024-03-05 19:37:32
++++ SDL2-2.30.1/include/SDL_platform.h	2026-09-05 18:29:55
+@@ -223,6 +223,11 @@
+ #define __SDL_NOGETPROCADDR__
+ #endif
+ 
++#if defined(__PSL1GHT__)
++#undef __PSL1GHT__
++#define __PSL1GHT__  1
++#endif
++
+ #if defined(__vita__)
+ #define __VITA__ 1
+ #endif
+diff -Nru SDL2-2.30.1/include/SDL_revision.h SDL2-2.30.1/include/SDL_revision.h
+--- SDL2-2.30.1/include/SDL_revision.h	2024-03-05 19:37:54
++++ SDL2-2.30.1/include/SDL_revision.h	2026-09-05 18:29:55
+@@ -1,7 +1,7 @@
+ /* Generated by updaterev.sh, do not edit */
+ #ifdef SDL_VENDOR_INFO
+-#define SDL_REVISION "SDL-release-2.30.1-0-g5adbf3765 (" SDL_VENDOR_INFO ")"
++#define SDL_REVISION "SDL-prerelease-2.29.2-89-gc79c313c7 (" SDL_VENDOR_INFO ")"
+ #else
+-#define SDL_REVISION "SDL-release-2.30.1-0-g5adbf3765"
++#define SDL_REVISION "SDL-prerelease-2.29.2-89-gc79c313c7"
+ #endif
+ #define SDL_REVISION_NUMBER 0
+diff -Nru SDL2-2.30.1/include/SDL_version.h SDL2-2.30.1/include/SDL_version.h
+--- SDL2-2.30.1/include/SDL_version.h	2024-03-05 19:37:32
++++ SDL2-2.30.1/include/SDL_version.h	2026-09-05 18:29:55
+@@ -58,8 +58,8 @@
+ /* Printable format: "%d.%d.%d", MAJOR, MINOR, PATCHLEVEL
+ */
+ #define SDL_MAJOR_VERSION   2
+-#define SDL_MINOR_VERSION   30
+-#define SDL_PATCHLEVEL      1
++#define SDL_MINOR_VERSION   31
++#define SDL_PATCHLEVEL      0
+ 
+ /**
+  * Macro to determine SDL version program was compiled against.
+diff -Nru SDL2-2.30.1/src/SDL_internal.h SDL2-2.30.1/src/SDL_internal.h
+--- SDL2-2.30.1/src/SDL_internal.h	2024-03-05 19:37:32
++++ SDL2-2.30.1/src/SDL_internal.h	2026-09-05 18:29:55
+@@ -160,6 +160,9 @@
+ #ifndef SDL_VIDEO_RENDER_VITA_GXM
+ #define SDL_VIDEO_RENDER_VITA_GXM 0
+ #endif
++#ifndef SDL_VIDEO_DRIVER_PSL1GHT
++#define SDL_VIDEO_DRIVER_PSL1GHT 0
++#endif
+ #else /* define all as 0 */
+ #undef SDL_VIDEO_RENDER_SW
+ #define SDL_VIDEO_RENDER_SW 0
+@@ -185,6 +188,8 @@
+ #define SDL_VIDEO_RENDER_PSP 0
+ #undef SDL_VIDEO_RENDER_VITA_GXM
+ #define SDL_VIDEO_RENDER_VITA_GXM 0
++#undef SDL_VIDEO_DRIVER_PSL1GHT
++#define SDL_VIDEO_DRIVER_PSL1GHT 0
+ #endif /* SDL_RENDER_DISABLED */
+ 
+ #define SDL_HAS_RENDER_DRIVER \
+@@ -199,6 +204,7 @@
+         SDL_VIDEO_RENDER_DIRECTFB | \
+         SDL_VIDEO_RENDER_PS2      | \
+         SDL_VIDEO_RENDER_PSP      | \
++        SDL_VIDEO_DRIVER_PSL1GHT  | \
+         SDL_VIDEO_RENDER_VITA_GXM)
+ 
+ #if !defined(SDL_RENDER_DISABLED) && !SDL_HAS_RENDER_DRIVER
+diff -Nru SDL2-2.30.1/src/SDL_log.c SDL2-2.30.1/src/SDL_log.c
+--- SDL2-2.30.1/src/SDL_log.c	2024-03-05 19:37:32
++++ SDL2-2.30.1/src/SDL_log.c	2026-09-05 18:29:55
+@@ -582,6 +582,15 @@
+             (void)fclose(pFile);
+         }
+     }
++#elif defined(__PSL1GHT__)
++    {
++        FILE *pFile;
++        pFile = fopen("SDL_Log.txt", "a");
++        if (pFile) {
++            (void)fprintf(pFile, "%s: %s\n", SDL_priority_prefixes[priority], message);
++            (void)fclose(pFile);
++        }
++    }
+ #endif
+ #if defined(HAVE_STDIO_H) && \
+     !(defined(__APPLE__) && (defined(SDL_VIDEO_DRIVER_COCOA) || defined(SDL_VIDEO_DRIVER_UIKIT)))
+diff -Nru SDL2-2.30.1/src/audio/SDL_audio.c SDL2-2.30.1/src/audio/SDL_audio.c
+--- SDL2-2.30.1/src/audio/SDL_audio.c	2024-03-05 19:37:32
++++ SDL2-2.30.1/src/audio/SDL_audio.c	2026-09-05 18:29:55
+@@ -135,6 +135,9 @@
+ #ifdef SDL_AUDIO_DRIVER_DUMMY
+     &DUMMYAUDIO_bootstrap,
+ #endif
++#ifdef SDL_AUDIO_DRIVER_PSL1GHT
++    &PSL1GHTAUDIO_bootstrap,
++#endif
+     NULL
+ };
+ 
+diff -Nru SDL2-2.30.1/src/audio/SDL_sysaudio.h SDL2-2.30.1/src/audio/SDL_sysaudio.h
+--- SDL2-2.30.1/src/audio/SDL_sysaudio.h	2024-03-05 19:37:32
++++ SDL2-2.30.1/src/audio/SDL_sysaudio.h	2026-09-05 18:29:55
+@@ -209,6 +209,7 @@
+ extern AudioBootStrap N3DSAUDIO_bootstrap;
+ extern AudioBootStrap EMSCRIPTENAUDIO_bootstrap;
+ extern AudioBootStrap OS2AUDIO_bootstrap;
++extern AudioBootStrap PSL1GHTAUDIO_bootstrap;
+ 
+ #endif /* SDL_sysaudio_h_ */
+ 
+diff -Nru SDL2-2.30.1/src/audio/psl1ght/SDL_psl1ghtaudio.c SDL2-2.30.1/src/audio/psl1ght/SDL_psl1ghtaudio.c
+--- SDL2-2.30.1/src/audio/psl1ght/SDL_psl1ghtaudio.c	1969-12-31 21:00:00
++++ SDL2-2.30.1/src/audio/psl1ght/SDL_psl1ghtaudio.c	2026-09-05 18:29:55
+@@ -0,0 +1,216 @@
++/*
++    SDL - Simple DirectMedia Layer
++    Copyright (C) 1997-2010 Sam Lantinga
++
++    This library is free software; you can redistribute it and/or
++    modify it under the terms of the GNU Lesser General Public
++    License as published by the Free Software Foundation; either
++    version 2.1 of the License, or (at your option) any later version.
++
++    This library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++    Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public
++    License along with this library; if not, write to the Free Software
++    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++    Sam Lantinga
++    slouken@libsdl.org
++
++    This file written by Ryan C. Gordon (icculus@icculus.org)
++*/
++//#include "SDL_config.h"
++#include "../../SDL_internal.h"
++
++/* Output audio to PSL1GHT */
++
++#include "SDL.h"
++
++
++#include "SDL_audio.h"
++#include "../SDL_audio_c.h"
++#include "SDL_psl1ghtaudio.h"
++
++#define SHW64(X) (u32)(((u64)X)>>32), (u32)(((u64)X)&0xFFFFFFFF)
++
++#define AUDIO_DEBUG
++
++#ifdef AUDIO_DEBUG
++#define deprintf(...) printf(__VA_ARGS__)
++#else
++#define deprintf(...)
++#endif
++
++static int
++PSL1GHT_AUD_OpenDevice(_THIS, void *handle, const char *devname, int iscapture)
++{
++	deprintf( "PSL1GHT_AUD_OpenDevice(%08X.%08X, %s, %d)\n", SHW64(this), devname, iscapture);
++    SDL_AudioFormat test_format = SDL_FirstAudioFormat(this->spec.format);
++    int valid_datatype = 0;
++
++    this->hidden = SDL_malloc(sizeof(*(this->hidden)));
++    if (!this->hidden) {
++        SDL_OutOfMemory();
++        return 0;
++    }
++    SDL_memset(this->hidden, 0, (sizeof *this->hidden));
++
++
++	// PS3 Libaudio only handles floats
++    while ((!valid_datatype) && (test_format)) {
++        this->spec.format = test_format;
++        switch (test_format) {
++        case AUDIO_F32MSB:
++            valid_datatype = 1;
++            break;
++        default:
++            test_format = SDL_NextAudioFormat();
++            break;
++        }
++    }
++
++    int ret=audioInit();
++
++	//set some parameters we want
++	//either 2 or 8 channel
++	_params.numChannels = AUDIO_PORT_2CH;
++	//8 16 or 32 block buffer
++	_params.numBlocks = AUDIO_BLOCK_8;
++	//extended attributes
++	_params.attrib = 0;
++	//sound level (1 is default)
++	_params.level = 1;
++
++	ret=audioPortOpen(&_params, &_portNum);
++	deprintf("audioPortOpen: %d\n",ret);
++	deprintf("  portNum: %d\n",_portNum);
++
++	ret=audioGetPortConfig(_portNum, &_config);
++	deprintf("audioGetPortConfig: %d\n",ret);
++	deprintf("  readIndex: 0x%8X\n",_config.readIndex);
++	deprintf("  status: %d\n",_config.status);
++	deprintf("  channelCount: %ld\n",_config.channelCount);
++	deprintf("  numBlocks: %ld\n",_config.numBlocks);
++	deprintf("  portSize: %d\n",_config.portSize);
++	deprintf("  audioDataStart: 0x%8X\n",_config.audioDataStart);
++
++	// create an event queue that will tell when a block is read
++	ret=audioCreateNotifyEventQueue( &_snd_queue, &_snd_queue_key);
++	printf("audioCreateNotifyEventQueue: %d\n",ret);
++
++	// Set it to the sprx
++	ret = audioSetNotifyEventQueue(_snd_queue_key);
++	printf("audioSetNotifyEventQueue: %d\n",ret);
++
++	// clears the event queue
++	ret = sysEventQueueDrain(_snd_queue);
++	printf("sysEentQueueDrain: %d\n",ret);
++
++	ret=audioPortStart(_portNum);
++	deprintf("audioPortStart: %d\n",ret);
++
++	_last_filled_buf = _config.numBlocks - 1;
++
++	this->spec.format = test_format;
++	this->spec.size = sizeof(float) * AUDIO_BLOCK_SAMPLES * _config.channelCount;
++	this->spec.freq = 48000;
++	this->spec.samples = AUDIO_BLOCK_SAMPLES;
++	this->spec.channels = _config.channelCount;
++
++    return ret == 0;
++}
++
++static void
++PSL1GHT_AUD_PlayDevice(_THIS)
++{
++	deprintf( "PSL1GHT_AUD_PlayDevice(%08X.%08X)\n", SHW64(this));
++
++	/*
++	while( _config.readIndex == _last_filled_buf) // FIXME this is a mess to remove when queued event will me integrated
++	{
++		deprintf( "\tplaying too fast... waiting a ms\n");
++		//sleep(1);
++	}*/
++    /*TransferSoundData *sound = SDL_malloc(sizeof(TransferSoundData));
++    if (!sound) {
++        SDL_OutOfMemory();
++    }
++
++    playGenericSound(this->hidden->mixbuf, this->hidden->mixlen);*/
++}
++
++
++static void
++PSL1GHT_AUD_CloseDevice(_THIS)
++{
++	deprintf( "PSL1GHT_AUD_CloseDevice(%08X.%08X)\n", SHW64(this));
++	int ret = 0;
++	ret=audioPortStop(_portNum);
++	deprintf("audioPortStop: %d\n",ret);
++	ret=audioRemoveNotifyEventQueue(_snd_queue_key);
++	deprintf("audioRemoveNotifyEventQueue: %d\n",ret);
++	ret=audioPortClose(_portNum);
++	deprintf("audioPortClose: %d\n",ret);
++	ret=sysEventQueueDestroy(_snd_queue, 0);
++	deprintf("sysEventQueueDestroy: %d\n",ret);
++	ret=audioQuit();
++	deprintf("audioQuit: %d\n",ret);
++
++    SDL_free(this->hidden);
++}
++
++static Uint8 *
++PSL1GHT_AUD_GetDeviceBuf(_THIS)
++{
++
++	//deprintf( "PSL1GHT_AUD_GetDeviceBuf(%08X.%08X) at %d ms\n", SHW64(this), SDL_GetTicks());
++
++    //int playing = _config.readIndex;
++    // int playing = *((u64*)(u64)_config.readIndex);
++    int filling = (_last_filled_buf + 1) % _config.numBlocks;
++	Uint8 * dma_buf = (Uint8 *)(u64)_config.audioDataStart;
++	//deprintf( "\tWriting to buffer %d \n", filling);
++	// deprintf( "\tbuffer address (%08X.%08X => %08X.%08X)\n", SHW64(_config.audioDataStart), SHW64(dma_buf));
++
++	_last_filled_buf = filling;
++    return (dma_buf + (filling * this->spec.size));
++}
++
++/* This function waits until it is possible to write a full sound buffer */
++static void
++PSL1GHT_WaitDevice(_THIS)
++{
++    /* We're in blocking mode, so there's nothing to do here */
++	//deprintf( "ALSA_WaitDevice(%08X.%08X)\n", SHW64(this));
++
++	sys_event_t event;
++	//s32 ret =
++	sysEventQueueReceive( _snd_queue, &event, 20 * 1000);
++	//deprintf( "sysEventQueueReceive: %08X\n", ret);
++}
++
++
++	static int
++PSL1GHT_AUD_Init(SDL_AudioDriverImpl * impl)
++{
++	deprintf( "PSL1GHT_AUD_Init(%08X.%08X)\n", SHW64(impl));
++	/* Set the function pointers */
++	impl->OpenDevice = PSL1GHT_AUD_OpenDevice;
++	//impl->PlayDevice = PSL1GHT_AUD_PlayDevice;
++    impl->WaitDevice = PSL1GHT_WaitDevice;
++	impl->CloseDevice = PSL1GHT_AUD_CloseDevice;
++	impl->GetDeviceBuf = PSL1GHT_AUD_GetDeviceBuf;
++
++    /* and the capabilities */
++    impl->OnlyHasDefaultOutputDevice = 1;
++
++    return 1;   /* this audio target is available. */
++}
++
++AudioBootStrap PSL1GHTAUDIO_bootstrap = {
++    "psl1ght", "SDL PSL1GHT audio driver", PSL1GHT_AUD_Init, 0       /*1? */
++};
++
++/* vi: set ts=4 sw=4 expandtab: */
+diff -Nru SDL2-2.30.1/src/audio/psl1ght/SDL_psl1ghtaudio.h SDL2-2.30.1/src/audio/psl1ght/SDL_psl1ghtaudio.h
+--- SDL2-2.30.1/src/audio/psl1ght/SDL_psl1ghtaudio.h	1969-12-31 21:00:00
++++ SDL2-2.30.1/src/audio/psl1ght/SDL_psl1ghtaudio.h	2026-09-05 18:29:55
+@@ -0,0 +1,53 @@
++/*
++    SDL - Simple DirectMedia Layer
++    Copyright (C) 1997-2010 Sam Lantinga
++
++    This library is free software; you can redistribute it and/or
++    modify it under the terms of the GNU Lesser General Public
++    License as published by the Free Software Foundation; either
++    version 2.1 of the License, or (at your option) any later version.
++
++    This library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++    Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public
++    License along with this library; if not, write to the Free Software
++    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++    Sam Lantinga
++    slouken@libsdl.org
++*/
++//#include "SDL_config.h"
++#include "../../SDL_internal.h"
++
++#pragma once
++
++#include "../SDL_sysaudio.h"
++
++#include <audio/audio.h>
++/* Hidden "this" pointer for the audio functions */
++#define _THIS	SDL_AudioDevice *this
++
++struct SDL_PrivateAudioData
++{
++    //:TransferSoundData *sound;
++    /* The file descriptor for the audio device */
++
++	audioPortParam params;
++	audioPortConfig config;
++	u32 portNum;
++	u32 last_filled_buf;
++	sys_event_queue_t snd_queue; // Queue identifier
++	u64	snd_queue_key; // Queue Key
++};
++
++#define _params this->hidden->params
++#define _config this->hidden->config
++#define _portNum this->hidden->portNum
++#define _last_filled_buf this->hidden->last_filled_buf
++#define _snd_queue  this->hidden->snd_queue
++#define _snd_queue_key this->hidden->snd_queue_key
++
++/* vi: set ts=4 sw=4 expandtab: */
+diff -Nru SDL2-2.30.1/src/dynapi/SDL_dynapi.h SDL2-2.30.1/src/dynapi/SDL_dynapi.h
+--- SDL2-2.30.1/src/dynapi/SDL_dynapi.h	2024-03-05 19:37:32
++++ SDL2-2.30.1/src/dynapi/SDL_dynapi.h	2026-09-05 18:29:55
+@@ -57,6 +57,8 @@
+ #define SDL_DYNAMIC_API 0
+ #elif defined(__PSP__) && __PSP__
+ #define SDL_DYNAMIC_API 0
++#elif defined(__PSL1GHT__) && __PSL1GHT__
++#define SDL_DYNAMIC_API 0
+ #elif defined(__riscos__) && __riscos__ /* probably not useful on RISC OS, since dlopen() can't be used when using static linking. */
+ #define SDL_DYNAMIC_API 0
+ #elif defined(__clang_analyzer__) || defined(SDL_THREAD_SAFETY_ANALYSIS)
+diff -Nru SDL2-2.30.1/src/file/SDL_rwops.c SDL2-2.30.1/src/file/SDL_rwops.c
+--- SDL2-2.30.1/src/file/SDL_rwops.c	2024-03-05 19:37:32
++++ SDL2-2.30.1/src/file/SDL_rwops.c	2026-09-05 18:29:55
+@@ -38,7 +38,6 @@
+ #include <stdio.h>
+ #include <sys/stat.h>
+ #endif
+-
+ #ifdef HAVE_LIMITS_H
+ #include <limits.h>
+ #endif
+@@ -525,16 +524,17 @@
+ /* Functions to create SDL_RWops structures from various data sources */
+ 
+ #if defined(HAVE_STDIO_H) && !(defined(__WIN32__) || defined(__GDK__))
+-static SDL_bool SDL_IsRegularFile(FILE *f)
++static SDL_bool IsRegularFileOrPipe(FILE *f)
+ {
+     #ifdef __WINRT__
+     struct __stat64 st;
+-    if (_fstat64(_fileno(f), &st) < 0 || (st.st_mode & _S_IFMT) != _S_IFREG) {
++    if (_fstat64(_fileno(f), &st) < 0 ||
++        !((st.st_mode & _S_IFMT) == _S_IFREG || (st.st_mode & _S_IFMT) == _S_IFIFO)) {
+         return SDL_FALSE;
+     }
+     #else
+     struct stat st;
+-    if (fstat(fileno(f), &st) < 0 || !S_ISREG(st.st_mode)) {
++    if (fstat(fileno(f), &st) < 0 || !(S_ISREG(st.st_mode) || S_ISFIFO(st.st_mode))) {
+         return SDL_FALSE;
+     }
+     #endif
+@@ -555,9 +555,9 @@
+     if (*file == '/') {
+         FILE *fp = fopen(file, mode);
+         if (fp) {
+-            if (!SDL_IsRegularFile(fp)) {
++            if (!IsRegularFileOrPipe(fp)) {
+                 fclose(fp);
+-                SDL_SetError("%s is not a regular file", file);
++                SDL_SetError("%s is not a regular file or pipe", file);
+                 return NULL;
+             }
+             return SDL_RWFromFP(fp, 1);
+@@ -575,9 +575,9 @@
+             fp = fopen(path, mode);
+             SDL_stack_free(path);
+             if (fp) {
+-                if (!SDL_IsRegularFile(fp)) {
++                if (!IsRegularFileOrPipe(fp)) {
+                     fclose(fp);
+-                    SDL_SetError("%s is not a regular file", path);
++                    SDL_SetError("%s is not a regular file or pipe", path);
+                     return NULL;
+                 }
+                 return SDL_RWFromFP(fp, 1);
+@@ -633,10 +633,10 @@
+ #endif
+         if (!fp) {
+             SDL_SetError("Couldn't open %s", file);
+-        } else if (!SDL_IsRegularFile(fp)) {
++        } else if (!IsRegularFileOrPipe(fp)) {
+             fclose(fp);
+             fp = NULL;
+-            SDL_SetError("%s is not a regular file", file);
++            SDL_SetError("%s is not a regular file or pipe", file);
+         } else {
+             rwops = SDL_RWFromFP(fp, SDL_TRUE);
+         }
+diff -Nru SDL2-2.30.1/src/joystick/SDL_gamecontroller.c SDL2-2.30.1/src/joystick/SDL_gamecontroller.c
+--- SDL2-2.30.1/src/joystick/SDL_gamecontroller.c	2024-03-05 19:37:32
++++ SDL2-2.30.1/src/joystick/SDL_gamecontroller.c	2026-09-05 18:29:55
+@@ -555,7 +555,7 @@
+             SDL_strlcat(mapping_string, "a:b0,b:b1,back:b4,dpdown:b12,dpleft:b13,dpright:b14,dpup:b11,guide:b5,leftshoulder:b9,leftstick:b7,lefttrigger:a4,leftx:a0,lefty:a1,rightshoulder:b10,righttrigger:a5,start:b6,x:b2,y:b3,misc1:b15,", sizeof(mapping_string));
+             break;
+         case k_eSwitchDeviceInfoControllerType_SEGA_Genesis:
+-            SDL_strlcat(mapping_string, "a:b0,b:b1,dpdown:b12,dpleft:b13,dpright:b14,dpup:b11,guide:b5,rightshoulder:b10,righttrigger:a5,start:b6,misc1:b15,", sizeof(mapping_string));
++            SDL_strlcat(mapping_string, "a:b0,b:b1,dpdown:b12,dpleft:b13,dpright:b14,dpup:b11,guide:b5,leftshoulder:b9,rightshoulder:b10,righttrigger:a5,start:b6,x:b2,y:b3,misc1:b15,", sizeof(mapping_string));
+             break;
+         case k_eWiiExtensionControllerType_None:
+             SDL_strlcat(mapping_string, "a:b0,b:b1,back:b4,dpdown:b12,dpleft:b13,dpright:b14,dpup:b11,guide:b5,start:b6,x:b2,y:b3,", sizeof(mapping_string));
+diff -Nru SDL2-2.30.1/src/joystick/SDL_gamecontrollerdb.h SDL2-2.30.1/src/joystick/SDL_gamecontrollerdb.h
+--- SDL2-2.30.1/src/joystick/SDL_gamecontrollerdb.h	2024-03-05 19:37:32
++++ SDL2-2.30.1/src/joystick/SDL_gamecontrollerdb.h	2026-09-05 18:29:55
+@@ -134,7 +134,6 @@
+     "03000000b80500000610000000000000,Elecom Gamepad,a:b2,b:b3,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b0,y:b1,",
+     "03000000852100000201000000000000,FF-GP1,a:b1,b:b2,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b0,y:b3,",
+     "030000000d0f00002700000000000000,FIGHTING STICK V3,a:b1,b:b2,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b12,leftshoulder:b4,lefttrigger:b6,rightshoulder:b5,righttrigger:b7,start:b9,x:b0,y:b3,",
+-    "03000000790000000600000000000000,G-Shark GS-GP702,crc:8e4f,a:b2,b:b1,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b3,y:b0,",
+     "030000008f0e00000d31000000000000,GAMEPAD 3 TURBO,a:b1,b:b2,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b12,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b0,y:b3,",
+     "03000000300f00000b01000000000000,GGE909 Recoil Pad,a:b2,b:b1,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a3,righty:a2,start:b9,x:b3,y:b0,",
+     "03000000790000002201000000000000,Game Controller for PC,a:b2,b:b1,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b3,y:b0,",
+@@ -317,7 +316,7 @@
+     "03000000a30600002106000000000000,Saitek PS1000,a:b1,b:b2,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b12,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a4,start:b9,x:b0,y:b3,",
+     "03000000a306000020f6000000000000,Saitek PS2700,a:b1,b:b2,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b12,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a4,start:b9,x:b0,y:b3,",
+     "03000000300f00001101000000000000,Saitek Rumble Pad,a:b2,b:b3,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b8,leftshoulder:b4,leftstick:b10,lefttrigger:b5,leftx:a0,lefty:a1,rightshoulder:b6,rightstick:b11,righttrigger:b7,rightx:a3,righty:a2,start:b9,x:b0,y:b1,",
+-    "03000000790000000600000000000000,Sanwa Supply JY-P76USV,crc:20f0,+leftx:+a0,+rightx:+a2,+righty:a4,-leftx:-a0,-lefty:-a1,-rightx:-a2,-righty:-a4,a:b0,b:b1,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,leftshoulder:b4,leftstick:b10,lefttrigger:b6,lefty:+a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,start:b9,x:b2,y:b3,",
++    "03000000790000000600000000000000,Sanwa Supply JY-P76USV,crc:20f0,a:b0,b:b1,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a4,start:b9,x:b2,y:b3,",
+     "0300000000050000289b000000000000,Saturn_Adapter_2.0,a:b1,b:b2,leftshoulder:b6,lefttrigger:b4,leftx:a0,lefty:a1,rightshoulder:b7,righttrigger:b5,start:b9,x:b0,y:b3,",
+     "030000009b2800000500000000000000,Saturn_Adapter_2.0,a:b1,b:b2,leftshoulder:b6,lefttrigger:b4,leftx:a0,lefty:a1,rightshoulder:b7,righttrigger:b5,start:b9,x:b0,y:b3,",
+     "030000008f0e00000800000000000000,SpeedLink Strike FX,a:b2,b:b1,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b3,y:b0,",
+@@ -993,6 +992,9 @@
+ #endif
+ #ifdef SDL_JOYSTICK_N3DS
+     "000000004e696e74656e646f20334400,Nintendo 3DS,crc:3210,a:b0,b:b1,back:b2,dpdown:b7,dpleft:b5,dpright:b4,dpup:b6,leftshoulder:b9,lefttrigger:b14,leftx:a0,lefty:a1,rightshoulder:b8,righttrigger:b15,rightx:a2,righty:a3,start:b3,x:b10,y:b11,",
++#endif
++#if defined(SDL_JOYSTICK_PSL1GHT)
++    "5053314c4947485420436f6e74726f6c,PS1LIGHT Controller,a:b9,b:b10,back:b7,dpdown:b1,dpleft:b0,dpright:b2,dpup:b3,leftshoulder:b13,leftstick:b6,lefttrigger:b15,leftx:a0,lefty:a1,rightshoulder:b12,rightstick:b5,righttrigger:b14,rightx:a2,righty:a3,start:b4,x:b8,y:b11,",
+ #endif
+     "hidapi,*,a:b0,b:b1,back:b4,dpdown:b12,dpleft:b13,dpright:b14,dpup:b11,guide:b5,leftshoulder:b9,leftstick:b7,lefttrigger:a4,leftx:a0,lefty:a1,rightshoulder:b10,rightstick:b8,righttrigger:a5,rightx:a2,righty:a3,start:b6,x:b2,y:b3,",
+     NULL
+diff -Nru SDL2-2.30.1/src/joystick/SDL_joystick.c SDL2-2.30.1/src/joystick/SDL_joystick.c
+--- SDL2-2.30.1/src/joystick/SDL_joystick.c	2024-03-05 19:37:32
++++ SDL2-2.30.1/src/joystick/SDL_joystick.c	2026-09-05 18:29:55
+@@ -1313,13 +1313,15 @@
+     const SDL_SteamVirtualGamepadInfo *info;
+ 
+     SDL_LockJoysticks();
+-    info = SDL_GetJoystickInstanceVirtualGamepadInfo(joystick->instance_id);
+-    if (info) {
+-        retval = info->name;
+-    } else {
++    {
+         CHECK_JOYSTICK_MAGIC(joystick, NULL);
+ 
+-        retval = joystick->name;
++        info = SDL_GetJoystickInstanceVirtualGamepadInfo(joystick->instance_id);
++        if (info) {
++            retval = info->name;
++        } else {
++            retval = joystick->name;
++        }
+     }
+     SDL_UnlockJoysticks();
+ 
+@@ -3102,13 +3104,17 @@
+     const SDL_SteamVirtualGamepadInfo *info;
+ 
+     SDL_LockJoysticks();
+-    info = SDL_GetJoystickInstanceVirtualGamepadInfo(joystick->instance_id);
+-    if (info) {
+-        vendor = info->vendor_id;
+-    } else {
+-        SDL_JoystickGUID guid = SDL_JoystickGetGUID(joystick);
++    {
++        CHECK_JOYSTICK_MAGIC(joystick, 0);
+ 
+-        SDL_GetJoystickGUIDInfo(guid, &vendor, NULL, NULL, NULL);
++        info = SDL_GetJoystickInstanceVirtualGamepadInfo(joystick->instance_id);
++        if (info) {
++            vendor = info->vendor_id;
++        } else {
++            SDL_JoystickGUID guid = SDL_JoystickGetGUID(joystick);
++
++            SDL_GetJoystickGUIDInfo(guid, &vendor, NULL, NULL, NULL);
++        }
+     }
+     SDL_UnlockJoysticks();
+ 
+@@ -3121,13 +3127,17 @@
+     const SDL_SteamVirtualGamepadInfo *info;
+ 
+     SDL_LockJoysticks();
+-    info = SDL_GetJoystickInstanceVirtualGamepadInfo(joystick->instance_id);
+-    if (info) {
+-        product = info->product_id;
+-    } else {
+-        SDL_JoystickGUID guid = SDL_JoystickGetGUID(joystick);
++    {
++        CHECK_JOYSTICK_MAGIC(joystick, 0);
+ 
+-        SDL_GetJoystickGUIDInfo(guid, NULL, &product, NULL, NULL);
++        info = SDL_GetJoystickInstanceVirtualGamepadInfo(joystick->instance_id);
++        if (info) {
++            product = info->product_id;
++        } else {
++            SDL_JoystickGUID guid = SDL_JoystickGetGUID(joystick);
++
++            SDL_GetJoystickGUIDInfo(guid, NULL, &product, NULL, NULL);
++        }
+     }
+     SDL_UnlockJoysticks();
+ 
+diff -Nru SDL2-2.30.1/src/joystick/SDL_sysjoystick.h SDL2-2.30.1/src/joystick/SDL_sysjoystick.h
+--- SDL2-2.30.1/src/joystick/SDL_sysjoystick.h	2024-03-05 19:37:32
++++ SDL2-2.30.1/src/joystick/SDL_sysjoystick.h	2026-09-05 18:29:55
+@@ -241,6 +241,7 @@
+ extern SDL_JoystickDriver SDL_EMSCRIPTEN_JoystickDriver;
+ extern SDL_JoystickDriver SDL_HAIKU_JoystickDriver;
+ extern SDL_JoystickDriver SDL_HIDAPI_JoystickDriver;
++extern SDL_JoystickDriver SDL_PSL1GHT_JoystickDriver;
+ extern SDL_JoystickDriver SDL_RAWINPUT_JoystickDriver;
+ extern SDL_JoystickDriver SDL_IOS_JoystickDriver;
+ extern SDL_JoystickDriver SDL_LINUX_JoystickDriver;
+diff -Nru SDL2-2.30.1/src/joystick/hidapi/SDL_hidapijoystick_c.h SDL2-2.30.1/src/joystick/hidapi/SDL_hidapijoystick_c.h
+--- SDL2-2.30.1/src/joystick/hidapi/SDL_hidapijoystick_c.h	2024-03-05 19:37:32
++++ SDL2-2.30.1/src/joystick/hidapi/SDL_hidapijoystick_c.h	2026-09-05 18:29:55
+@@ -47,7 +47,14 @@
+ #define SDL_JOYSTICK_HIDAPI_SHIELD
+ 
+ /* Whether HIDAPI is enabled by default */
++#if defined(__ANDROID__) || \
++    defined(__IPHONEOS__) || \
++    defined(__TVOS__)
++/* On Android, HIDAPI prompts for permissions and acquires exclusive access to the device, and on Apple mobile platforms it doesn't do anything except for handling Bluetooth Steam Controllers, so we'll leave it off by default. */
++#define SDL_HIDAPI_DEFAULT SDL_FALSE
++#else
+ #define SDL_HIDAPI_DEFAULT SDL_TRUE
++#endif
+ 
+ /* The maximum size of a USB packet for HID devices */
+ #define USB_PACKET_LENGTH 64
+diff -Nru SDL2-2.30.1/src/joystick/psl1ght/SDL_sysjoystick.c SDL2-2.30.1/src/joystick/psl1ght/SDL_sysjoystick.c
+--- SDL2-2.30.1/src/joystick/psl1ght/SDL_sysjoystick.c	1969-12-31 21:00:00
++++ SDL2-2.30.1/src/joystick/psl1ght/SDL_sysjoystick.c	2026-09-05 18:29:55
+@@ -0,0 +1,291 @@
++/*
++    SDL - Simple DirectMedia Layer
++    Copyright (C) 1997-2010 Sam Lantinga
++
++    This library is free software; you can redistribute it and/or
++    modify it under the terms of the GNU Lesser General Public
++    License as published by the Free Software Foundation; either
++    version 2.1 of the License, or (at your option) any later version.
++
++    This library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++    Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public
++    License along with this library; if not, write to the Free Software
++    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++    Sam Lantinga
++    slouken@libsdl.org
++*/
++#include "SDL_config.h"
++
++#ifdef SDL_JOYSTICK_PSL1GHT
++
++/* This is the system specific header for the SDL joystick API */
++
++#include "SDL_events.h"
++#include "SDL_joystick.h"
++#include "../SDL_sysjoystick.h"
++#include "../SDL_joystick_c.h"
++
++#include <io/pad.h>
++
++#define pdprintf(x) printf(x)
++
++#define NAMESIZE 10
++
++typedef struct SDL_PSL1GHT_JoyData
++{
++	char name[NAMESIZE];
++} SDL_PSL1GHT_JoyData;
++
++struct joystick_hwdata
++{
++	padData old_pad_data;
++};
++
++static SDL_PSL1GHT_JoyData joy_data[MAX_PADS];
++int numberOfJoysticks = 0;
++
++void SDL_SYS_JoystickDetect(void);
++
++/* Function to scan the system for joysticks.
++ * This function should set numberOfJoysticks to the number of available
++ * joysticks.  Joystick 0 should be the system default joystick.
++ * It should return 0, or -1 on an unrecoverable fatal error.
++ */
++int
++SDL_SYS_JoystickInit(void)
++{
++	int iReturn = 0;
++    numberOfJoysticks = MAX_PADS;
++
++	pdprintf("SDL_SYS_JoystickInit\n");
++
++	SDL_zero( joy_data);
++
++	if( iReturn == 0)
++	{
++		iReturn =  ioPadInit( MAX_PADS) ;
++		pdprintf("\tPad initialized\n");
++		if( iReturn != 0)
++		{
++			SDL_SetError("SDL_SYS_JoystickInit() : Couldn't initialize PS3 pads");
++		}
++	}
++	
++	SDL_SYS_JoystickDetect();
++
++	return numberOfJoysticks;	
++}
++
++int
++SDL_SYS_JoystickGetCount(void)
++{
++    return numberOfJoysticks;
++}
++
++void
++SDL_SYS_JoystickDetect(void)
++{
++	padInfo padinfo;
++
++	int iReturn = ioPadGetInfo(&padinfo);
++	pdprintf("\tGot info\n");
++	if( iReturn != 0)
++	{
++		SDL_SetError("SDL_SYS_JoystickInit() : Couldn't get PS3 pads information ");
++	}
++
++	if( iReturn == 0)
++	{
++		unsigned int i;
++		numberOfJoysticks = padinfo.connected;
++
++		for(i = 0; i < padinfo.connected; i++)
++		{
++			if( padinfo.status[i])
++			{
++				sprintf( joy_data[i].name, "PAD%02X", i);
++			}
++		} 
++	}
++}
++
++/* Function to get the device-dependent name of a joystick */
++const char *
++SDL_SYS_JoystickGetDeviceName(int device_index)
++{
++	char * name = NULL;
++	if (device_index < numberOfJoysticks)
++		name = "PS1LIGHT Controller";
++	else
++		SDL_SetError("No joystick available with that index");
++    return name;
++}
++
++/* Function to perform the mapping from device index to the instance id for this index */
++SDL_JoystickID
++SDL_SYS_JoystickGetDevicePlayerIndex(int device_index)
++{
++    return device_index;
++}
++
++void
++SDL_SYS_JoystickSetDevicePlayerIndex(int device_index, int player_index)
++{
++	
++}
++
++SDL_JoystickID
++SDL_SYS_JoystickGetDeviceInstanceID(int device_index)
++{
++    return device_index;
++}
++
++SDL_JoystickGUID
++SDL_SYS_JoystickGetDeviceGUID(int device_index)
++{
++    SDL_JoystickGUID guid;
++    /* the GUID is just the first 16 chars of the name for now */
++    const char *name = SDL_SYS_JoystickGetDeviceName( device_index );
++    SDL_zero( guid );
++    SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
++    return guid;
++}
++
++/* Function to open a joystick for use.
++   The joystick to open is specified by the index field of the joystick.
++   This should fill the nbuttons and naxes fields of the joystick structure.
++   It returns 0, or -1 if there is an error.
++ */
++int
++SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
++{
++    if (!(joystick->hwdata = SDL_malloc(sizeof(struct joystick_hwdata))))
++    {
++        return -1;
++    }
++
++	joystick->naxes = 4;
++	joystick->nhats = 0;
++	joystick->nballs = 0;
++	joystick->nbuttons = 16;
++
++    return 0;
++}
++
++static int
++SDL_SYS_JoystickRumble(SDL_Joystick * joystick, Uint16 low_frequency_rumble, Uint16 high_frequency_rumble)
++{
++    return SDL_Unsupported();
++}
++
++#define CheckPSL1GHTAxis( btn, bnum) \
++	if( new_pad_data.btn != joystick->hwdata->old_pad_data.btn) {\
++		SDL_PrivateJoystickAxis( joystick, (bnum), ((new_pad_data.btn-0x80)<<8)|new_pad_data.btn); \
++	} \
++	joystick->hwdata->old_pad_data.btn = new_pad_data.btn;
++
++#define CheckPSL1GHTButton( btn, bnum) \
++	if( new_pad_data.btn != joystick->hwdata->old_pad_data.btn) {\
++		if( new_pad_data.btn == 0) \
++		SDL_PrivateJoystickButton( joystick, (bnum), SDL_RELEASED); \
++		else \
++		SDL_PrivateJoystickButton( joystick, (bnum), SDL_PRESSED); \
++	} \
++	joystick->hwdata->old_pad_data.btn = new_pad_data.btn;
++
++
++/* Function to update the state of a joystick - called as a device poll.
++ * This function shouldn't update the joystick structure directly,
++ * but instead should call SDL_PrivateJoystick*() to deliver events
++ * and update joystick device state.
++ */
++void
++SDL_SYS_JoystickUpdate(SDL_Joystick * joystick)
++{
++	padData new_pad_data;
++	int joystickIndex = SDL_JoystickGetDeviceIndexFromInstanceID(joystick->instance_id);
++	
++	if (ioPadGetData(joystickIndex, &new_pad_data) != 0)
++	{
++		SDL_SetError("No joystick available with that index");
++	}
++	else if(new_pad_data.len >= 8)
++	{
++		// Update axes
++		CheckPSL1GHTAxis( ANA_L_H, 0);
++		CheckPSL1GHTAxis( ANA_L_V, 1);
++		CheckPSL1GHTAxis( ANA_R_H, 2);
++		CheckPSL1GHTAxis( ANA_R_V, 3);
++		
++		// Update buttons
++		CheckPSL1GHTButton( BTN_LEFT, 0);
++		CheckPSL1GHTButton( BTN_DOWN, 1);
++		CheckPSL1GHTButton( BTN_RIGHT, 2);
++		CheckPSL1GHTButton( BTN_UP, 3);
++
++		CheckPSL1GHTButton( BTN_START, 4);
++		CheckPSL1GHTButton( BTN_R3, 5);
++		CheckPSL1GHTButton( BTN_L3, 6);
++		CheckPSL1GHTButton( BTN_SELECT, 7);
++
++		CheckPSL1GHTButton( BTN_SQUARE, 8);
++		CheckPSL1GHTButton( BTN_CROSS, 9);
++		CheckPSL1GHTButton( BTN_CIRCLE, 10);
++		CheckPSL1GHTButton( BTN_TRIANGLE, 11);
++
++		CheckPSL1GHTButton( BTN_R1, 12);
++		CheckPSL1GHTButton( BTN_L1, 13);
++		CheckPSL1GHTButton( BTN_R2, 14);
++		CheckPSL1GHTButton( BTN_L2, 15);
++	}
++
++    return;
++}
++
++/* Function to close a joystick after use */
++void
++SDL_SYS_JoystickClose(SDL_Joystick * joystick)
++{
++    if (joystick->hwdata)
++        SDL_free(joystick->hwdata);
++}
++
++/* Function to perform any system-specific joystick related cleanup */
++void
++SDL_SYS_JoystickQuit(void)
++{
++    numberOfJoysticks = 0;
++}
++
++static SDL_bool
++SDL_SYS_JoystickGetGamepadMapping(int device_index, SDL_GamepadMapping *out)
++{
++	return SDL_FALSE;
++}
++
++SDL_JoystickDriver SDL_PSL1GHT_JoystickDriver =
++{
++    SDL_SYS_JoystickInit,
++    SDL_SYS_JoystickGetCount,
++    SDL_SYS_JoystickDetect,
++    SDL_SYS_JoystickGetDeviceName,
++    SDL_SYS_JoystickGetDevicePlayerIndex,
++    SDL_SYS_JoystickSetDevicePlayerIndex,
++    SDL_SYS_JoystickGetDeviceGUID,
++    SDL_SYS_JoystickGetDeviceInstanceID,
++    SDL_SYS_JoystickOpen,
++    SDL_SYS_JoystickRumble,
++    SDL_SYS_JoystickUpdate,
++    SDL_SYS_JoystickClose,
++    SDL_SYS_JoystickQuit,
++    SDL_SYS_JoystickGetGamepadMapping,
++};
++
++#endif /* SDL_JOYSTICK_PSL1GHT */
++
++/* vi: set ts=4 sw=4 expandtab: */
+diff -Nru SDL2-2.30.1/src/render/SDL_render.c SDL2-2.30.1/src/render/SDL_render.c
+--- SDL2-2.30.1/src/render/SDL_render.c	2024-03-05 19:37:32
++++ SDL2-2.30.1/src/render/SDL_render.c	2026-09-05 18:29:55
+@@ -125,7 +125,10 @@
+     &VITA_GXM_RenderDriver,
+ #endif
+ #if SDL_VIDEO_RENDER_SW
+-    &SW_RenderDriver
++    &SW_RenderDriver,
++#endif
++#if SDL_VIDEO_RENDER_PSL1GHT
++    &PSL1GHT_RenderDriver,
+ #endif
+ };
+ #endif /* !SDL_RENDER_DISABLED */
+diff -Nru SDL2-2.30.1/src/render/SDL_sysrender.h SDL2-2.30.1/src/render/SDL_sysrender.h
+--- SDL2-2.30.1/src/render/SDL_sysrender.h	2024-03-05 19:37:32
++++ SDL2-2.30.1/src/render/SDL_sysrender.h	2026-09-05 18:29:55
+@@ -305,6 +305,7 @@
+ extern SDL_RenderDriver METAL_RenderDriver;
+ extern SDL_RenderDriver PS2_RenderDriver;
+ extern SDL_RenderDriver PSP_RenderDriver;
++extern SDL_RenderDriver PSL1GHT_RenderDriver;
+ extern SDL_RenderDriver SW_RenderDriver;
+ extern SDL_RenderDriver VITA_GXM_RenderDriver;
+ 
+diff -Nru SDL2-2.30.1/src/render/psl1ght/SDL_PSL1GHTrender.c SDL2-2.30.1/src/render/psl1ght/SDL_PSL1GHTrender.c
+--- SDL2-2.30.1/src/render/psl1ght/SDL_PSL1GHTrender.c	1969-12-31 21:00:00
++++ SDL2-2.30.1/src/render/psl1ght/SDL_PSL1GHTrender.c	2026-09-05 18:29:55
+@@ -0,0 +1,858 @@
++/*
++  Simple DirectMedia Layer
++  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++#include "../../SDL_internal.h"
++
++#if SDL_VIDEO_RENDER_PSL1GHT
++
++#include "../SDL_sysrender.h"
++#include "../../video/SDL_sysvideo.h"
++#include "../../video/psl1ght/SDL_PSL1GHTvideo.h"
++
++#include "../software/SDL_draw.h"
++#include "../software/SDL_blendfillrect.h"
++#include "../software/SDL_blendline.h"
++#include "../software/SDL_blendpoint.h"
++#include "../software/SDL_drawline.h"
++#include "../software/SDL_drawpoint.h"
++
++#include <rsx/rsx.h>
++#include <unistd.h>
++#include <assert.h>
++
++/* SDL surface based renderer implementation */
++
++static SDL_Renderer *PSL1GHT_CreateRenderer(SDL_Window * window, Uint32 flags);
++static void PSL1GHT_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event);
++static SDL_bool PSL1GHT_SupportsBlendMode(SDL_Renderer * renderer, SDL_BlendMode blendMode);
++static int PSL1GHT_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
++static int PSL1GHT_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
++                            const SDL_Rect * rect, const void *pixels,
++                            int pitch);
++static int PSL1GHT_UpdateTextureYUV(SDL_Renderer * renderer, SDL_Texture * texture,
++                     const SDL_Rect * rect,
++                     const Uint8 *Yplane, int Ypitch,
++                     const Uint8 *Uplane, int Upitch,
++                     const Uint8 *Vplane, int Vpitch);
++static int PSL1GHT_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
++                          const SDL_Rect * rect, void **pixels, int *pitch);
++static void PSL1GHT_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
++static int PSL1GHT_SetRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture);
++static int PSL1GHT_QueueSetViewport(SDL_Renderer * renderer, SDL_RenderCommand *cmd);
++static int PSL1GHT_QueueSetDrawColor(SDL_Renderer * renderer, SDL_RenderCommand *cmd);
++static void PSL1GHT_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture, SDL_ScaleMode scaleMode);
++static int PSL1GHT_UpdateViewport(SDL_Renderer * renderer);
++static int PSL1GHT_RenderClear(SDL_Renderer * renderer);
++static int PSL1GHT_QueueDrawPoints(SDL_Renderer * renderer, SDL_RenderCommand *cmd, const SDL_FPoint * points, int count);
++static int PSL1GHT_RenderDrawPoints(SDL_Renderer * renderer,
++                               const SDL_Point * points, int count);
++static int PSL1GHT_RenderDrawLines(SDL_Renderer * renderer,
++                              const SDL_Point * points, int count);
++static int PSL1GHT_QueueFillRects(SDL_Renderer * renderer, SDL_RenderCommand *cmd, const SDL_FRect * rects, int count);
++static int PSL1GHT_RenderFillRects(SDL_Renderer * renderer,
++                              const SDL_Rect * rects, int count);
++static int PSL1GHT_QueueCopy(SDL_Renderer * renderer, SDL_RenderCommand *cmd, SDL_Texture * texture,
++                const SDL_Rect * srcrect, const SDL_FRect * dstrect);
++static int PSL1GHT_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
++                         const SDL_Rect * srcrect, const SDL_Rect * dstrect);
++static int PSL1GHT_QueueCopyEx(SDL_Renderer * renderer, SDL_RenderCommand *cmd, SDL_Texture * texture,
++                const SDL_Rect * srcquad, const SDL_FRect * dstrect,
++                const double angle, const SDL_FPoint *center, const SDL_RendererFlip flip);
++static int PSL1GHT_RunCommandQueue(SDL_Renderer * renderer, SDL_RenderCommand *cmd, void *vertices, size_t vertsize);
++static int PSL1GHT_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
++                               Uint32 format, void * pixels, int pitch);
++static void PSL1GHT_RenderPresent(SDL_Renderer * renderer);
++static void PSL1GHT_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture);
++static void PSL1GHT_DestroyRenderer(SDL_Renderer * renderer);
++
++
++SDL_RenderDriver PSL1GHT_RenderDriver = {
++    PSL1GHT_CreateRenderer,
++    {
++     "PSL1GHT",
++     SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC,
++     1,
++     { SDL_PIXELFORMAT_ARGB8888 },
++     0,
++     0}
++};
++
++typedef struct
++{
++    bool first_fb; // Is this the first flip ?
++    int current_screen;
++    SDL_Surface *screens[3];
++    void *textures[3];
++    gcmContextData *context; // Context to keep track of the RSX buffer.
++} PSL1GHT_RenderData;
++
++typedef struct
++{
++    SDL_Rect    srcRect;
++    SDL_Rect   dstRect;
++} PSL1GHT_CopyData;
++
++
++static void waitFlip()
++{
++    while (gcmGetFlipStatus() != 0)
++      usleep(200);
++    gcmResetFlipStatus();
++}
++
++static SDL_Surface *
++PSL1GHT_ActivateRenderer(SDL_Renderer * renderer)
++{
++    PSL1GHT_RenderData *data = (PSL1GHT_RenderData *) renderer->driverdata;
++
++    return data->screens[data->current_screen];
++}
++
++SDL_Renderer *
++PSL1GHT_CreateRenderer(SDL_Window * window, Uint32 flags)
++{
++    printf("createRendered\n");
++    SDL_Renderer *renderer;
++    PSL1GHT_RenderData *data;
++    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
++    SDL_DisplayMode *displayMode = &display->current_mode;
++    int i, n;
++    int bpp;
++    int pitch;
++    Uint32 Rmask, Gmask, Bmask, Amask;
++
++    if (!SDL_PixelFormatEnumToMasks(displayMode->format, &bpp,
++                                    &Rmask, &Gmask, &Bmask, &Amask)) {
++        SDL_SetError("Unknown display format");
++        return NULL;
++    }
++
++    renderer = (SDL_Renderer *) SDL_calloc(1, sizeof(*renderer));
++    if (!renderer) {
++        SDL_OutOfMemory();
++        return NULL;
++    }
++
++    data = (PSL1GHT_RenderData *) SDL_calloc(1, sizeof(*data));
++    if (!data) {
++        PSL1GHT_DestroyRenderer(renderer);
++        SDL_OutOfMemory();
++        return NULL;
++    }
++
++    SDL_zerop(data);
++
++    deprintf (1, "\tMem allocated\n");
++
++    // Get a copy of the command buffer
++    data->context = ((SDL_DeviceData*) display->device->driverdata)->_CommandBuffer;
++    data->current_screen = 0;
++    data->first_fb = true;
++
++    pitch = displayMode->w * SDL_BYTESPERPIXEL(displayMode->format);
++
++    n = 2;
++    deprintf (1, "\tCreate the %d screen(s):\n", n);
++    for (i = 0; i < n; ++i) {
++        deprintf (1,  "\t\tAllocate RSX memory for pixels\n");
++        /* Allocate RSX memory for pixels */
++        data->textures[i] = rsxMemalign(64, displayMode->h * pitch);
++        if (!data->textures[i]) {
++            deprintf (1, "ERROR\n");
++            PSL1GHT_DestroyRenderer(renderer);
++            SDL_OutOfMemory();
++            return NULL;
++        }
++
++        memset(data->textures[i], 0, displayMode->h * pitch);
++
++        deprintf (1,  "\t\tSDL_CreateRGBSurfaceFrom( w: %d, h: %d)\n", displayMode->w, displayMode->h);
++        data->screens[i] =
++            SDL_CreateRGBSurfaceFrom(data->textures[i], displayMode->w, displayMode->h, bpp, pitch, Rmask, Gmask,
++                                 Bmask, Amask);
++        if (!data->screens[i]) {
++            deprintf (1, "ERROR\n");
++            PSL1GHT_DestroyRenderer(renderer);
++            return NULL;
++        }
++
++        u32 offset = 0;
++        deprintf (1,  "\t\tPrepare RSX offsets (%p, %p) \n", data->screens[i]->pixels, &offset);
++        if (rsxAddressToOffset(data->screens[i]->pixels, &offset) != 0) {
++            deprintf (1, "ERROR\n");
++            PSL1GHT_DestroyRenderer(renderer);
++            SDL_OutOfMemory();
++            return NULL;
++        }
++
++        deprintf (1,  "\t\tSetup the display buffers\n");
++        // Setup the display buffers
++        if (gcmSetDisplayBuffer(i, offset, data->screens[i]->pitch, data->screens[i]->w, data->screens[i]->h) != 0) {
++            deprintf (1, "ERROR\n");
++            PSL1GHT_DestroyRenderer(renderer);
++            SDL_OutOfMemory();
++            return NULL;
++        }
++    }
++
++    deprintf (1,  "\tFinished\n");
++
++    renderer->WindowEvent = PSL1GHT_WindowEvent;
++    renderer->SupportsBlendMode = PSL1GHT_SupportsBlendMode;
++    renderer->CreateTexture = PSL1GHT_CreateTexture;
++    renderer->UpdateTexture = PSL1GHT_UpdateTexture;
++    renderer->UpdateTextureYUV = PSL1GHT_UpdateTextureYUV;
++    renderer->LockTexture = PSL1GHT_LockTexture;
++    renderer->UnlockTexture = PSL1GHT_UnlockTexture;
++    renderer->SetTextureScaleMode = PSL1GHT_SetTextureScaleMode;
++    renderer->SetRenderTarget = PSL1GHT_SetRenderTarget;
++    renderer->QueueSetViewport = PSL1GHT_QueueSetViewport;
++    renderer->QueueSetDrawColor = PSL1GHT_QueueSetDrawColor;
++    renderer->QueueDrawPoints = PSL1GHT_QueueDrawPoints;
++    renderer->QueueDrawLines = PSL1GHT_QueueDrawPoints;  // lines and points queue the same way.
++    renderer->QueueFillRects = PSL1GHT_QueueFillRects;
++    renderer->QueueCopy = PSL1GHT_QueueCopy;
++    renderer->QueueCopyEx = PSL1GHT_QueueCopyEx;
++    renderer->RunCommandQueue = PSL1GHT_RunCommandQueue;
++    renderer->RenderReadPixels = PSL1GHT_RenderReadPixels;
++    renderer->RenderPresent = PSL1GHT_RenderPresent;
++    renderer->DestroyTexture = PSL1GHT_DestroyTexture;
++    renderer->DestroyRenderer = PSL1GHT_DestroyRenderer;
++    renderer->info = PSL1GHT_RenderDriver.info;
++    renderer->info.flags = (SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
++    renderer->driverdata = data;
++    renderer->window = window;
++
++    PSL1GHT_UpdateViewport(renderer);
++    PSL1GHT_ActivateRenderer(renderer);
++
++    return renderer;
++}
++
++static void
++PSL1GHT_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
++{
++}
++
++static SDL_bool
++PSL1GHT_SupportsBlendMode(SDL_Renderer * renderer, SDL_BlendMode blendMode)
++{
++    return SDL_FALSE;
++}
++
++static int
++PSL1GHT_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
++{
++    int bpp;
++    int pitch;
++    void *pixels;
++    Uint32 Rmask, Gmask, Bmask, Amask;
++
++    if (!SDL_PixelFormatEnumToMasks
++        (texture->format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
++        SDL_SetError("Unknown texture format");
++        return -1;
++    }
++
++    // Allocate GFX memory for textures
++    pitch = texture->w * SDL_BYTESPERPIXEL(texture->format);
++    pixels = rsxMemalign(64, texture->h * pitch);
++
++    texture->driverdata =
++        SDL_CreateRGBSurfaceFrom(pixels, texture->w, texture->h, bpp, pitch,
++                            Rmask, Gmask, Bmask, Amask);
++
++    SDL_SetSurfaceColorMod(texture->driverdata, texture->color.r, texture->color.g, texture->color.b);
++    SDL_SetSurfaceAlphaMod(texture->driverdata, texture->color.a);
++    SDL_SetSurfaceBlendMode(texture->driverdata, texture->blendMode);
++
++    if (!texture->driverdata) {
++        return -1;
++    }
++    return 0;
++}
++
++static int
++PSL1GHT_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
++                 const SDL_Rect * rect, const void *pixels, int pitch)
++{
++    SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
++    Uint8 *src, *dst;
++    int row;
++    size_t length;
++
++    src = (Uint8 *) pixels;
++    dst = (Uint8 *) surface->pixels +
++                        rect->y * surface->pitch +
++                        rect->x * surface->format->BytesPerPixel;
++    length = rect->w * surface->format->BytesPerPixel;
++    for (row = 0; row < rect->h; ++row) {
++        SDL_memcpy(dst, src, length);
++        src += pitch;
++        dst += surface->pitch;
++    }
++    return 0;
++}
++
++static int
++PSL1GHT_UpdateTextureYUV(SDL_Renderer * renderer, SDL_Texture * texture,
++                     const SDL_Rect * rect,
++                     const Uint8 *Yplane, int Ypitch,
++                     const Uint8 *Uplane, int Upitch,
++                     const Uint8 *Vplane, int Vpitch)
++{
++    return 0;
++}
++
++static int
++PSL1GHT_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
++               const SDL_Rect * rect, void **pixels, int *pitch)
++{
++    SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
++
++    *pixels =
++        (void *) ((Uint8 *) surface->pixels + rect->y * surface->pitch +
++                  rect->x * surface->format->BytesPerPixel);
++    *pitch = surface->pitch;
++    return 0;
++}
++
++static void
++PSL1GHT_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
++{
++}
++
++static int
++PSL1GHT_SetRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture)
++{
++    return 0;
++}
++
++static int
++PSL1GHT_QueueSetViewport(SDL_Renderer * renderer, SDL_RenderCommand *cmd)
++{
++    return 0;
++}
++
++static int
++PSL1GHT_QueueSetDrawColor(SDL_Renderer * renderer, SDL_RenderCommand *cmd)
++{
++    return 0;
++}
++
++static void
++PSL1GHT_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture, SDL_ScaleMode scaleMode)
++{
++    // if (scaleMode == SDL_SCALEMODE_NEAREST) {
++    //     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0"); // Nearest neighbor interpolation
++    // } else if (scaleMode == SDL_SCALEMODE_LINEAR) {
++    //     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"); // Linear interpolation
++    // }
++
++    SDL_RenderSetLogicalSize(renderer, 0, 0); // Reset logical size
++    SDL_RenderSetScale(renderer, 1.0f, 1.0f); // Reset scale
++
++    // Get texture width and height
++    int textureWidth, textureHeight;
++    SDL_QueryTexture(texture, NULL, NULL, &textureWidth, &textureHeight);
++
++    // Set logical size based on texture size
++    SDL_RenderSetLogicalSize(renderer, textureWidth, textureHeight);
++}
++
++static int
++PSL1GHT_UpdateViewport(SDL_Renderer * renderer)
++{
++    PSL1GHT_RenderData *data = (PSL1GHT_RenderData *) renderer->driverdata;
++    SDL_Surface *surface = data->screens[0];
++
++    if (!renderer->viewport.w && !renderer->viewport.h) {
++        /* There may be no window, so update the viewport directly */
++        renderer->viewport.w = surface->w;
++        renderer->viewport.h = surface->h;
++    }
++
++    /* Center drawable region on screen */
++    if (renderer->window && surface->w > renderer->window->w) {
++        renderer->viewport.x += (surface->w - renderer->window->w)/2;
++    }
++    if (renderer->window && surface->h > renderer->window->h) {
++        renderer->viewport.y += (surface->h - renderer->window->h)/2;
++    }
++
++    SDL_SetClipRect(data->screens[0], &renderer->viewport);
++    SDL_SetClipRect(data->screens[1], &renderer->viewport);
++    return 0;
++}
++
++static int
++PSL1GHT_RenderClear(SDL_Renderer * renderer)
++{
++    SDL_Surface *surface = PSL1GHT_ActivateRenderer(renderer);
++    Uint32 color;
++    SDL_Rect clip_rect;
++
++    if (!surface) {
++        return -1;
++    }
++
++    color = SDL_MapRGBA(surface->format,
++                        renderer->color.r, renderer->color.g, renderer->color.b, renderer->color.a);
++
++    /* By definition the clear ignores the clip rect */
++    clip_rect = surface->clip_rect;
++    SDL_SetClipRect(surface, NULL);
++    SDL_FillRect(surface, NULL, color);
++    SDL_SetClipRect(surface, &clip_rect);
++    return 0;
++}
++
++static int
++PSL1GHT_QueueDrawPoints(SDL_Renderer * renderer, SDL_RenderCommand *cmd, const SDL_FPoint * points, int count)
++{
++    const size_t vertlen = sizeof(SDL_Point) * count;
++    SDL_Point *verts = (SDL_Point *) SDL_AllocateRenderVertices(renderer, vertlen, 0, &cmd->data.draw.first);
++    if (!verts) {
++        return -1;
++    }
++    cmd->data.draw.count = count;
++    for (int i = 0; i < count; ++i)
++    {
++        verts[i].x = points[i].x;
++        verts[i].y = points[i].y;
++    }
++    return 0;
++}
++
++static int
++PSL1GHT_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
++                    int count)
++{
++    SDL_Surface *surface = PSL1GHT_ActivateRenderer(renderer);
++    SDL_Point *temp = NULL;
++    int status;
++
++    if (!surface) {
++        return -1;
++    }
++
++    if (renderer->viewport.x || renderer->viewport.y) {
++        int i;
++        int x = renderer->viewport.x;
++        int y = renderer->viewport.y;
++
++        temp = SDL_stack_alloc(SDL_Point, count);
++        for (i = 0; i < count; ++i) {
++            temp[i].x = x + points[i].x;
++            temp[i].y = y + points[i].x;
++        }
++        points = temp;
++    }
++    /* Draw the points! */
++    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
++        Uint32 color = SDL_MapRGBA(surface->format,
++                                   renderer->color.r, renderer->color.g, renderer->color.b,
++                                   renderer->color.a);
++
++        status = SDL_DrawPoints(surface, points, count, color);
++    } else {
++        status = SDL_BlendPoints(surface, points, count,
++                                renderer->blendMode,
++                                renderer->color.r, renderer->color.g, renderer->color.b,
++                                renderer->color.a);
++    }
++
++    if (temp) {
++        SDL_stack_free(temp);
++    }
++    return status;
++}
++
++static int
++PSL1GHT_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
++                   int count)
++{
++    SDL_Surface *surface = PSL1GHT_ActivateRenderer(renderer);
++    SDL_Point *temp = NULL;
++    int status;
++
++    if (!surface) {
++        return -1;
++    }
++
++    if (renderer->viewport.x || renderer->viewport.y) {
++        int i;
++        int x = renderer->viewport.x;
++        int y = renderer->viewport.y;
++
++        temp = SDL_stack_alloc(SDL_Point, count);
++        for (i = 0; i < count; ++i) {
++            temp[i].x = x + points[i].x;
++            temp[i].y = y + points[i].y;
++        }
++        points = temp;
++    }
++
++    /* Draw the lines! */
++    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
++        Uint32 color = SDL_MapRGBA(surface->format,
++                                   renderer->color.r, renderer->color.g, renderer->color.b,
++                                   renderer->color.a);
++
++        status = SDL_DrawLines(surface, points, count, color);
++    } else {
++        status = SDL_BlendLines(surface, points, count,
++                                renderer->blendMode,
++                                renderer->color.r, renderer->color.g, renderer->color.b,
++                                renderer->color.a);
++    }
++
++    if (temp) {
++        SDL_stack_free(temp);
++    }
++    return status;
++}
++
++static int
++PSL1GHT_QueueFillRects(SDL_Renderer * renderer, SDL_RenderCommand *cmd, const SDL_FRect * rects, int count)
++{
++    const size_t outLen = count * sizeof (SDL_Rect);
++    SDL_Rect *outRects = (SDL_Rect *) SDL_AllocateRenderVertices(renderer, outLen, 0, &cmd->data.draw.first);
++
++    if (!outRects) {
++        return -1;
++    }
++    cmd->data.draw.count = count;
++    for (int i = 0; i < count; ++i)
++    {
++        outRects[i].x = rects[i].x;
++        outRects[i].y = rects[i].y;
++        outRects[i].w = rects[i].w;
++        outRects[i].h = rects[i].h;
++    }
++
++    SDL_memcpy(outRects, rects, outLen);
++
++    return 0;
++}
++
++static int
++PSL1GHT_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect * rects, int count)
++{
++    SDL_Surface *surface = PSL1GHT_ActivateRenderer(renderer);
++    SDL_Rect *temp = NULL;
++    int status;
++
++    if (!surface) {
++        return -1;
++    }
++
++    if (renderer->viewport.x || renderer->viewport.y) {
++        int i;
++        int x = renderer->viewport.x;
++        int y = renderer->viewport.y;
++
++        temp = SDL_stack_alloc(SDL_Rect, count);
++        for (i = 0; i < count; ++i) {
++            temp[i].x = x + rects[i].x;
++            temp[i].y = y + rects[i].y;
++            temp[i].w = rects[i].w;
++            temp[i].h = rects[i].h;
++        }
++        rects = temp;
++    }
++
++    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
++        Uint32 color = SDL_MapRGBA(surface->format,
++                                   renderer->color.r, renderer->color.g, renderer->color.b,
++                                   renderer->color.a);
++        status = SDL_FillRects(surface, rects, count, color);
++    } else {
++        status = SDL_BlendFillRects(surface, rects, count,
++                                    renderer->blendMode,
++                                    renderer->color.r, renderer->color.g, renderer->color.b,
++                                    renderer->color.a);
++    }
++
++    if (temp) {
++        SDL_stack_free(temp);
++    }
++    return status;
++}
++
++static int
++PSL1GHT_QueueCopy(SDL_Renderer * renderer, SDL_RenderCommand *cmd, SDL_Texture * texture,
++                const SDL_Rect * srcrect, const SDL_FRect * dstrect)
++{
++    const size_t outLen = sizeof (PSL1GHT_CopyData);
++    PSL1GHT_CopyData *outData = (PSL1GHT_CopyData *) SDL_AllocateRenderVertices(renderer, outLen, 0, &cmd->data.draw.first);
++
++    if (!outData) {
++        return -1;
++    }
++    cmd->data.draw.count = 1;
++
++    SDL_memcpy(&outData->srcRect, srcrect, sizeof(SDL_Rect));
++
++    outData->dstRect.x = dstrect->x;
++    outData->dstRect.y = dstrect->y;
++    outData->dstRect.w = dstrect->w;
++    outData->dstRect.h = dstrect->h;
++
++    return 0;
++}
++
++static int
++PSL1GHT_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
++              const SDL_Rect * srcrect, const SDL_Rect * dstrect)
++{
++    PSL1GHT_RenderData *data = (PSL1GHT_RenderData *) renderer->driverdata;
++    SDL_Surface *dst = PSL1GHT_ActivateRenderer(renderer);
++    SDL_Surface *src = (SDL_Surface *) texture->driverdata;
++    SDL_Rect final_rect = *dstrect;
++    u32 src_offset, dst_offset;
++
++    if (!dst) {
++        return -1;
++    }
++
++    if (renderer->viewport.x || renderer->viewport.y) {
++        final_rect.x += renderer->viewport.x;
++        final_rect.y += renderer->viewport.y;
++    }
++
++    rsxAddressToOffset(dst->pixels, &dst_offset);
++    rsxAddressToOffset(src->pixels, &src_offset);
++
++    gcmTransferScale scale;
++    scale.conversion = GCM_TRANSFER_CONVERSION_TRUNCATE;
++    scale.format = GCM_TRANSFER_SCALE_FORMAT_A8R8G8B8;
++    scale.operation = GCM_TRANSFER_OPERATION_SRCCOPY;
++    scale.clipX = final_rect.x;
++    scale.clipY = final_rect.y;
++    scale.clipW = final_rect.w;
++    scale.clipH = final_rect.h;
++    scale.outX = final_rect.x;
++    scale.outY = final_rect.y;
++    scale.outW = final_rect.w;
++    scale.outH = final_rect.h;
++    scale.ratioX = (srcrect->w << 20) / final_rect.w;
++    scale.ratioY = (srcrect->h << 20) / final_rect.h;
++    scale.inX = srcrect->x;
++    scale.inY = srcrect->y;
++    scale.inW = srcrect->w;
++    scale.inH = srcrect->h;
++    scale.offset = src_offset;
++    scale.pitch = src->pitch;
++    scale.origin = GCM_TRANSFER_ORIGIN_CORNER;
++    scale.interp = GCM_TRANSFER_INTERPOLATOR_NEAREST;
++
++    gcmTransferSurface surface;
++    surface.format = GCM_TRANSFER_SURFACE_FORMAT_A8R8G8B8;
++    surface.pitch = dst->pitch;
++    surface.offset = dst_offset;
++
++    // Hardware accelerated blit with scaling
++    rsxSetTransferScaleMode(data->context, GCM_TRANSFER_LOCAL_TO_LOCAL, GCM_TRANSFER_SURFACE);
++    rsxSetTransferScaleSurface(data->context, &scale, &surface);
++
++    // TODO: Blending / clipping
++
++    return 0;
++}
++
++static int
++PSL1GHT_QueueCopyEx(SDL_Renderer * renderer, SDL_RenderCommand *cmd, SDL_Texture * texture,
++                const SDL_Rect * srcquad, const SDL_FRect * dstrect,
++                const double angle, const SDL_FPoint *center, const SDL_RendererFlip flip)
++{
++    return 0;
++}
++
++static int
++PSL1GHT_RunCommandQueue(SDL_Renderer * renderer, SDL_RenderCommand *cmd, void *vertices, size_t vertsize)
++{
++    while (cmd) {
++        switch (cmd->command) {
++            case SDL_RENDERCMD_SETDRAWCOLOR: {
++                break;
++            }
++
++            case SDL_RENDERCMD_SETVIEWPORT: {
++                break;
++            }
++
++            case SDL_RENDERCMD_SETCLIPRECT: {
++                break;
++            }
++
++            case SDL_RENDERCMD_CLEAR: {
++                PSL1GHT_RenderClear(renderer);
++                break;
++            }
++
++            case SDL_RENDERCMD_DRAW_POINTS: {
++                const size_t count = cmd->data.draw.count;
++                const size_t first = cmd->data.draw.first;
++                const SDL_Point *points = (SDL_Point *) (((Uint8 *) vertices) + first);
++                PSL1GHT_RenderDrawPoints(renderer, points, count);
++                break;
++            }
++
++            case SDL_RENDERCMD_DRAW_LINES: {
++                const size_t count = cmd->data.draw.count;
++                const size_t first = cmd->data.draw.first;
++                const SDL_Point *points = (SDL_Point *) (((Uint8 *) vertices) + first);
++
++                PSL1GHT_RenderDrawLines(renderer, points, count);
++                break;
++            }
++
++            case SDL_RENDERCMD_FILL_RECTS: {
++                const size_t count = cmd->data.draw.count;
++                const size_t first = cmd->data.draw.first;
++                const SDL_Rect *rects = (SDL_Rect *) (((Uint8 *) vertices) + first);
++
++                PSL1GHT_RenderFillRects(renderer, rects, count);
++                break;
++            }
++
++            case SDL_RENDERCMD_COPY: {
++                const size_t first = cmd->data.draw.first;
++                const PSL1GHT_CopyData *copyData = (PSL1GHT_CopyData *) (((Uint8 *) vertices) + first);
++
++                PSL1GHT_RenderCopy(renderer, cmd->data.draw.texture, &copyData->srcRect, &copyData->dstRect);
++                break;
++            }
++
++            case SDL_RENDERCMD_COPY_EX: {
++                break;
++            }
++
++            case SDL_RENDERCMD_NO_OP:
++                break;
++        }
++
++        cmd = cmd->next;
++    }
++
++    return 0;
++}
++
++static int
++PSL1GHT_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
++                    Uint32 format, void * pixels, int pitch)
++{
++    SDL_Surface *surface = PSL1GHT_ActivateRenderer(renderer);
++    Uint32 src_format;
++    void *src_pixels;
++    SDL_Rect final_rect;
++
++    if (!surface) {
++        return -1;
++    }
++
++    if (renderer->viewport.x || renderer->viewport.y) {
++        final_rect.x = renderer->viewport.x + rect->x;
++        final_rect.y = renderer->viewport.y + rect->y;
++        final_rect.w = rect->w;
++        final_rect.h = rect->h;
++        rect = &final_rect;
++    }
++
++    if (rect->x < 0 || rect->x+rect->w > surface->w ||
++        rect->y < 0 || rect->y+rect->h > surface->h) {
++        SDL_SetError("Tried to read outside of surface bounds");
++        return -1;
++    }
++
++    src_format = surface->format->format;
++    src_pixels = (void*)((Uint8 *) surface->pixels +
++                    rect->y * surface->pitch +
++                    rect->x * surface->format->BytesPerPixel);
++
++    return SDL_ConvertPixels(rect->w, rect->h,
++                             src_format, src_pixels, surface->pitch,
++                             format, pixels, pitch);
++}
++
++static void
++PSL1GHT_RenderPresent(SDL_Renderer * renderer)
++{
++    PSL1GHT_RenderData *data = (PSL1GHT_RenderData *) renderer->driverdata;
++
++    if (data->first_fb)
++    {
++        gcmResetFlipStatus();
++    }
++
++    gcmSetFlip(data->context, data->current_screen);
++    rsxFlushBuffer(data->context);
++
++    gcmSetWaitFlip(data->context);
++
++    waitFlip();
++
++    data->first_fb = false;
++
++    // Update the flipping chain, if any
++    data->current_screen = (data->current_screen + 1) % 2;
++}
++
++static void
++PSL1GHT_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
++{
++    SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
++
++    if (!surface)
++    {
++        return;
++    }
++
++    // TODO: Wait for the DMA transfer to complete
++    rsxFree(surface->pixels);
++    SDL_FreeSurface(surface);
++}
++
++static void
++PSL1GHT_DestroyRenderer(SDL_Renderer * renderer)
++{
++    PSL1GHT_RenderData *data = (PSL1GHT_RenderData *) renderer->driverdata;
++    int i;
++
++    deprintf (1, "SDL_PSL1GHT_DestroyRenderer()\n");
++
++    if (data) {
++        for (i = 0; i < SDL_arraysize(data->screens); ++i) {
++            if (data->screens[i]) {
++               SDL_FreeSurface(data->screens[i]);
++            }
++            if (data->textures[i]) {
++                rsxFree(data->textures[i]);
++            }
++        }
++        SDL_free(data);
++    }
++    SDL_free(renderer);
++}
++
++#endif /* SDL_VIDEO_RENDER_PSL1GHT */
++
++/* vi: set ts=4 sw=4 expandtab: */
+diff -Nru SDL2-2.30.1/src/stdlib/SDL_malloc.c SDL2-2.30.1/src/stdlib/SDL_malloc.c
+--- SDL2-2.30.1/src/stdlib/SDL_malloc.c	2024-03-05 19:37:32
++++ SDL2-2.30.1/src/stdlib/SDL_malloc.c	2026-09-05 18:29:55
+@@ -1259,7 +1259,7 @@
+ #      define _SC_PAGE_SIZE _SC_PAGESIZE
+ #    endif
+ #  endif
+-#  ifdef _SC_PAGE_SIZE
++#  if defined(_SC_PAGE_SIZE) && defined(HAVE_SYSCONF)
+ #    define malloc_getpagesize sysconf(_SC_PAGE_SIZE)
+ #  else
+ #    if defined(BSD) || defined(DGUX) || defined(HAVE_GETPAGESIZE)
+diff -Nru SDL2-2.30.1/src/thread/SDL_thread_c.h SDL2-2.30.1/src/thread/SDL_thread_c.h
+--- SDL2-2.30.1/src/thread/SDL_thread_c.h	2024-03-05 19:37:32
++++ SDL2-2.30.1/src/thread/SDL_thread_c.h	2026-09-05 18:29:55
+@@ -46,6 +46,8 @@
+ #include "os2/SDL_systhread_c.h"
+ #elif defined(SDL_THREAD_NGAGE)
+ #include "ngage/SDL_systhread_c.h"
++#elif defined(SDL_THREAD_PSL1GHT)
++#include "psl1ght/SDL_systhread_c.h"
+ #else
+ #error Need thread implementation for this platform
+ #include "generic/SDL_systhread_c.h"
+diff -Nru SDL2-2.30.1/src/thread/psl1ght/SDL_syssem.c SDL2-2.30.1/src/thread/psl1ght/SDL_syssem.c
+--- SDL2-2.30.1/src/thread/psl1ght/SDL_syssem.c	1969-12-31 21:00:00
++++ SDL2-2.30.1/src/thread/psl1ght/SDL_syssem.c	2026-09-05 18:29:55
+@@ -0,0 +1,159 @@
++/*
++    SDL - Simple DirectMedia Layer
++    Copyright (C) 1997-2010 Sam Lantinga
++
++    This library is free software; you can redistribute it and/or
++    modify it under the terms of the GNU Lesser General Public
++    License as published by the Free Software Foundation; either
++    version 2.1 of the License, or (at your option) any later version.
++
++    This library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++    Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public
++    License along with this library; if not, write to the Free Software
++    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++    Sam Lantinga
++    slouken@libsdl.org
++*/
++#include "SDL_config.h"
++
++/* Semaphores in the BeOS environment */
++
++//#include <be/kernel/OS.h>
++#include <sys/sem.h>
++#include <sys/errno.h> 
++
++#include "SDL_thread.h"
++
++
++struct SDL_semaphore
++{
++    sys_sem_t id;
++};
++
++/* Create a counting semaphore */
++SDL_sem *
++SDL_CreateSemaphore(Uint32 initial_value)
++{
++	SDL_sem *sem;
++	sys_sem_attr_t attr;
++
++	SDL_zero( attr);
++	attr.attr_protocol = SYS_SEM_ATTR_PROTOCOL;
++	attr.attr_pshared = SYS_SEM_ATTR_PSHARED;
++
++	sem = (SDL_sem *) SDL_malloc(sizeof(*sem));
++	if (sem) {
++		sysSemCreate( &sem->id, &attr, initial_value, 32 * 1024);
++	} else {
++		SDL_OutOfMemory();
++	}
++	return (sem);
++}
++
++/* Free the semaphore */
++void
++SDL_DestroySemaphore(SDL_sem * sem)
++{
++    if (sem) {
++		sysSemDestroy( sem->id);
++        SDL_free(sem);
++    }
++}
++
++int
++SDL_SemWaitTimeout(SDL_sem * sem, Uint32 timeout)
++{
++	int32_t val;
++	int retval;
++
++	if (!sem) {
++		SDL_SetError("Passed a NULL semaphore");
++		return -1;
++	}
++
++	int finished = 0;
++	while( finished == 0)
++	{
++		// Do not wait
++		if( timeout == 0) {
++			val = sysSemTryWait( sem->id);
++		// Wait Forever
++		} else if (timeout == SDL_MUTEX_MAXWAIT) {
++			val = sysSemWait(sem->id, 0);
++		// Wait until timeout
++		} else {
++			timeout *= 1000;     /* PS 3uses a timeout in microseconds */
++			val = sysSemWait(sem->id, timeout);
++		}
++		switch (val) {
++			case EINTR:
++				break;
++			case 0:
++				retval = 0;
++				finished = 1;
++				break;
++			case ETIMEDOUT:
++				retval = SDL_MUTEX_TIMEDOUT;
++				finished = 1;
++				break;
++			default:
++				SDL_SetError("sysSem[Try]Wait() failed");
++				retval = -1;
++				finished = 1;
++				break;
++		}
++	}
++	return retval;
++}
++
++int
++SDL_SemTryWait(SDL_sem * sem)
++{
++    return SDL_SemWaitTimeout(sem, 0);
++}
++
++int
++SDL_SemWait(SDL_sem * sem)
++{
++    return SDL_SemWaitTimeout(sem, SDL_MUTEX_MAXWAIT);
++}
++
++/* Returns the current count of the semaphore */
++Uint32
++SDL_SemValue(SDL_sem * sem)
++{
++    int32_t count;
++    Uint32 value;
++
++    value = 0;
++    if (sem) {
++		sysSemGetValue (sem->id, &count);
++        if (count > 0) {
++            value = (Uint32) count;
++        }
++    }
++    return value;
++}
++
++/* Atomically increases the semaphore's count (not blocking) */
++int
++SDL_SemPost(SDL_sem * sem)
++{
++    if (!sem) {
++        SDL_SetError("Passed a NULL semaphore");
++        return -1;
++    }
++
++    if (sysSemPost(sem->id, 1) != 0) {
++        SDL_SetError("release_sem() failed");
++        return -1;
++    }
++    return 0;
++}
++
++/* vi: set ts=4 sw=4 expandtab: */
+diff -Nru SDL2-2.30.1/src/thread/psl1ght/SDL_systhread.c SDL2-2.30.1/src/thread/psl1ght/SDL_systhread.c
+--- SDL2-2.30.1/src/thread/psl1ght/SDL_systhread.c	1969-12-31 21:00:00
++++ SDL2-2.30.1/src/thread/psl1ght/SDL_systhread.c	2026-09-05 18:29:55
+@@ -0,0 +1,142 @@
++/*
++    SDL - Simple DirectMedia Layer
++    Copyright (C) 1997-2010 Sam Lantinga
++
++    This library is free software; you can redistribute it and/or
++    modify it under the terms of the GNU Lesser General Public
++    License as published by the Free Software Foundation; either
++    version 2.1 of the License, or (at your option) any later version.
++
++    This library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++    Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public
++    License along with this library; if not, write to the Free Software
++    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++    Sam Lantinga
++    slouken@libsdl.org
++*/
++#include "../../SDL_internal.h"
++
++#ifdef SDL_THREAD_PSL1GHT
++
++/* PSL1GHT thread management routines for SDL */
++
++#include <stdio.h>
++#include <signal.h>
++#include <lv2/thread.h>
++#include <sys/thread.h>
++
++#include "SDL_mutex.h"
++#include "SDL_thread.h"
++#include "../SDL_thread_c.h"
++#include "../SDL_systhread.h"
++
++
++static int sig_list[] = {
++    SIGHUP, SIGINT, SIGQUIT, SIGPIPE, SIGALRM, SIGTERM, SIGWINCH, 0
++};
++
++void
++SDL_MaskSignals(sigset_t * omask)
++{
++    sigset_t mask;
++    int i;
++
++    sigemptyset(&mask);
++    for (i = 0; sig_list[i]; ++i) {
++        sigaddset(&mask, sig_list[i]);
++    }
++	// FIXME as soom as signal are implemented in PSL1GHT
++//    sigprocmask(SIG_BLOCK, &mask, omask);
++}
++
++void
++SDL_UnmaskSignals(sigset_t * omask)
++{
++	// FIXME as soom as signal are implemented in PSL1GHT
++    //sigprocmask(SIG_SETMASK, omask, NULL);
++}
++
++static void
++RunThread(void *thread)
++{
++    SDL_RunThread(thread);
++	sysThreadExit(0);
++}
++
++int
++SDL_SYS_CreateThread(SDL_Thread * thread)
++{
++	sys_ppu_thread_t id;
++	size_t stack_size = 0x4000;
++	u64 priority = 1500;
++
++    /* Create the thread and go! */
++	int s = sysThreadCreate(&id, RunThread, thread, priority, stack_size, THREAD_JOINABLE, "SDL");
++    thread->handle = id;
++
++    if ( s != 0)
++	{
++        SDL_SetError("Not enough resources to create thread");
++        return (-1);
++    }
++    //resume_thread(thread->handle);
++    return (0);
++}
++
++void
++SDL_SYS_SetupThread(const char *name)
++{
++    /* Mask asynchronous signals for this thread */
++    SDL_MaskSignals(NULL);
++}
++
++SDL_threadID
++SDL_ThreadID(void)
++{
++	sys_ppu_thread_t id;
++	sysThreadGetId(&id);
++    return ((SDL_threadID) id);
++}
++
++void
++SDL_SYS_WaitThread(SDL_Thread * thread)
++{
++	u64 retval;
++
++    sysThreadJoin(thread->handle, &retval);
++}
++
++void SDL_SYS_DetachThread(SDL_Thread *thread)
++{
++    sysThreadDetach(thread->handle);
++}
++
++int SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
++{
++    s32 value;
++
++    if (priority == SDL_THREAD_PRIORITY_LOW) {
++        value = 19;
++    } else if (priority == SDL_THREAD_PRIORITY_HIGH) {
++        value = -10;
++    } else if (priority == SDL_THREAD_PRIORITY_TIME_CRITICAL) {
++        value = -20;
++    } else {
++        value = 0;
++    }
++
++    sys_ppu_thread_t id;
++    sysThreadGetId(&id);
++
++    return sysThreadGetPriority(id, &value);
++
++}
++
++#endif /* SDL_THREAD_PSL1GHT */
++
++/* vi: set ts=4 sw=4 expandtab: */
+diff -Nru SDL2-2.30.1/src/thread/psl1ght/SDL_systhread_c.h SDL2-2.30.1/src/thread/psl1ght/SDL_systhread_c.h
+--- SDL2-2.30.1/src/thread/psl1ght/SDL_systhread_c.h	1969-12-31 21:00:00
++++ SDL2-2.30.1/src/thread/psl1ght/SDL_systhread_c.h	2026-09-05 18:29:55
+@@ -0,0 +1,34 @@
++/*
++    SDL - Simple DirectMedia Layer
++    Copyright (C) 1997-2010 Sam Lantinga
++
++    This library is free software; you can redistribute it and/or
++    modify it under the terms of the GNU Lesser General Public
++    License as published by the Free Software Foundation; either
++    version 2.1 of the License, or (at your option) any later version.
++
++    This library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++    Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public
++    License along with this library; if not, write to the Free Software
++    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++    Sam Lantinga
++    slouken@libsdl.org
++*/
++// #include "SDL_config.h"
++#include "../../SDL_internal.h"
++
++#include <signal.h>
++#include <lv2/thread.h>
++
++typedef sys_ppu_thread_t SYS_ThreadHandle;
++
++/* Functions needed to work with system threads in other portions of SDL */
++extern void SDL_MaskSignals(sigset_t * omask);
++extern void SDL_UnmaskSignals(sigset_t * omask);
++
++/* vi: set ts=4 sw=4 expandtab: */
+diff -Nru SDL2-2.30.1/src/timer/psl1ght/SDL_systimer.c SDL2-2.30.1/src/timer/psl1ght/SDL_systimer.c
+--- SDL2-2.30.1/src/timer/psl1ght/SDL_systimer.c	1969-12-31 21:00:00
++++ SDL2-2.30.1/src/timer/psl1ght/SDL_systimer.c	2026-09-05 18:29:55
+@@ -0,0 +1,86 @@
++/*
++    SDL - Simple DirectMedia Layer
++    Copyright (C) 1997-2010 Sam Lantinga
++
++    This library is free software; you can redistribute it and/or
++    modify it under the terms of the GNU Lesser General Public
++    License as published by the Free Software Foundation; either
++    version 2.1 of the License, or (at your option) any later version.
++
++    This library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++    Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public
++    License along with this library; if not, write to the Free Software
++    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++    Sam Lantinga
++    slouken@libsdl.org
++*/
++#include "../../SDL_internal.h"
++
++#ifdef SDL_TIMER_PSL1GHT
++#include <sys/time.h>
++#include <sys/unistd.h>
++
++#include "SDL_thread.h"
++#include "SDL_timer.h"
++#include "../SDL_timer_c.h"
++
++static struct timeval start;
++static SDL_bool ticks_started = SDL_FALSE;
++
++void
++SDL_TicksInit(void)
++{
++    if (ticks_started) {
++        return;
++    }
++    ticks_started = SDL_TRUE;
++
++    gettimeofday(&start, NULL);
++}
++
++void
++SDL_TicksQuit(void)
++{
++    ticks_started = SDL_FALSE;
++}
++
++Uint64 SDL_GetTicks64(void)
++{
++    if (!ticks_started) {
++        SDL_TicksInit();
++    }
++
++    struct timeval now;
++    Uint64 ticks;
++
++    gettimeofday(&now, NULL);
++    ticks=(now.tv_sec-start.tv_sec)*1000+(now.tv_usec-start.tv_usec)/1000;
++    return(ticks);
++
++}
++
++Uint64
++SDL_GetPerformanceCounter(void)
++{
++    return SDL_GetTicks64();
++}
++
++Uint64
++SDL_GetPerformanceFrequency(void)
++{
++    return 1000;
++}
++
++void
++SDL_Delay(Uint32 ms)
++{
++    usleep(ms * 1000);
++}
++
++#endif /* SDL_TIMER_PSL1GHT */
++/* vi: set ts=4 sw=4 expandtab: */
+diff -Nru SDL2-2.30.1/src/video/SDL_sysvideo.h SDL2-2.30.1/src/video/SDL_sysvideo.h
+--- SDL2-2.30.1/src/video/SDL_sysvideo.h	2024-03-05 19:37:32
++++ SDL2-2.30.1/src/video/SDL_sysvideo.h	2026-09-05 18:29:55
+@@ -484,6 +484,7 @@
+ extern VideoBootStrap NGAGE_bootstrap;
+ extern VideoBootStrap OS2DIVE_bootstrap;
+ extern VideoBootStrap OS2VMAN_bootstrap;
++extern VideoBootStrap PSL1GHT_bootstrap;
+ 
+ /* Use SDL_OnVideoThread() sparingly, to avoid regressions in use cases that currently happen to work */
+ extern SDL_bool SDL_OnVideoThread(void);
+diff -Nru SDL2-2.30.1/src/video/SDL_video.c SDL2-2.30.1/src/video/SDL_video.c
+--- SDL2-2.30.1/src/video/SDL_video.c	2024-03-05 19:37:32
++++ SDL2-2.30.1/src/video/SDL_video.c	2026-09-05 18:29:55
+@@ -141,9 +141,12 @@
+ #endif
+ #ifdef SDL_VIDEO_DRIVER_DUMMY
+     &DUMMY_bootstrap,
++#endif
+ #ifdef SDL_INPUT_LINUXEV
+     &DUMMY_evdev_bootstrap,
+ #endif
++#ifdef SDL_VIDEO_DRIVER_PSL1GHT
++    &PSL1GHT_bootstrap,
+ #endif
+     NULL
+ };
+diff -Nru SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTevents.c SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTevents.c
+--- SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTevents.c	1969-12-31 21:00:00
++++ SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTevents.c	2026-09-05 18:29:55
+@@ -0,0 +1,96 @@
++/*
++    SDL - Simple DirectMedia Layer
++    Copyright (C) 1997-2010 Sam Lantinga
++
++    This library is free software; you can redistribute it and/or
++    modify it under the terms of the GNU Lesser General Public
++    License as published by the Free Software Foundation; either
++    version 2.1 of the License, or (at your option) any later version.
++
++    This library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++    Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public
++    License along with this library; if not, write to the Free Software
++    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++    Sam Lantinga
++    slouken@libsdl.org
++*/
++#include "SDL_config.h"
++
++/* Being a null driver, there's no event stream. We just define stubs for
++   most of the API. */
++
++// TODO: FIXME
++//#include "../../events/SDL_sysevents.h"
++#include "../../events/SDL_events_c.h"
++
++#include "SDL_PSL1GHTvideo.h"
++#include "SDL_PSL1GHTevents_c.h"
++#include "SDL_PSL1GHTkeyboard_c.h"
++#include "SDL_PSL1GHTmouse_c.h"
++
++#include <sysutil/sysutil.h>
++
++static void eventHandle(u64 status, u64 param, void * userdata) {
++    _THIS = userdata;
++    SDL_Window *window = NULL;
++
++    // There should only be one window
++    if (_this->num_displays == 1) {
++        SDL_VideoDisplay *display = &_this->displays[0];
++        if (display->fullscreen_window != NULL) {
++            window = display->fullscreen_window;
++        }
++    }
++
++    // Process event
++    if (status == SYSUTIL_EXIT_GAME) {
++	    deprintf(1, "Quit game requested\n");
++	    SDL_SendQuit();
++    } else if(status == SYSUTIL_MENU_OPEN) {
++	    // XMB opened
++	    if (window) {
++	        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_LEAVE, 0, 0);
++	    }
++    } else if(status == SYSUTIL_MENU_CLOSE) {
++		// XMB closed
++	    if (window) {
++	        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_ENTER, 0, 0);
++	    }
++    } else if(status == SYSUTIL_DRAW_BEGIN) {
++    } else if(status == SYSUTIL_DRAW_END) {
++    } else {
++	    deprintf(1, "Unhandled event: %08llX\n", (unsigned long long int)status);
++    }
++}
++
++void
++PSL1GHT_PumpEvents(_THIS)
++{
++    sysUtilCheckCallback();
++    PSL1GHT_PumpKeyboard(_this);
++    PSL1GHT_PumpMouse(_this);
++}
++
++
++void
++PSL1GHT_InitSysEvent(_THIS)
++{
++    sysUtilRegisterCallback(SYSUTIL_EVENT_SLOT0, eventHandle, _this);
++    PSL1GHT_InitKeyboard(_this);
++    PSL1GHT_InitMouse(_this);
++}
++
++void
++PSL1GHT_QuitSysEvent(_THIS)
++{
++    sysUtilUnregisterCallback(SYSUTIL_EVENT_SLOT0);
++    PSL1GHT_QuitKeyboard(_this);
++    PSL1GHT_QuitMouse(_this);
++}
++
++/* vi: set ts=4 sw=4 expandtab: */
+diff -Nru SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTevents_c.h SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTevents_c.h
+--- SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTevents_c.h	1969-12-31 21:00:00
++++ SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTevents_c.h	2026-09-05 18:29:55
+@@ -0,0 +1,30 @@
++/*
++    SDL - Simple DirectMedia Layer
++    Copyright (C) 1997-2010 Sam Lantinga
++
++    This library is free software; you can redistribute it and/or
++    modify it under the terms of the GNU Lesser General Public
++    License as published by the Free Software Foundation; either
++    version 2.1 of the License, or (at your option) any later version.
++
++    This library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++    Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public
++    License along with this library; if not, write to the Free Software
++    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++    Sam Lantinga
++    slouken@libsdl.org
++*/
++#include "SDL_config.h"
++
++#include "SDL_PSL1GHTvideo.h"
++
++extern void PSL1GHT_PumpEvents(_THIS);
++extern void PSL1GHT_InitSysEvent(_THIS);
++extern void PSL1GHT_QuitSysEvent(_THIS);
++
++/* vi: set ts=4 sw=4 expandtab: */
+diff -Nru SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTkeyboard.c SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTkeyboard.c
+--- SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTkeyboard.c	1969-12-31 21:00:00
++++ SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTkeyboard.c	2026-09-05 18:29:55
+@@ -0,0 +1,232 @@
++/*
++    SDL - Simple DirectMedia Layer
++    Copyright (C) 1997-2010 Sam Lantinga
++
++    This library is free software; you can redistribute it and/or
++    modify it under the terms of the GNU Lesser General Public
++    License as published by the Free Software Foundation; either
++    version 2.1 of the License, or (at your option) any later version.
++
++    This library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++    Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public
++    License along with this library; if not, write to the Free Software
++    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++    Sam Lantinga
++    slouken@libsdl.org
++*/
++#include "SDL_config.h"
++#include "SDL_events.h"
++#include "../../events/SDL_keyboard_c.h"
++
++#include <io/kb.h>
++
++#include "SDL_PSL1GHTkeyboard_c.h"
++
++static void unicodeToUtf8(Uint16 w, char *utf8buf)
++{
++    unsigned char *utf8s = (unsigned char *) utf8buf;
++
++    if ( w < 0x0080 ) {
++        utf8s[0] = ( unsigned char ) w;
++        utf8s[1] = 0;
++    }
++    else if ( w < 0x0800 ) {
++        utf8s[0] = 0xc0 | (( w ) >> 6 );
++        utf8s[1] = 0x80 | (( w ) & 0x3f );
++        utf8s[2] = 0;
++    }
++    else {
++        utf8s[0] = 0xe0 | (( w ) >> 12 );
++        utf8s[1] = 0x80 | (( ( w ) >> 6 ) & 0x3f );
++        utf8s[2] = 0x80 | (( w ) & 0x3f );
++        utf8s[3] = 0;
++    }
++}
++
++static void updateKeymap(_THIS)
++{
++    SDL_DeviceData *data =
++        (SDL_DeviceData *) _this->driverdata;
++
++    SDL_Scancode scancode;
++    SDL_Keycode keymap[SDL_NUM_SCANCODES];
++    KbConfig kbConfig;
++    KbMkey kbMkey;
++    KbLed kbLed;
++    Uint16 unicode;
++
++    SDL_GetDefaultKeymap(keymap);
++
++    ioKbGetConfiguration(0, &kbConfig);
++
++    data->_keyboardMapping = kbConfig.mapping;
++
++    kbMkey._KbMkeyU.mkeys = 0;
++    kbLed._KbLedU.leds = 1; // Num lock
++
++    // Update SDL keycodes according to the keymap
++    for (scancode = 0; scancode < SDL_NUM_SCANCODES; ++scancode) {
++
++        // Make sure this scancode is a valid character scancode
++        if (scancode == SDL_SCANCODE_UNKNOWN ||
++            scancode == SDL_SCANCODE_ESCAPE ||
++            scancode == SDL_SCANCODE_RETURN ||
++            (keymap[scancode] & SDLK_SCANCODE_MASK)) {
++            continue;
++        }
++
++        unicode = ioKbCnvRawCode(data->_keyboardMapping, kbMkey, kbLed, scancode);
++
++        // Ignore Keypad flag
++        unicode &= ~KB_KEYPAD;
++
++        // Exclude raw keys
++        if (unicode != 0 && unicode < KB_RAWDAT) {
++            keymap[scancode] = unicode;
++        }
++    }
++    SDL_SetKeymap(0, keymap, SDL_NUM_SCANCODES, SDL_FALSE);
++}
++
++static void checkKeyboardConnected(_THIS)
++{
++    SDL_DeviceData *data =
++        (SDL_DeviceData *) _this->driverdata;
++
++    KbInfo kbInfo;
++    ioKbGetInfo(&kbInfo);
++
++    if (kbInfo.status[0] == 1 && !data->_keyboardConnected) // Connected
++    {
++        data->_keyboardConnected = true;
++
++        // Old events in the queue are discarded
++        ioKbClearBuf(0);
++
++        // Set raw keyboard code types to get scan codes
++        ioKbSetCodeType(0, KB_CODETYPE_RAW);
++        ioKbSetReadMode(0, KB_RMODE_INPUTCHAR);
++
++        updateKeymap(_this);
++    }
++    else if (kbInfo.status[0] != 1 && data->_keyboardConnected) // Disconnected
++    {
++        data->_keyboardConnected = false;
++
++        SDL_ResetKeyboard();
++    }
++}
++
++static void updateModifierKey(bool oldState, bool newState, SDL_Scancode scancode)
++{
++    if (!oldState ^ !newState) {
++        SDL_SendKeyboardKey(newState ? SDL_PRESSED : SDL_RELEASED, scancode);
++    }
++}
++
++static void updateModifiers(_THIS, const KbData *Keys)
++{
++    SDL_Keymod modstate = SDL_GetModState();
++
++    updateModifierKey(modstate & KMOD_LSHIFT, Keys->mkey._KbMkeyU._KbMkeyS.l_shift, SDL_SCANCODE_LSHIFT);
++    updateModifierKey(modstate & KMOD_RSHIFT, Keys->mkey._KbMkeyU._KbMkeyS.r_shift, SDL_SCANCODE_RSHIFT);
++    updateModifierKey(modstate & KMOD_LCTRL, Keys->mkey._KbMkeyU._KbMkeyS.l_ctrl, SDL_SCANCODE_LCTRL);
++    updateModifierKey(modstate & KMOD_RCTRL, Keys->mkey._KbMkeyU._KbMkeyS.r_ctrl, SDL_SCANCODE_RCTRL);
++    updateModifierKey(modstate & KMOD_LALT, Keys->mkey._KbMkeyU._KbMkeyS.l_alt, SDL_SCANCODE_LALT);
++    updateModifierKey(modstate & KMOD_RALT, Keys->mkey._KbMkeyU._KbMkeyS.r_alt, SDL_SCANCODE_RALT);
++    updateModifierKey(modstate & KMOD_LGUI, Keys->mkey._KbMkeyU._KbMkeyS.l_win, SDL_SCANCODE_LGUI);
++    updateModifierKey(modstate & KMOD_RGUI, Keys->mkey._KbMkeyU._KbMkeyS.r_win, SDL_SCANCODE_RGUI);
++}
++
++static void updateKeys(_THIS, const KbData *Keys)
++{
++    SDL_DeviceData *data =
++        (SDL_DeviceData *) _this->driverdata;
++
++    int x = 0;
++    int numKeys = 0;
++    Uint8 newkeystate[SDL_NUM_SCANCODES];
++    const Uint8 * keystate = SDL_GetKeyboardState(&numKeys);
++    Uint16 unicode;
++    SDL_Scancode scancode;
++
++    for (scancode = 0; scancode < SDL_NUM_SCANCODES; ++scancode) {
++        newkeystate[scancode] = SDL_RELEASED;
++    }
++
++    for (x = 0; x < Keys->nb_keycode; x++) {
++        if (Keys->keycode[0] != 0)
++            newkeystate[Keys->keycode[x]] = SDL_PRESSED;
++    }
++
++    for (scancode = 0; scancode < SDL_NUM_SCANCODES; ++scancode) {
++        if ((newkeystate[scancode] != keystate[scancode])
++                && (scancode < SDL_SCANCODE_LCTRL || scancode > SDL_SCANCODE_RGUI)) {
++
++            // Send new key state
++            SDL_SendKeyboardKey(newkeystate[scancode], scancode);
++
++            // Send the text corresponding to the keypress
++            if (newkeystate[scancode] == SDL_PRESSED) {
++                // Convert scancode
++                unicode = ioKbCnvRawCode(data->_keyboardMapping, Keys->mkey, Keys->led, scancode);
++
++                // Ignore Keypad flag
++                unicode &= ~KB_KEYPAD;
++
++                // Exclude raw keys
++                if (unicode != 0 && unicode < KB_RAWDAT) {
++                    char utf8[SDL_TEXTINPUTEVENT_TEXT_SIZE];
++
++                    // Convert from Unicode to UTF-8
++                    unicodeToUtf8(unicode, utf8);
++                    SDL_SendKeyboardText(utf8);
++                }
++            }
++        }
++    }
++}
++
++void
++PSL1GHT_PumpKeyboard(_THIS)
++{
++    SDL_DeviceData *data =
++        (SDL_DeviceData *) _this->driverdata;
++
++    checkKeyboardConnected(_this);
++
++    if (data->_keyboardConnected) {
++        KbData Keys;
++
++        // Read data from the keyboard buffer
++        if (ioKbRead(0, &Keys) == 0 && Keys.nb_keycode > 0) {
++            updateModifiers(_this, &Keys);
++            updateKeys(_this, &Keys);
++        }
++    }
++}
++
++void
++PSL1GHT_InitKeyboard(_THIS)
++{
++    SDL_DeviceData *data =
++        (SDL_DeviceData *) _this->driverdata;
++
++    // Init the PS3 Keyboard
++    ioKbInit(1);
++
++    data->_keyboardConnected = false;
++}
++
++void
++PSL1GHT_QuitKeyboard(_THIS)
++{
++    ioKbEnd();
++}
++
++/* vi: set ts=4 sw=4 expandtab: */
+diff -Nru SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTkeyboard_c.h SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTkeyboard_c.h
+--- SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTkeyboard_c.h	1969-12-31 21:00:00
++++ SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTkeyboard_c.h	2026-09-05 18:29:55
+@@ -0,0 +1,30 @@
++/*
++    SDL - Simple DirectMedia Layer
++    Copyright (C) 1997-2010 Sam Lantinga
++
++    This library is free software; you can redistribute it and/or
++    modify it under the terms of the GNU Lesser General Public
++    License as published by the Free Software Foundation; either
++    version 2.1 of the License, or (at your option) any later version.
++
++    This library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++    Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public
++    License along with this library; if not, write to the Free Software
++    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++    Sam Lantinga
++    slouken@libsdl.org
++*/
++#include "SDL_config.h"
++
++#include "SDL_PSL1GHTvideo.h"
++
++extern void PSL1GHT_PumpKeyboard(_THIS);
++extern void PSL1GHT_InitKeyboard(_THIS);
++extern void PSL1GHT_QuitKeyboard(_THIS);
++
++/* vi: set ts=4 sw=4 expandtab: */
+diff -Nru SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTmodes.c SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTmodes.c
+--- SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTmodes.c	1969-12-31 21:00:00
++++ SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTmodes.c	2026-09-05 18:29:55
+@@ -0,0 +1,183 @@
++/*
++    SDL - Simple DirectMedia Layer
++    Copyright (C) 1997-2010 Sam Lantinga
++
++    This library is free software; you can redistribute it and/or
++    modify it under the terms of the GNU Lesser General Public
++    License as published by the Free Software Foundation; either
++    version 2.1 of the License, or (at your option) any later version.
++
++    This library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++    Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public
++    License along with this library; if not, write to the Free Software
++    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++    Sam Lantinga
++    slouken@libsdl.org
++*/
++#include "SDL_config.h"
++
++#include "SDL_PSL1GHTvideo.h"
++#include "../SDL_sysvideo.h"
++#include "SDL_timer.h"
++
++#include <sysutil/video.h>
++
++#include <assert.h>
++
++void
++PSL1GHT_InitModes(_THIS)
++{
++    deprintf(1, "+PSL1GHT_InitModes()\n");
++    SDL_DisplayMode mode;
++    PSL1GHT_DisplayModeData *modedata;
++    videoState state;
++
++    modedata = (PSL1GHT_DisplayModeData *) SDL_malloc(sizeof(*modedata));
++    if (!modedata) {
++        return;
++    }
++
++    assert(videoGetState(0, 0, &state) == 0); // Get the state of the display
++    assert(state.state == 0); // Make sure display is enabled
++
++    // Get the current resolution
++	videoResolution res;
++    assert(videoGetResolution(state.displayMode.resolution, &res) == 0);
++
++    /* Setting up the DisplayMode based on current settings */
++    mode.format = SDL_PIXELFORMAT_ARGB8888;
++    mode.refresh_rate = 0;
++    mode.w = res.width;
++    mode.h = res.height;
++
++    modedata->vconfig.resolution = state.displayMode.resolution;
++    modedata->vconfig.format = VIDEO_BUFFER_FORMAT_XRGB;
++    modedata->vconfig.pitch = res.width * 4;
++    mode.driverdata = modedata;
++
++    /* Setup the display to it's  default mode */
++    assert(videoConfigure(0, &modedata->vconfig, NULL, 1) == 0);
++
++	// Wait until RSX is ready
++	do{
++		SDL_Delay(10);
++		assert( videoGetState(0, 0, &state) == 0);
++	}while ( state.state == 3);
++
++    /* Set display's videomode and add it */
++    SDL_AddBasicVideoDisplay(&mode);
++
++    deprintf(1, "-PSL1GHT_InitModes()\n");
++}
++
++/* DisplayModes available on the PS3 */
++static SDL_DisplayMode ps3fb_modedb[] = {
++    /* Native resolutions (progressive, "fullscreen") */
++    {SDL_PIXELFORMAT_ARGB8888, 1920, 1080, 0, NULL}, // 1080p
++    {SDL_PIXELFORMAT_ARGB8888, 1280, 720, 0, NULL}, // 720p
++    {SDL_PIXELFORMAT_ARGB8888, 720, 480, 0, NULL}, // 480p
++    {SDL_PIXELFORMAT_ARGB8888, 720, 576, 0, NULL}, // 576p
++};
++
++/* PS3 videomode number according to ps3fb_modedb */
++static PSL1GHT_DisplayModeData ps3fb_data[] = {
++	// { resolution, format, aspect, padding, pitch }
++	{{
++		VIDEO_RESOLUTION_1080, 
++		VIDEO_BUFFER_FORMAT_XRGB,
++		VIDEO_ASPECT_16_9, 
++		{0, 0, 0, 0, 0, 0, 0, 0, 0},
++		1920 * 4
++	}},
++	{{
++		VIDEO_RESOLUTION_720, 
++		VIDEO_BUFFER_FORMAT_XRGB,
++		VIDEO_ASPECT_16_9, 
++		{0, 0, 0, 0, 0, 0, 0, 0, 0},
++		1280 * 4
++	}},
++	{{
++		VIDEO_RESOLUTION_480, 
++		VIDEO_BUFFER_FORMAT_XRGB,
++		VIDEO_ASPECT_16_9, 
++		{0, 0, 0, 0, 0, 0, 0, 0, 0},
++		720 * 4
++	}},
++	{{
++		VIDEO_RESOLUTION_576, 
++		VIDEO_BUFFER_FORMAT_XRGB,
++		VIDEO_ASPECT_16_9, 
++		{0, 0, 0, 0, 0, 0, 0, 0, 0},
++		720 * 4
++	}},
++};
++
++void
++PSL1GHT_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
++{
++    deprintf(1, "+PSL1GHT_GetDisplayModes()\n");
++    unsigned int nummodes;
++
++    nummodes = sizeof(ps3fb_modedb) / sizeof(SDL_DisplayMode);
++
++    int n;
++    for (n=0; n<nummodes; ++n) {
++        /* Get driver specific mode data */
++        ps3fb_modedb[n].driverdata = &ps3fb_data[n];
++
++        /* Add DisplayMode to list */
++        deprintf(2, "Adding resolution %u x %u\n", ps3fb_modedb[n].w, ps3fb_modedb[n].h);
++        SDL_AddDisplayMode(display, &ps3fb_modedb[n]);
++    }
++    deprintf(1, "-PSL1GHT_GetDisplayModes()\n");
++}
++
++int
++PSL1GHT_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
++{
++    deprintf(1, "+PSL1GHT_SetDisplayMode()\n");
++    PSL1GHT_DisplayModeData *dispdata = (PSL1GHT_DisplayModeData *) mode->driverdata;
++	videoState state;
++
++    /* Set the new DisplayMode */
++    deprintf(2, "Setting PS3_MODE to %u\n", dispdata->vconfig.resolution);
++    if ( videoConfigure(0, &dispdata->vconfig, NULL, 0) != 0)
++	{
++        deprintf(2, "Could not set PS3FB_MODE\n");
++        SDL_SetError("Could not set PS3FB_MODE\n");
++        return -1;
++    }
++
++	// Wait until RSX is ready
++	do{
++		SDL_Delay(10);
++		assert( videoGetState(0, 0, &state) == 0);
++	}while ( state.state == 3);
++
++    deprintf(1, "-PSL1GHT_SetDisplayMode()\n");
++    return 0;
++}
++
++void
++PSL1GHT_QuitModes(_THIS)
++{
++    deprintf(1, "+PSL1GHT_QuitModes()\n");
++
++    /* There was no mem allocated for driverdata */
++    int i, j;
++    for (i = 0; i < SDL_GetNumVideoDisplays(); ++i) {
++        SDL_VideoDisplay *display = &_this->displays[i];
++        for (j = display->num_display_modes; j--;) {
++            display->display_modes[j].driverdata = NULL;
++        }
++    }
++
++    deprintf(1, "-PSL1GHT_QuitModes()\n");
++}
++
++/* vi: set ts=4 sw=4 expandtab: */
+diff -Nru SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTmodes_c.h SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTmodes_c.h
+--- SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTmodes_c.h	1969-12-31 21:00:00
++++ SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTmodes_c.h	2026-09-05 18:29:55
+@@ -0,0 +1,35 @@
++/*
++    SDL - Simple DirectMedia Layer
++    Copyright (C) 1997-2010 Sam Lantinga
++
++    This library is free software; you can redistribute it and/or
++    modify it under the terms of the GNU Lesser General Public
++    License as published by the Free Software Foundation; either
++    version 2.1 of the License, or (at your option) any later version.
++
++    This library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++    Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public
++    License along with this library; if not, write to the Free Software
++    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++    Sam Lantinga
++    slouken@libsdl.org
++*/
++#include "SDL_config.h"
++
++#ifndef _SDL_psl1ghtmodes_h
++#define _SDL_psl1ghtmodes_h
++
++extern void PSL1GHT_InitModes(_THIS);
++extern void PSL1GHT_GetDisplayModes(_THIS, SDL_VideoDisplay * display);
++extern int PSL1GHT_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
++extern void PSL1GHT_QuitModes(_THIS);
++
++
++#endif /* SDL_psl1ghtmodes_h */
++
++/* vi: set ts=4 sw=4 expandtab: */
+diff -Nru SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTmouse.c SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTmouse.c
+--- SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTmouse.c	1969-12-31 21:00:00
++++ SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTmouse.c	2026-09-05 18:29:55
+@@ -0,0 +1,139 @@
++/*
++    SDL - Simple DirectMedia Layer
++    Copyright (C) 1997-2010 Sam Lantinga
++
++    This library is free software; you can redistribute it and/or
++    modify it under the terms of the GNU Lesser General Public
++    License as published by the Free Software Foundation; either
++    version 2.1 of the License, or (at your option) any later version.
++
++    This library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++    Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public
++    License along with this library; if not, write to the Free Software
++    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++    Sam Lantinga
++    slouken@libsdl.org
++*/
++#include "SDL_config.h"
++#include "SDL_events.h"
++#include "../../events/SDL_mouse_c.h"
++
++#include <io/mouse.h>
++
++#include "SDL_PSL1GHTmouse_c.h"
++
++void checkMouseConnected(_THIS) {
++    SDL_DeviceData *data =
++        (SDL_DeviceData *) _this->driverdata;
++
++    mouseInfo mouseinfo;
++    ioMouseGetInfo(&mouseinfo);
++
++    if (mouseinfo.status[0] == 1 && !data->_mouseConnected) // Connected
++    {
++        data->_mouseConnected = true;
++        data->_mouseButtons = 0;
++
++        // Old events in the queue are discarded
++        ioMouseClearBuf(0);
++    }
++    else if (mouseinfo.status[0] != 1 && data->_mouseConnected) // Disconnected
++    {
++        data->_mouseConnected = false;
++        data->_mouseButtons = 0;
++    }
++}
++
++void updateMouseButtons(_THIS, const mouseData *mouse) {
++    SDL_DeviceData *data =
++        (SDL_DeviceData *) _this->driverdata;
++    // There should only be one window
++    SDL_Window *window = _this->windows;
++
++    // Check left mouse button changes
++    bool oldLMB = data->_mouseButtons & 1;
++    bool newLMB = mouse->buttons & 1;
++    if (newLMB != oldLMB) {
++        SDL_SendMouseButton(window, 0, newLMB ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_LEFT);
++    }
++
++    // Check rigth mouse button changes
++    bool oldRMB = data->_mouseButtons & 2;
++    bool newRMB = mouse->buttons & 2;
++    if (newRMB != oldRMB) {
++        SDL_SendMouseButton(window, 0, newRMB ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_RIGHT);
++    }
++
++    // Check middle mouse button changes
++    bool oldMMB = data->_mouseButtons & 4;
++    bool newMMB = mouse->buttons & 4;
++    if (newMMB != oldMMB) {
++        SDL_SendMouseButton(window, 0, newMMB ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_MIDDLE);
++    }
++
++    data->_mouseButtons = mouse->buttons;
++}
++
++void updateMousePosition(_THIS, const mouseData *mouse) {
++    // There should only be one window
++    SDL_Window *window = _this->windows;
++
++    // Mouse movement is relative
++    SDL_SendMouseMotion(window, 0, 1, mouse->x_axis, mouse->y_axis);
++}
++
++void updateMouseWheel(_THIS, const mouseData *mouse) {
++    // There should only be one window
++    SDL_Window *window = _this->windows;
++
++    SDL_SendMouseWheel(window, 0, mouse->tilt, mouse->wheel, SDL_MOUSEWHEEL_NORMAL);
++}
++
++void
++PSL1GHT_PumpMouse(_THIS)
++{
++    SDL_DeviceData *data =
++        (SDL_DeviceData *) _this->driverdata;
++
++    // Check if a mouse has been connected / disconnected
++    checkMouseConnected(_this);
++
++    if (data->_mouseConnected)
++    {
++        mouseDataList datalist;
++        ioMouseGetDataList(0, &datalist);
++
++        int i;
++        for (i = 0; i < datalist.count; i++) {
++            // Send SDL events
++            updateMouseButtons(_this, &datalist.list[i]);
++            updateMousePosition(_this, &datalist.list[i]);
++            updateMouseWheel(_this, &datalist.list[i]);
++        }
++    }
++}
++
++void
++PSL1GHT_InitMouse(_THIS)
++{
++    SDL_DeviceData *data =
++        (SDL_DeviceData *) _this->driverdata;
++
++    // Support only one mouse for now
++    ioMouseInit(1);
++
++    data->_mouseConnected = false;
++}
++
++void
++PSL1GHT_QuitMouse(_THIS)
++{
++    ioMouseEnd();
++}
++
++/* vi: set ts=4 sw=4 expandtab: */
+diff -Nru SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTmouse_c.h SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTmouse_c.h
+--- SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTmouse_c.h	1969-12-31 21:00:00
++++ SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTmouse_c.h	2026-09-05 18:29:55
+@@ -0,0 +1,30 @@
++/*
++    SDL - Simple DirectMedia Layer
++    Copyright (C) 1997-2010 Sam Lantinga
++
++    This library is free software; you can redistribute it and/or
++    modify it under the terms of the GNU Lesser General Public
++    License as published by the Free Software Foundation; either
++    version 2.1 of the License, or (at your option) any later version.
++
++    This library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++    Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public
++    License along with this library; if not, write to the Free Software
++    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++    Sam Lantinga
++    slouken@libsdl.org
++*/
++#include "SDL_config.h"
++
++#include "SDL_PSL1GHTvideo.h"
++
++extern void PSL1GHT_PumpMouse(_THIS);
++extern void PSL1GHT_InitMouse(_THIS);
++extern void PSL1GHT_QuitMouse(_THIS);
++
++/* vi: set ts=4 sw=4 expandtab: */
+diff -Nru SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTvideo.c SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTvideo.c
+--- SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTvideo.c	1969-12-31 21:00:00
++++ SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTvideo.c	2026-09-05 18:29:55
+@@ -0,0 +1,267 @@
++/*
++    SDL - Simple DirectMedia Layer
++    Copyright (C) 1997-2010 Sam Lantinga
++
++    This library is free software; you can redistribute it and/or
++    modify it under the terms of the GNU Lesser General Public
++    License as published by the Free Software Foundation; either
++    version 2.1 of the License, or (at your option) any later version.
++
++    This library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++    Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public
++    License along with this library; if not, write to the Free Software
++    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++    Sam Lantinga
++    slouken@libsdl.org
++*/
++#include "../../SDL_internal.h"
++
++/* PSL1GHT SDL video driver implementation (for PS3). Based on Dummy driver.
++ *
++ * Initial work by Ryan C. Gordon (icculus@icculus.org). A good portion
++ *  of this was cut-and-pasted from Stephane Peter's work in the AAlib
++ *  SDL video driver.  Renamed to "DUMMY" by Sam Lantinga.
++ */
++
++#include "SDL_video.h"
++#include "SDL_mouse.h"
++#include "../SDL_sysvideo.h"
++#include "../SDL_pixels_c.h"
++#include "../../events/SDL_events_c.h"
++
++#include "SDL_PSL1GHTvideo.h"
++#include "SDL_PSL1GHTevents_c.h"
++#include "SDL_PSL1GHTmodes_c.h"
++
++
++#include <malloc.h>
++#include <assert.h>
++
++#include <rsx/rsx.h>
++
++#define PSL1GHTVID_DRIVER_NAME "psl1ght"
++
++/* Initialization/Query functions */
++static int PSL1GHT_VideoInit(_THIS);
++static void PSL1GHT_VideoQuit(_THIS);
++
++/* PS3GUI init functions : */
++static void initializeGPU(SDL_DeviceData * devdata);
++
++/* PSL1GHT driver bootstrap functions */
++
++static int
++PSL1GHT_Available(void)
++{
++    return (1);
++}
++
++static void
++PSL1GHT_DeleteDevice(SDL_VideoDevice * device)
++{
++    deprintf (1, "PSL1GHT_DeleteDevice( %p)\n", device);
++    SDL_free(device);
++}
++
++int
++PSL1GHT_VideoInit(_THIS)
++{
++    SDL_DeviceData *devdata = NULL;
++
++    devdata = (SDL_DeviceData*) SDL_calloc(1, sizeof(SDL_DeviceData));
++    if (devdata == NULL) {
++        /* memory allocation problem */
++        SDL_OutOfMemory();
++        return -1;
++    }
++
++    _this->driverdata = devdata;
++
++    PSL1GHT_InitSysEvent(_this);
++
++    initializeGPU(devdata);
++    PSL1GHT_InitModes(_this);
++
++    gcmSetFlipMode(GCM_FLIP_VSYNC); // Wait for VSYNC to flip
++
++    /* We're done! */
++    return 0;
++}
++
++void
++PSL1GHT_VideoQuit(_THIS)
++{
++    deprintf (1, "PSL1GHT_VideoQuit()\n");
++    PSL1GHT_QuitModes(_this);
++    PSL1GHT_QuitSysEvent(_this);
++    SDL_free( _this->driverdata);
++
++}
++
++void initializeGPU( SDL_DeviceData * devdata)
++{
++    deprintf (1, "initializeGPU()\n");
++   // Allocate a 1Mb buffer, alligned to a 1Mb boundary to be our shared IO memory with the RSX.
++    void *host_addr = memalign(1024*1024, 1024*1024);
++    assert(host_addr != NULL);
++
++    // Initilise Reality, which sets up the command buffer and shared IO memory
++    rsxInit(&devdata->_CommandBuffer, 0x10000, 1024*1024, host_addr);
++    assert(devdata->_CommandBuffer != NULL);
++}
++
++int
++PSL1GHT_CreateWindow(_THIS, SDL_Window * window)
++{
++    SDL_WindowData *wdata;
++
++    /* Allocate window internal data */
++    wdata = (SDL_WindowData *) SDL_calloc(1, sizeof(SDL_WindowData));
++    if (wdata == NULL) {
++        return SDL_OutOfMemory();
++    }
++
++    /* Setup driver data for this window */
++    window->driverdata = wdata;
++
++    SDL_SetKeyboardFocus(window);
++
++    /* Window has been successfully created */
++    return 0;
++}
++
++int
++PSL1GHT_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
++{
++    return SDL_Unsupported();
++}
++
++void
++PSL1GHT_SetWindowTitle(_THIS, SDL_Window * window)
++{
++}
++void
++PSL1GHT_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
++{
++}
++void
++PSL1GHT_SetWindowPosition(_THIS, SDL_Window * window)
++{
++}
++void
++PSL1GHT_SetWindowSize(_THIS, SDL_Window * window)
++{
++}
++void
++PSL1GHT_ShowWindow(_THIS, SDL_Window * window)
++{
++}
++void
++PSL1GHT_HideWindow(_THIS, SDL_Window * window)
++{
++}
++void
++PSL1GHT_RaiseWindow(_THIS, SDL_Window * window)
++{
++}
++void
++PSL1GHT_MaximizeWindow(_THIS, SDL_Window * window)
++{
++}
++void
++PSL1GHT_MinimizeWindow(_THIS, SDL_Window * window)
++{
++}
++void
++PSL1GHT_RestoreWindow(_THIS, SDL_Window * window)
++{
++}
++void
++PSL1GHT_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
++{
++
++}
++void
++PSL1GHT_DestroyWindow(_THIS, SDL_Window * window)
++{
++}
++
++SDL_bool PSL1GHT_HasScreenKeyboardSupport(_THIS)
++{
++    return SDL_FALSE;
++}
++void PSL1GHT_ShowScreenKeyboard(_THIS, SDL_Window *window)
++{
++}
++void PSL1GHT_HideScreenKeyboard(_THIS, SDL_Window *window)
++{
++}
++
++SDL_bool PSL1GHT_IsScreenKeyboardShown(_THIS, SDL_Window *window)
++{
++    return SDL_FALSE;
++}
++
++static SDL_VideoDevice *
++PSL1GHT_CreateDevice(int devindex)
++{
++    SDL_VideoDevice *device;
++    deprintf (1, "PSL1GHT_CreateDevice( %16X)\n", devindex);
++
++    /* Initialize all variables that we clean on shutdown */
++    device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
++    if (device) {
++        SDL_memset(device, 0, (sizeof *device));
++    }
++    else {
++        SDL_OutOfMemory();
++        SDL_free(device);
++        return (0);
++    }
++
++    /* Set the function pointers */
++    device->VideoInit = PSL1GHT_VideoInit;
++    device->VideoQuit = PSL1GHT_VideoQuit;
++    device->GetDisplayModes = PSL1GHT_GetDisplayModes;
++    device->SetDisplayMode = PSL1GHT_SetDisplayMode;
++    device->CreateSDLWindow = PSL1GHT_CreateWindow;
++    device->CreateSDLWindowFrom = PSL1GHT_CreateWindowFrom;
++    device->SetWindowTitle = PSL1GHT_SetWindowTitle;
++    device->SetWindowIcon = PSL1GHT_SetWindowIcon;
++    device->SetWindowPosition = PSL1GHT_SetWindowPosition;
++    device->SetWindowSize = PSL1GHT_SetWindowSize;
++    device->ShowWindow = PSL1GHT_ShowWindow;
++    device->HideWindow = PSL1GHT_HideWindow;
++    device->RaiseWindow = PSL1GHT_RaiseWindow;
++    device->MaximizeWindow = PSL1GHT_MaximizeWindow;
++    device->MinimizeWindow = PSL1GHT_MinimizeWindow;
++    device->RestoreWindow = PSL1GHT_RestoreWindow;
++
++    // TODO: FIXME
++    // device->SetWindowGrab = PSL1GHT_SetWindowGrab;
++
++    device->DestroyWindow = PSL1GHT_DestroyWindow;
++    device->HasScreenKeyboardSupport = PSL1GHT_HasScreenKeyboardSupport;
++    device->ShowScreenKeyboard = PSL1GHT_ShowScreenKeyboard;
++    device->HideScreenKeyboard = PSL1GHT_HideScreenKeyboard;
++    device->IsScreenKeyboardShown = PSL1GHT_IsScreenKeyboardShown;
++
++    device->PumpEvents = PSL1GHT_PumpEvents;
++
++    device->free = PSL1GHT_DeleteDevice;
++
++    return device;
++}
++
++VideoBootStrap PSL1GHT_bootstrap = {
++    PSL1GHTVID_DRIVER_NAME, "SDL psl1ght video driver",
++    PSL1GHT_CreateDevice,
++    NULL /* no ShowMessageBox implementation */
++};
++
++/* vi: set ts=4 sw=4 expandtab: */
+diff -Nru SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTvideo.h SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTvideo.h
+--- SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTvideo.h	1969-12-31 21:00:00
++++ SDL2-2.30.1/src/video/psl1ght/SDL_PSL1GHTvideo.h	2026-09-05 18:29:55
+@@ -0,0 +1,79 @@
++/*
++    SDL - Simple DirectMedia Layer
++    Copyright (C) 1997-2010 Sam Lantinga
++
++    This library is free software; you can redistribute it and/or
++    modify it under the terms of the GNU Lesser General Public
++    License as published by the Free Software Foundation; either
++    version 2.1 of the License, or (at your option) any later version.
++
++    This library is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++    Lesser General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public
++    License along with this library; if not, write to the Free Software
++    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++    Sam Lantinga
++    slouken@libsdl.org
++*/
++#include "SDL_config.h"
++
++#ifndef _SDL_PSL1GHTvideo_h
++#define _SDL_PSL1GHTvideo_h
++
++#include "../SDL_sysvideo.h"
++
++#include <rsx/rsx.h>
++#include <sysutil/video.h>
++
++/* Debugging
++ * 0: No debug messages
++ * 1: Video debug messages
++ * 2: SPE debug messages
++ * 3: Memory adresses
++ */
++#define VIDEO_DEBUG_LEVEL 3
++
++#ifdef VIDEO_DEBUG_LEVEL
++#define deprintf( level, fmt, args... ) \
++    do \
++{ \
++    if ( (unsigned)(level) <= VIDEO_DEBUG_LEVEL ) \
++    { \
++        fprintf( stdout, fmt, ##args ); \
++        fflush( stdout ); \
++    } \
++} while ( 0 )
++#else
++#define deprintf( level, fmt, args... )
++#endif
++
++/* Private RSX data */
++typedef struct SDL_DeviceData
++{
++    // Context to keep track of the RSX buffer.
++    gcmContextData *_CommandBuffer;
++
++    bool _keyboardConnected;
++    Uint32 _keyboardMapping;
++
++    bool _mouseConnected;
++    Uint8 _mouseButtons;
++} SDL_DeviceData;
++
++typedef struct SDL_DisplayModeData
++{
++    videoConfiguration vconfig;
++} PSL1GHT_DisplayModeData;
++
++typedef struct SDL_WindowData
++{
++
++} SDL_WindowData;
++
++#endif /* _SDL_PSL1GHTvideo_h */
++
++/* vi: set ts=4 sw=4 expandtab: */
