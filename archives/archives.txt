@@ -31,3 +31,6 @@ b6ae1ee2fa3d42ac489287d3ec34c5885730b1296f0801ae577a35193d3affbc  1903175 https:
 -                                                                       - https://github.com/sahlberg/libsmb2/tarball/master -> libsmb2.tar.gz
 -                                                                       - https://github.com/clienthax/psl1ght/tarball/master -> psl1ght.tar.gz
 -                                                                       - https://github.com/bucanero/pthread-emb-ps3/tarball/master -> pthread-emb-ps3.tar.gz
+-                                                                       - https://github.com/onesixromcom/SDL/tarball/ps3-rsx-ps3dev -> sdl3.tar.gz
+182a07c745375e113dc740d43964ff21b0be29f29f59876c4dbc4db3d32f6901  5161139 https://github.com/libsdl-org/SDL_mixer/releases/download/release-3.2.4/SDL3_mixer-3.2.4.tar.gz
+63547d58d0185c833213885b635a2c0548201cc8f301e6587c0be1a67e1e045d  1545950 https://github.com/libsdl-org/SDL_ttf/releases/download/release-3.2.2/SDL3_ttf-3.2.2.tar.gz
