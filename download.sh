@@ -4,7 +4,7 @@ cd "$(dirname "$0")"
 cd archives || exit 1
 
 ARCHIVE="archives.txt"
-WGET="wget --tries=5 --timeout=15 --quiet --show-progress"
+WGET="wget --tries=5 --timeout=30 --quiet --show-progress"
 
 # -----------------------------------------------------------------------------
 # verify_sha256 <file> <expected_sha>

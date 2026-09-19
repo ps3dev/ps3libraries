@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-# libxml2-2.7.8.sh by Naomi Peori (naomi@peori.ca)
-LIBXML2="libxml2-2.7.8"
+# libxml2-2.9.12.sh by Naomi Peori (naomi@peori.ca)
+LIBXML2="libxml2-2.9.12"
 
 ## Source util functions
 source ../utils/utils.sh
@@ -19,10 +19,6 @@ echo "Unpacking ${LIBXML2}"
 extract ../archives/${LIBXML2}.tar.gz
 cd ${LIBXML2}
 
-## Patch pthread_t issue for modern toolchains
-echo "Patching testThreads.c..."
-patch -p1 < ../../patches/${LIBXML2}-pthread.patch
-
 ## Replace config.guess and config.sub
 cp ../../archives/config.guess ../../archives/config.sub .
 
@@ -32,8 +28,12 @@ mkdir build-ppu && cd build-ppu
 ## Configure the build.
 CFLAGS="-I$PSL1GHT/ppu/include -I$PS3DEV/portlibs/ppu/include" \
 LDFLAGS="-L$PSL1GHT/ppu/lib -L$PS3DEV/portlibs/ppu/lib -lrt -llv2" \
+PKG_CONFIG_LIBDIR="$PS3DEV/portlibs/ppu/lib/pkgconfig" \
 PKG_CONFIG_PATH="$PS3DEV/portlibs/ppu/lib/pkgconfig" \
-../configure --prefix="$PS3DEV/portlibs/ppu" --host="powerpc64-ps3-elf" --enable-static --disable-shared --without-ftp --without-http --without-python
+../configure --prefix="$PS3DEV/portlibs/ppu" --host="powerpc64-ps3-elf" \
+    --enable-static --disable-shared \
+    --without-ftp --without-http --without-python \
+    --without-lzma
 
 ## Compile and install.
 jobs=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
