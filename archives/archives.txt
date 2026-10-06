@@ -15,7 +15,7 @@ d3605afc28ed4b7d1d9e3142d72e42855e4a23c07c951bbb0299556b02d36755  1741396 https:
 432d3f466644b9416bc5b649d344116a753aeaa520c8beaf024a90cba9d3d35d  4008103 https://curl.haxx.se/download/curl-7.64.1.tar.gz
 bbfac3ed6bfbc2823d3775ebb931087371e142bb0e9bb1bee51a76a6e0078690   502379 https://downloads.sourceforge.net/project/mad/libmad/0.15.1b/libmad-0.15.1b.tar.gz
 9635a44bceb478bbf2ee8a785cf6986fba525afb5fad1fd4bba73cf71f2d3edf  2009217 https://downloads.sourceforge.net/project/flac/flac-src/flac-1.2.1-src/flac-1.2.1.tar.gz
-ee26ed1e177c0cd8fa8458a481b14a0b24ca0b51468c8b4c8b676fd3ceccd330  1137407 https://downloads.sourceforge.net/faac/faad2-2.7.tar.gz
+ee26ed1e177c0cd8fa8458a481b14a0b24ca0b51468c8b4c8b676fd3ceccd330  1137407 https://ftp.osuosl.org/pub/blfs/conglomeration/faad2/faad2-2.7.tar.gz
 b6ae1ee2fa3d42ac489287d3ec34c5885730b1296f0801ae577a35193d3affbc  1903175 https://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2
 9988283408c71838d8d62e5418e5abb5eb5300bd84c385fdc96143b5e8f10ed5   455089 https://codeload.github.com/json-c/json-c/tar.gz/json-c-0.11-20130402 -> json-c-0.11-20130402.tar.gz
 19e5b81fdac0fe22009b9e2bdcd52d7dcafbf62bc67fc59cf0a76b5b5540d149  3489179 https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-2.28.10/mbedtls-2.28.10.tar.bz2
