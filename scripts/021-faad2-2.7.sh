@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -eo pipefail
 # faad2-2.7.sh by dhewg (dhewg@wiibrew.org)
-FAAD2="FAAD2_2_7"
-FAAD2_FOLDER="faad2-FAAD2_2_7"
+FAAD2="faad2-2.7"
 
 ## Source util functions
 source ../utils/utils.sh
@@ -16,8 +15,9 @@ source ../utils/utils.sh
 ## Unpack the source code.
 rm -Rf ${FAAD2}
 echo "Unpacking ${FAAD2}"
-extract ../archives/${FAAD2}.tar.gz
-cd ${FAAD2_FOLDER}
+mkdir ${FAAD2}
+extract ../archives/${FAAD2}.tar.gz --strip-components=1  --directory=${FAAD2}
+cd ${FAAD2}
 
 ## Replace config.guess and config.sub
 cp ../../archives/config.guess ../../archives/config.sub .
