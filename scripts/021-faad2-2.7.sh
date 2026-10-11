@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eo pipefail
 # faad2-2.7.sh by dhewg (dhewg@wiibrew.org)
-FAAD2="faad2-2.7"
+FAAD2="FAAD2_2_7"
 
 ## Source util functions
 source ../utils/utils.sh
@@ -20,6 +20,9 @@ cd ${FAAD2}
 
 ## Replace config.guess and config.sub
 cp ../../archives/config.guess ../../archives/config.sub .
+
+# Run automake
+sh bootstrap
 
 ## Create the build directory.
 mkdir build-ppu && cd build-ppu
