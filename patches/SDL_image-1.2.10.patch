@@ -1,0 +1,12 @@
+diff -burN SDL_image-1.2.10.orig//Makefile.in SDL_image-1.2.10/Makefile.in
+--- SDL_image-1.2.10.orig//Makefile.in	2009-11-12 01:42:10.000000000 -0500
++++ SDL_image-1.2.10/Makefile.in	2011-01-16 21:13:17.045505002 -0500
+@@ -41,7 +41,7 @@
+ host_triplet = @host@
+ @USE_VERSION_RC_FALSE@libSDL_image_la_DEPENDENCIES =  \
+ @USE_VERSION_RC_FALSE@	$(am__DEPENDENCIES_1)
+-noinst_PROGRAMS = showimage$(EXEEXT)
++noinst_PROGRAMS =
+ subdir = .
+ DIST_COMMON = README $(am__configure_deps) \
+ 	$(libSDL_imageinclude_HEADERS) $(srcdir)/Makefile.am \
