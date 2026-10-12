@@ -12,7 +12,7 @@ jobs:
           - runner: ubuntu-latest
             os: linux
 
-          - runner: macos-15-intel
+          - runner: macos-26-intel
             os: macos
 
           - runner: macos-26
@@ -31,7 +31,7 @@ jobs:
       - name: Install Linux requirements
         if: matrix.os == 'linux'
         run: |
-          sudo apt-get -y install gcc libelf-dev autoconf automake bison flex make texinfo patch wget zlib1g-dev libtool-bin bzip2 pkg-config libssl-dev
+          sudo apt-get -y install gcc libelf-dev autoconf automake bison flex make cmake texinfo patch wget zlib1g-dev libtool-bin bzip2 pkg-config libssl-dev
 
       - name: Install MacOS requirements
         if: matrix.os == 'macos'
@@ -42,7 +42,7 @@ jobs:
           HOMEBREW_NO_ENV_HINTS: 1
         run: |
           eval "$(brew shellenv)"
-          brew install autoconf automake openssl libelf ncurses zlib gmp wget pkg-config texinfo
+          brew install autoconf automake openssl libelf ncurses zlib gmp wget pkg-config texinfo cmake
 
       - name: Create build folder
         run: |
@@ -132,7 +132,7 @@ jobs:
       - name: Build Libmikmod 3.1.11
         run: ./libraries.sh 011
 
-      - name: Build Libxml2 2.7.8
+      - name: Build Libxml2 2.9.12
         run: ./libraries.sh 012
 
       - name: Build Sdl_psl1ght
@@ -194,6 +194,30 @@ jobs:
 
       - name: Build Pthread-emb
         run: ./libraries.sh 032
+
+      - name: Build Libun7zip
+        run: ./libraries.sh 033
+
+      - name: Build Libtinytar
+        run: ./libraries.sh 034
+
+      - name: Build Libya2d
+        run: ./libraries.sh 035
+
+      - name: Build Dbglogger
+        run: ./libraries.sh 036
+
+      - name: Build Mini18n
+        run: ./libraries.sh 037
+
+      - name: Build Libansilove
+        run: ./libraries.sh 038
+
+      - name: Build Yaml-cpp 0.9.0
+        run: ./libraries.sh 039
+
+      - name: Build SDL2 Libs
+        run: ./libraries.sh 040
 
       - name: Build Package
         run: |
