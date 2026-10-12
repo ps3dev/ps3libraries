@@ -1,6 +1,13 @@
 #!/bin/sh
 # libraries.sh by Naomi Peori (naomi@peori.ca)
 
+## Copy share file.
+if [ ! -f "$PS3DEV/share/ps3dev.cmake" ]; then
+    cp -r ./share  "$PS3DEV/"
+fi
+
+exit
+
 ## Enter the ps3libraries directory.
 cd "`dirname $0`" || { echo "ERROR: Could not enter the ps3libraries directory."; exit 1; }
 
