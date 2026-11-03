@@ -255,9 +255,6 @@ jobs:
       - name: Build Yaml-cpp 0.9.0
         run: ./libraries.sh 052
 
-      - name: Build SDL2 Libs
-        run: ./libraries.sh 053
-
       - name: Build Package
         run: |
            cd $PSL1GHT
