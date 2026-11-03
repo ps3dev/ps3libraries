@@ -1,0 +1,12 @@
+diff --git a/testThreads.c b/testThreads.c
+index b43cbd0..5c12894 100644
+--- a/testThreads.c
++++ b/testThreads.c
+@@ -107,7 +107,6 @@ main(void)
+ 
+ 	for (i = 0; i < num_threads; i++) {
+ 	    results[i] = NULL;
+-	    tid[i] = (pthread_t) -1;
+ 	}
+ 
+ 	for (i = 0; i < num_threads; i++) {

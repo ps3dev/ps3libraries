@@ -12,7 +12,7 @@ jobs:
           - runner: ubuntu-latest
             os: linux
 
-          - runner: macos-15-intel
+          - runner: macos-26-intel
             os: macos
 
           - runner: macos-26
@@ -132,7 +132,7 @@ jobs:
       - name: Build Libmikmod 3.1.11
         run: ./libraries.sh 011
 
-      - name: Build Libxml2 2.7.8
+      - name: Build Libxml2 2.9.12
         run: ./libraries.sh 012
 
       - name: Build SDL 1.2.15
@@ -233,6 +233,30 @@ jobs:
 
       - name: Build Pthread-emb
         run: ./libraries.sh 045
+
+      - name: Build Libun7zip
+        run: ./libraries.sh 046
+
+      - name: Build Libtinytar
+        run: ./libraries.sh 047
+
+      - name: Build Libya2d
+        run: ./libraries.sh 048
+
+      - name: Build Dbglogger
+        run: ./libraries.sh 049
+
+      - name: Build Mini18n
+        run: ./libraries.sh 050
+
+      - name: Build Libansilove
+        run: ./libraries.sh 051
+
+      - name: Build Yaml-cpp 0.9.0
+        run: ./libraries.sh 052
+
+      - name: Build SDL2 Libs
+        run: ./libraries.sh 053
 
       - name: Build Package
         run: |

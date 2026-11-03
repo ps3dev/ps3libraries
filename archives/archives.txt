@@ -4,12 +4,12 @@ d07616ba1e9c161017384feb3b576d70c160b970abfd9549ad39a622284b574a   829414 https:
 33ec92273c2d809e51dece879c09d206e5dfa3d6deb7ce9e4c2bf0891b8111f9  1907043 https://downloads.sourceforge.net/project/freetype/freetype2/2.4.3/freetype-2.4.3.tar.gz
 9c02c22c6cc3f28f3633d02ef6f0cac130518f621edb011ebbbf08cd1a81251a   537274 https://cairographics.org/releases/pixman-0.20.0.tar.gz
 0f2ce4cc4615594088d74eb8b5360bad7c3cc3c3da9b61af9bfd979ed1ed94b2 24022822 https://cairographics.org/releases/cairo-1.10.0.tar.gz
-fe5670640bd49e828d64d2879c31cb4dde9758681bb664f9bdbf159a01b0c76e   589570 https://downloads.xiph.org/releases/ogg/libogg-1.3.4.tar.gz
-6efbcecdd3e5dfbf090341b485da9d176eb250d893e3eb378c428a2db38301ce  1638779 https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.5.tar.gz
+fe5670640bd49e828d64d2879c31cb4dde9758681bb664f9bdbf159a01b0c76e   589570 https://ftp.osuosl.org/pub/xiph/releases/ogg/libogg-1.3.4.tar.gz
+6efbcecdd3e5dfbf090341b485da9d176eb250d893e3eb378c428a2db38301ce  1638779 https://ftp.osuosl.org/pub/xiph/releases/vorbis/libvorbis-1.3.5.tar.gz
 e63f5dc1b33fd1c02a881d5a819620634a69d1e4ce8637261ca0cb0fbc9f9dca   304965 https://www.nih.at/libzip/libzip-0.9.3.tar.bz2
 67b76d075fb74f7cb32e7e4b217701674755fe6cee0f463b259a753fce691da6  1436968 https://download.osgeo.org/libtiff/old/tiff-3.9.4.tar.gz
 2d7598cd2a8c61c023f27c9c7c1aca8bbfd92aadbee2f98b7a6d421eae35c929   611590 https://mikmod.raphnet.net/files/libmikmod-3.1.11.tar.gz
-cda23bc9ebd26474ca8f3d67e7d1c4a1f1e7106364b690d822e009fdc3c417ec  4881808 http://xmlsoft.org/sources/libxml2-2.7.8.tar.gz
+c8d6681e38c56f172892c85ddc0852e1fd4b53b4209e7f4ebf17f7e2eae71d92  5681632 http://xmlsoft.org/sources/libxml2-2.9.12.tar.gz
 dfb15ac5f8ce7a4952dc12d2aed9747518c5e6b335c0e31636d23f93c630f419  1693451 http://www.ferzkopp.net/Software/SDL_gfx-2.0/SDL_gfx-2.0.27.tar.gz
 75e05d1e95f6277b44797157d9e25a908ba8d08a393216ffb019b0d74de11876  1332906 https://www.libsdl.org/projects/SDL_image/release/SDL_image-1.2.10.tar.gz
 86145ac39cac6d2c6169c226f937648dca5e89dcd828751763dd174fa9af9cf9  2690654 https://www.libsdl.org/projects/SDL_mixer/release/SDL_mixer-1.2.11.tar.gz
@@ -21,20 +21,20 @@ d48cbd1ce475b9e178206bf3b72d56b66d84d44f64ac05803328396234d67723 14314901 https:
 63e0e01addedc9df2f85b93a248f06e8a04affa014a835c2ea34bfe34e576262  1230588 http://www.ferzkopp.net/Software/SDL2_gfx/SDL2_gfx-1.0.4.tar.gz
 5172f97606100080603a48e5279a2b90213905c77e17953ce2a13cff03e10bef  3743019 https://github.com/libsdl-org/SDL-1.2/archive/refs/tags/release-1.2.15.tar.gz -> SDL-1.2.15.tar.gz
 01215ffbc8cfc4ad165ba7573750f15ddda1f971d5a66e9dcaffd37c587f473a  7428023 https://github.com/libsdl-org/SDL/releases/download/release-2.30.1/SDL2-2.30.1.tar.gz
-d3605afc28ed4b7d1d9e3142d72e42855e4a23c07c951bbb0299556b02d36755  1741396 https://mirror2.openwrt.org/sources/polarssl-1.3.9-gpl.tgz
+d3605afc28ed4b7d1d9e3142d72e42855e4a23c07c951bbb0299556b02d36755  1741396 https://src.fedoraproject.org/repo/pkgs/polarssl/polarssl-1.3.9-gpl.tgz/48af7d1f0d5de512cbd6dacf5407884c/polarssl-1.3.9-gpl.tgz
 432d3f466644b9416bc5b649d344116a753aeaa520c8beaf024a90cba9d3d35d  4008103 https://curl.haxx.se/download/curl-7.64.1.tar.gz
 bbfac3ed6bfbc2823d3775ebb931087371e142bb0e9bb1bee51a76a6e0078690   502379 https://downloads.sourceforge.net/project/mad/libmad/0.15.1b/libmad-0.15.1b.tar.gz
 9635a44bceb478bbf2ee8a785cf6986fba525afb5fad1fd4bba73cf71f2d3edf  2009217 https://downloads.sourceforge.net/project/flac/flac-src/flac-1.2.1-src/flac-1.2.1.tar.gz
-ee26ed1e177c0cd8fa8458a481b14a0b24ca0b51468c8b4c8b676fd3ceccd330  1137407 https://downloads.sourceforge.net/faac/faad2-2.7.tar.gz
-b6ae1ee2fa3d42ac489287d3ec34c5885730b1296f0801ae577a35193d3affbc  1903175 https://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2
+ee26ed1e177c0cd8fa8458a481b14a0b24ca0b51468c8b4c8b676fd3ceccd330  1137407 https://ftp2.osuosl.org/pub/blfs/conglomeration/faad2/faad2-2.7.tar.gz
+b6ae1ee2fa3d42ac489287d3ec34c5885730b1296f0801ae577a35193d3affbc  1903175 https://ftp.osuosl.org/pub/xiph/releases/theora/libtheora-1.1.1.tar.bz2
 9988283408c71838d8d62e5418e5abb5eb5300bd84c385fdc96143b5e8f10ed5   455089 https://codeload.github.com/json-c/json-c/tar.gz/json-c-0.11-20130402 -> json-c-0.11-20130402.tar.gz
 19e5b81fdac0fe22009b9e2bdcd52d7dcafbf62bc67fc59cf0a76b5b5540d149  3489179 https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-2.28.10/mbedtls-2.28.10.tar.bz2
 -                                                                       - https://github.com/wargio/NoRSX/tarball/master -> NoRSX.tar.gz
 -                                                                       - https://github.com/sergiou87/ps3debugnet/tarball/master -> ps3debugnet.tar.gz
 -                                                                       - https://github.com/wargio/ps3soundlib/tarball/master -> ps3soundlib.tar.gz
--                                                                       - https://github.com/wargio/tiny3d/tarball/master -> tiny3d.tar.gz 
+-                                                                       - https://github.com/wargio/tiny3d/tarball/master -> tiny3d.tar.gz
 -                                                                       - https://github.com/bucanero/libunrar-ps3/tarball/master -> libunrar.tar.gz
--                                                                       - https://github.com/sahlberg/libnfs/tarball/master -> libnfs.tar.gz
+e483944fdd53f1b5542d50c75d0018f4132dbb77027600acd82a755b73f1d406   476542 https://github.com/sahlberg/libnfs/archive/067c2ed6cb8f3db5d12290af3eecc3c6b4a71665.tar.gz -> libnfs.tar.gz
 -                                                                       - https://github.com/sahlberg/libsmb2/tarball/master -> libsmb2.tar.gz
 -                                                                       - https://github.com/clienthax/psl1ght/tarball/master -> psl1ght.tar.gz
 -                                                                       - https://github.com/bucanero/pthread-emb-ps3/tarball/master -> pthread-emb-ps3.tar.gz
@@ -44,3 +44,12 @@ d2e4637ae700f72e5196b8fbd749850ed2e5e1e09c5a5be8d06ff55aaccf3b01  8604748 https:
 63547d58d0185c833213885b635a2c0548201cc8f301e6587c0be1a67e1e045d  1545950 https://github.com/libsdl-org/SDL_ttf/releases/download/release-3.2.2/SDL3_ttf-3.2.2.tar.gz
 098522fc26d4e302ef9348aee6e76e67fe504dfefd7f596236568f8330570c41  1497570 https://github.com/libsdl-org/SDL_net/releases/download/release-3.2.0/SDL3_net-3.2.0.tar.gz
 b92e6002825f92b19e10abe8a974f0c38839f6bfb9b065f2d8dd14c51bf12a77  5139685 https://github.com/sabdul-khabir/SDL3_gfx/archive/refs/tags/v1.0.1.tar.gz -> SDL3_gfx-1.0.1.tar.gz
+-                                                                       - https://github.com/bucanero/libun7zip/tarball/master -> libun7zip.tar.gz
+-                                                                       - https://github.com/bucanero/libtinytar/tarball/master -> libtinytar.tar.gz
+-                                                                       - https://github.com/bucanero/ya2d_ps3/tarball/master -> ya2d.tar.gz
+-                                                                       - https://github.com/bucanero/psl1ght-libs/tarball/master -> psl1ght-libs.tar.gz
+-                                                                       - https://github.com/bucanero/dbglogger/tarball/master -> dbglogger.tar.gz
+-                                                                       - https://github.com/bucanero/mini18n/tarball/master -> mini18n.tar.gz
+-                                                                       - https://github.com/bucanero/libansilove/tarball/master -> libansilove.tar.gz
+25cb043240f828a8c51beb830569634bc7ac603978e0f69d6b63558dadefd49a  1056093 https://github.com/jbeder/yaml-cpp/archive/refs/tags/yaml-cpp-0.9.0.tar.gz -> yaml-cpp.tar.gz
+-                                                                       - https://github.com/humbertodias/SDL2_PSL1GHT_Libs/tarball/psl1ght-2.30.1 -> sdl2_psl1ght_libs.tar.gz
