@@ -1,0 +1,78 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -44,7 +44,7 @@
+ # Target
+ ################################################################################
+ # Build an static and a dynamic library.
+-if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Emscripten"))
++if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Emscripten") AND NOT PS3)
+   add_library(${PROJECT_NAME}_Shared SHARED ${ALL_FILES})
+ endif()
+ add_library(${PROJECT_NAME}_Static STATIC ${ALL_FILES})
+@@ -56,7 +56,7 @@
+   ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_NAME}_Static
+   PUBLIC_HEADER "${Headers}"
+ )
+-if(NOT(CMAKE_SYSTEM_NAME STREQUAL "Emscripten"))
++if(NOT(CMAKE_SYSTEM_NAME STREQUAL "Emscripten") AND NOT PS3)
+   set_target_properties(
+       ${PROJECT_NAME}_Shared PROPERTIES
+     OUTPUT_NAME ${PROJECT_NAME}
+@@ -69,41 +69,30 @@
+ ################################################################################
+ # Specify include directories to use when compiling SDL3_gfx
+ # Include SDL3 include folder
+-if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Emscripten"))
++if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Emscripten") AND NOT PS3)
+   target_include_directories(${PROJECT_NAME}_Shared PUBLIC
+     "${CMAKE_CURRENT_SOURCE_DIR}/../SDL/include"
+   )
+ endif()
+-
+-# Add the include directories of standard SDL3 for static library.
+-target_include_directories(${PROJECT_NAME}_Static PUBLIC
+-    "${CMAKE_CURRENT_SOURCE_DIR}/../SDL/include"
+-)
+ ################################################################################
+ # Dependencies
+ ################################################################################
+ 
+-# In Emscripten there are only static libraries.
+-if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+-  find_library(SDL3_LIB libSDL3.a)
+-else()
+-  find_library(SDL3_LIB SDL3)
++find_package(SDL3 REQUIRED CONFIG)
++if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Emscripten") AND NOT PS3)
++  target_link_libraries(${PROJECT_NAME}_Shared PUBLIC SDL3::SDL3)
+ endif()
++target_link_libraries(${PROJECT_NAME}_Static PUBLIC SDL3::SDL3)
+ 
+-# Specify libraries directories that we will link with SDL3_gfx.
+-# Static libraries don't need linking.
+-if(NOT(CMAKE_SYSTEM_NAME STREQUAL "Emscripten"))
+-  target_link_libraries(${PROJECT_NAME}_Shared PUBLIC ${SDL3_LIB})
+-endif()
+-
+ # copy to default locations
+-if(NOT(CMAKE_SYSTEM_NAME STREQUAL "Emscripten"))
++if(NOT(CMAKE_SYSTEM_NAME STREQUAL "Emscripten") AND NOT PS3)
+   install (TARGETS ${PROJECT_NAME}_Shared
+     LIBRARY DESTINATION lib
+     RUNTIME DESTINATION bin)
+ endif()
+ # Install headers following the convension of SDL3.
+ install (TARGETS ${PROJECT_NAME}_Static
++  ARCHIVE DESTINATION lib
+   LIBRARY DESTINATION lib
+   RUNTIME DESTINATION bin
+   PUBLIC_HEADER DESTINATION include/SDL3_gfx
+@@ -114,6 +103,6 @@
+ # Sub-projects
+ ################################################################################
+ # build the test also
+-if(BUILD_TESTS AND NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
++if(BUILD_TESTS AND NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten" AND NOT PS3)
+   add_subdirectory(test)
+ endif()

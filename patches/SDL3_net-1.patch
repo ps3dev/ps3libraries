@@ -1,0 +1,389 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -67,7 +67,7 @@
+ include(GNUInstallDirs)
+ 
+ set(PLATFORM_SUPPORTS_SHARED ON)
+-if(EMSCRIPTEN OR VITA OR PSP OR PS2 OR N3DS OR RISCOS)
++if(EMSCRIPTEN OR VITA OR PSP OR PS2 OR PS3 OR N3DS OR RISCOS)
+     set(PLATFORM_SUPPORTS_SHARED OFF)
+ endif()
+ 
+
+diff --git a/src/SDL_net.c b/src/SDL_net.c
+--- a/src/SDL_net.c
++++ b/src/SDL_net.c
+@@ -168,18 +168,277 @@
+ 
+ #else
+ #include <sys/types.h>
++#include <sys/time.h>
+ #include <sys/socket.h>
+ #include <arpa/inet.h>
+ #include <netinet/in.h>
++#ifdef SDL_PLATFORM_PS3
++#include <net/netdb.h>
++#include <net/select.h>
++#else
+ #include <net/if.h>
+ #include <netdb.h>
+-#include <errno.h>
+-#include <string.h>
+ #include <signal.h>
+ #include <poll.h>
++#endif
++#include <errno.h>
++#include <string.h>
+ #include <unistd.h>
+ #include <fcntl.h>
++
++#ifdef SDL_PLATFORM_PS3
++#ifndef POLLIN
++#define POLLIN   0x001
++#define POLLOUT  0x004
++#define POLLERR  0x008
++#define POLLHUP  0x010
++#define POLLNVAL 0x020
++#endif
++struct pollfd {
++    int fd;
++    short events;
++    short revents;
++};
++static int PS3Poll(struct pollfd *fds, unsigned int nfds, int timeout)
++{
++    fd_set readfds, writefds, exceptfds;
++    FD_ZERO(&readfds);
++    FD_ZERO(&writefds);
++    FD_ZERO(&exceptfds);
++    int maxfd = -1;
++    for (unsigned int i = 0; i < nfds; i++) {
++        fds[i].revents = 0;
++        if (fds[i].fd < 0) {
++            continue;
++        }
++        if (fds[i].fd > maxfd) {
++            maxfd = fds[i].fd;
++        }
++        if (fds[i].events & POLLIN) {
++            FD_SET(fds[i].fd, &readfds);
++        }
++        if (fds[i].events & POLLOUT) {
++            FD_SET(fds[i].fd, &writefds);
++        }
++        FD_SET(fds[i].fd, &exceptfds);
++    }
++    struct timeval tv;
++    struct timeval *ptv = NULL;
++    if (timeout >= 0) {
++        tv.tv_sec = timeout / 1000;
++        tv.tv_usec = (timeout % 1000) * 1000;
++        ptv = &tv;
++    }
++    int rc = select(maxfd + 1, &readfds, &writefds, &exceptfds, ptv);
++    if (rc > 0) {
++        int ready = 0;
++        for (unsigned int i = 0; i < nfds; i++) {
++            if (fds[i].fd < 0) {
++                continue;
++            }
++            if (FD_ISSET(fds[i].fd, &readfds)) {
++                fds[i].revents |= POLLIN;
++            }
++            if (FD_ISSET(fds[i].fd, &writefds)) {
++                fds[i].revents |= POLLOUT;
++            }
++            if (FD_ISSET(fds[i].fd, &exceptfds)) {
++                fds[i].revents |= POLLERR;
++            }
++            if (fds[i].revents) {
++                ready++;
++            }
++        }
++        rc = ready;
++    }
++    return rc;
++}
++#define poll PS3Poll
++#ifndef AF_INET6
++#define AF_INET6 (-1)
++#endif
++#ifndef AI_NUMERICSERV
++#define AI_NUMERICSERV 0
++#endif
++#ifndef EAI_SYSTEM
++#define EAI_BADFLAGS  -1
++#define EAI_NONAME    -2
++#define EAI_AGAIN     -3
++#define EAI_FAIL      -4
++#define EAI_FAMILY    -6
++#define EAI_MEMORY    -10
++#define EAI_SERVICE   -8
++#define EAI_SOCKTYPE  -7
++#define EAI_SYSTEM    -11
++#define EAI_OVERFLOW  -12
++#endif
++
++static const char *gai_strerror(int err)
++{
++    switch (err) {
++    case 0: return "Success";
++    case EAI_BADFLAGS: return "Invalid flags";
++    case EAI_NONAME: return "Unknown host";
++    case EAI_AGAIN: return "Temporary failure in name resolution";
++    case EAI_FAIL: return "Non-recoverable failure in name resolution";
++    case EAI_FAMILY: return "Address family not supported";
++    case EAI_MEMORY: return "Memory allocation failure";
++    case EAI_SERVICE: return "Servname not supported for ai_socktype";
++    case EAI_SOCKTYPE: return "ai_socktype not supported";
++    case EAI_SYSTEM: return "System error";
++    case EAI_OVERFLOW: return "Argument buffer overflow";
++    default: return "Unknown error";
++    }
++}
++
++static void freeaddrinfo(struct addrinfo *ai)
++{
++    while (ai) {
++        struct addrinfo *next = ai->ai_next;
++        SDL_free(ai->ai_addr);
++        SDL_free(ai->ai_canonname);
++        SDL_free(ai);
++        ai = next;
++    }
++}
++
++static int getnameinfo(const struct sockaddr *sa, socklen_t salen, char *host, socklen_t hostlen, char *serv, socklen_t servlen, int flags)
++{
++    (void) salen;
++    (void) flags;
++    if (!sa) {
++        return EAI_FAIL;
++    }
++    if (sa->sa_family != AF_INET) {
++        return EAI_FAMILY;
++    }
++    const struct sockaddr_in *sin = (const struct sockaddr_in *) sa;
++    if (host && hostlen > 0) {
++        if (!inet_ntop(AF_INET, &sin->sin_addr, host, hostlen)) {
++            return EAI_OVERFLOW;
++        }
++    }
++    if (serv && servlen > 0) {
++        SDL_snprintf(serv, servlen, "%u", (unsigned int) ntohs(sin->sin_port));
++    }
++    return 0;
++}
++
++static struct addrinfo *PS3AllocAddrInfo(int socktype, int protocol, const struct sockaddr_in *sin)
++{
++    struct addrinfo *ai = (struct addrinfo *) SDL_calloc(1, sizeof (*ai));
++    struct sockaddr_in *addr = (struct sockaddr_in *) SDL_calloc(1, sizeof (*addr));
++    if (!ai || !addr) {
++        SDL_free(ai);
++        SDL_free(addr);
++        return NULL;
++    }
++    SDL_copyp(addr, sin);
++    addr->sin_len = sizeof (*addr);
++    addr->sin_family = AF_INET;
++    ai->ai_family = AF_INET;
++    ai->ai_socktype = socktype;
++    ai->ai_protocol = protocol;
++    ai->ai_addrlen = sizeof (*addr);
++    ai->ai_addr = (struct sockaddr *) addr;
++    return ai;
++}
++
++static int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res)
++{
++    int flags = 0;
++    int socktype = 0;
++    int protocol = 0;
++    int family = AF_INET;
++    Uint16 port = 0;
++
++    if (!res) {
++        return EAI_FAIL;
++    }
++    *res = NULL;
++
++    if (hints) {
++        flags = hints->ai_flags;
++        socktype = hints->ai_socktype;
++        protocol = hints->ai_protocol;
++        if (hints->ai_family != AF_UNSPEC && hints->ai_family != AF_INET) {
++            return EAI_FAMILY;
++        }
++        family = AF_INET;
++        (void) family;
++    }
++
++    if (service && service[0]) {
++        char *end = NULL;
++        const long parsed = SDL_strtol(service, &end, 10);
++        if (!end || *end != '\0' || parsed < 0 || parsed > 65535) {
++            return EAI_SERVICE;
++        }
++        port = (Uint16) parsed;
++    }
++
++    if (!socktype) {
++        socktype = SOCK_STREAM;
++    }
++    if (!protocol) {
++        protocol = (socktype == SOCK_DGRAM) ? IPPROTO_UDP : IPPROTO_TCP;
++    }
++
++    struct sockaddr_in sin;
++    SDL_zero(sin);
++    sin.sin_family = AF_INET;
++    sin.sin_port = htons(port);
+ 
++    if (!node || !node[0]) {
++        sin.sin_addr.s_addr = (flags & AI_PASSIVE) ? htonl(INADDR_ANY) : htonl(INADDR_LOOPBACK);
++        *res = PS3AllocAddrInfo(socktype, protocol, &sin);
++        return *res ? 0 : EAI_MEMORY;
++    }
++
++    if (inet_aton(node, &sin.sin_addr)) {
++        *res = PS3AllocAddrInfo(socktype, protocol, &sin);
++        return *res ? 0 : EAI_MEMORY;
++    }
++
++    if (flags & AI_NUMERICHOST) {
++        return EAI_NONAME;
++    }
++
++    struct hostent *he = gethostbyname(node);
++    if (!he || he->h_addrtype != AF_INET || !he->h_addr_list || !he->h_addr_list[0]) {
++        return EAI_NONAME;
++    }
++
++    struct addrinfo *head = NULL;
++    struct addrinfo *tail = NULL;
++    for (char **alist = he->h_addr_list; *alist; alist++) {
++        SDL_memcpy(&sin.sin_addr, *alist, sizeof (sin.sin_addr));
++        struct addrinfo *ai = PS3AllocAddrInfo(socktype, protocol, &sin);
++        if (!ai) {
++            freeaddrinfo(head);
++            return EAI_MEMORY;
++        }
++        if ((flags & AI_CANONNAME) && he->h_name && !head) {
++            ai->ai_canonname = SDL_strdup(he->h_name);
++        }
++        if (!head) {
++            head = ai;
++        } else {
++            tail->ai_next = ai;
++        }
++        tail = ai;
++    }
++    *res = head;
++    return head ? 0 : EAI_NONAME;
++}
++
++struct sockaddr_storage {
++    u8 ss_len;
++    sa_family_t ss_family;
++    char ss_data[126];
++};
++#endif
++
+ #if defined(SDL_PLATFORM_LINUX) || defined(SDL_PLATFORM_ANDROID)
+ #define USE_NETLINK 1
+ #include <linux/netlink.h>
+@@ -359,7 +618,12 @@
+     DWORD one = 1;
+     return ioctlsocket(handle, FIONBIO, &one);
+     #else
++#ifdef SDL_PLATFORM_PS3
++    int nbio = 1;
++    return setsockopt(handle, SOL_SOCKET, SO_NBIO, &nbio, sizeof (nbio));
++#else
+     return fcntl(handle, F_SETFL, fcntl(handle, F_GETFL, 0) | O_NONBLOCK);
++#endif
+     #endif
+ }
+ 
+@@ -796,7 +1060,9 @@
+ }
+ 
+ #else
++#ifndef SDL_PLATFORM_PS3
+ #warning implement me for your platform.
++#endif
+ static bool InitInterfaceChangeNotifications(void)
+ {
+     return true;
+@@ -1025,7 +1291,9 @@
+         return SetSocketErrorBool("WSAStartup() failed", LastSocketError());
+     }
+     #else
++#ifndef SDL_PLATFORM_PS3
+     signal(SIGPIPE, SIG_IGN);
++#endif
+     #endif
+ 
+     SDL_zeroa(resolver_threads);
+@@ -1051,12 +1319,14 @@
+         }
+     }
+ 
++#ifndef SDL_PLATFORM_PS3
+     struct sockaddr_in6 sa_in6;
+     SDL_zero(sa_in6);
+     if (inet_pton(AF_INET6, "ff02::1", &sa_in6.sin6_addr) == 1) {
+         sa_in6.sin6_family = AF_INET6;
+         ipv6_broadcast_addr = CreateSDLNetAddrFromSockAddr((const struct sockaddr *) &sa_in6, sizeof (sa_in6));
+     }
++#endif
+ 
+     interface_rwlock = SDL_CreateRWLock();
+     if (!interface_rwlock) {
+@@ -1598,10 +1868,12 @@
+             goto failed;
+         }
+ 
++#ifndef SDL_PLATFORM_PS3
+         const int one = 1;
+         if (ainfo->ai_family == AF_INET6) {
+             setsockopt(handle, IPPROTO_IPV6, IPV6_V6ONLY, (const char *) &one, sizeof (one));  // if this fails, oh well.
+         }
++#endif
+ 
+         setsockopt(handle, SOL_SOCKET, SO_REUSEADDR, (const char *) &reuseaddr, sizeof (reuseaddr));
+ 
+@@ -2075,10 +2347,12 @@
+         setsockopt(handle, SOL_SOCKET, SO_REUSEADDR, (const char *) &reuseaddr, sizeof (reuseaddr));
+         setsockopt(handle, SOL_SOCKET, SO_BROADCAST, (const char *) &bcast, sizeof (bcast));
+ 
++#ifndef SDL_PLATFORM_PS3
+         if (ainfo->ai_family == AF_INET6) {
+             const int one = 1;
+             setsockopt(handle, IPPROTO_IPV6, IPV6_V6ONLY, (const char *) &one, sizeof (one));  // if this fails, oh well.
+         }
++#endif
+ 
+         const int rc = bind(handle, ainfo->ai_addr, (SockLen) ainfo->ai_addrlen);
+         if (rc == SOCKET_ERROR) {
+@@ -2096,6 +2370,7 @@
+             if (!socket_handle->broadcast && (addr || (ainfo->ai_family == AF_INET6))) {
+                 SDL_SetError("Failed to determine broadcast address for this interface");
+                 goto failed;
++#ifndef SDL_PLATFORM_PS3
+             } else if (ainfo->ai_family == AF_INET6) { // fake broadcast support via multicasting to all-nodes link-local group, ff02::1.
+                 SDL_assert(socket_handle->broadcast == ipv6_broadcast_addr);
+                 const struct addrinfo *bai = socket_handle->broadcast->ainfo;
+@@ -2113,7 +2388,10 @@
+                 }
+                 const int ifidx = (int) interface_index;
+                 setsockopt(handle, IPPROTO_IPV6, IPV6_MULTICAST_IF, (const char *) &ifidx, (SockLen) sizeof (ifidx));  // multicast sends go through the same interface.
++            }
++#else
+             }
++#endif
+         }
+     }
+ 

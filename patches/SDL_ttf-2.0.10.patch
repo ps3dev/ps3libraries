@@ -1,0 +1,12 @@
+diff -burN SDL_ttf-2.0.10.original/Makefile.in SDL_ttf-2.0.10/Makefile.in
+--- SDL_ttf-2.0.10.original/Makefile.in	2009-10-19 04:18:21.000000000 -0400
++++ SDL_ttf-2.0.10/Makefile.in	2011-01-16 20:28:34.641505001 -0500
+@@ -39,7 +39,7 @@
+ POST_UNINSTALL = :
+ build_triplet = @build@
+ host_triplet = @host@
+-noinst_PROGRAMS = showfont$(EXEEXT) glfont$(EXEEXT)
++noinst_PROGRAMS =
+ subdir = .
+ DIST_COMMON = README $(am__configure_deps) \
+ 	$(libSDL_ttfinclude_HEADERS) $(srcdir)/Makefile.am \

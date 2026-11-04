@@ -135,89 +135,125 @@ jobs:
       - name: Build Libxml2 2.9.12
         run: ./libraries.sh 012
 
-      - name: Build Sdl_psl1ght
+      - name: Build SDL 1.2.15
         run: ./libraries.sh 013
 
-      - name: Build Sdl2_psl1ght
+      - name: Build SDL_mixer 1.2.11
         run: ./libraries.sh 014
 
-      - name: Build Sdl_psl1ght_libs
+      - name: Build SDL_image 1.2.10
         run: ./libraries.sh 015
 
-      - name: Build SDL2_mixer 2.0.4
+      - name: Build SDL_gfx 2.0.27
         run: ./libraries.sh 016
 
-      - name: Build Polarssl 1.3.9
+      - name: Build SDL_net 1.2.7
         run: ./libraries.sh 017
 
-      - name: Build MbedTLS 2.28.10
+      - name: Build SDL_ttf 2.0.10
         run: ./libraries.sh 018
 
-      - name: Build Libmad 0.15.1b
+      - name: Build SDL2 2.31.0
         run: ./libraries.sh 019
 
-      - name: Build Flac 1.2.1
+      - name: Build SDL2_mixer 2.8.0
         run: ./libraries.sh 020
 
-      - name: Build Faad2 2.7
+      - name: Build SDL2_image 2.8.2
         run: ./libraries.sh 021
 
-      - name: Build Libtheora 1.1.1
+      - name: Build SDL2_ttf 2.22.0
         run: ./libraries.sh 022
 
-      - name: Build NoRSX
+      - name: Build SDL2_gfx 1.0.4
         run: ./libraries.sh 023
 
-      - name: Build Libjson
+      - name: Build SDL3 3.5.0
         run: ./libraries.sh 024
 
-      - name: Build Debugnet
+      - name: Build SDL3_mixer 3.2.4
         run: ./libraries.sh 025
 
-      - name: Build Ps3soundlib
+      - name: Build SDL3_image 3.4.6
         run: ./libraries.sh 026
 
-      - name: Build Tiny3d_libfont
+      - name: Build SDL3_net 3.2.0
         run: ./libraries.sh 027
 
-      - name: Build Libcurl 7.64.1
+      - name: Build SDL3_ttf 3.2.2
         run: ./libraries.sh 028
 
-      - name: Build Libunrar
+      - name: Build SDL3_gfx 1.0.1
         run: ./libraries.sh 029
 
-      - name: Build Libnfs
+      - name: Build Polarssl 1.3.9
         run: ./libraries.sh 030
 
-      - name: Build Libsmb2
+      - name: Build MbedTLS 2.28.10
         run: ./libraries.sh 031
 
-      - name: Build Pthread-emb
+      - name: Build Libmad 0.15.1b
         run: ./libraries.sh 032
 
-      - name: Build Libun7zip
+      - name: Build Flac 1.2.1
         run: ./libraries.sh 033
 
-      - name: Build Libtinytar
+      - name: Build Faad2 2.7
         run: ./libraries.sh 034
 
-      - name: Build Libya2d
+      - name: Build Libtheora 1.1.1
         run: ./libraries.sh 035
 
-      - name: Build Dbglogger
+      - name: Build NoRSX
         run: ./libraries.sh 036
 
-      - name: Build Mini18n
+      - name: Build Libjson
         run: ./libraries.sh 037
 
-      - name: Build Libansilove
+      - name: Build Debugnet
         run: ./libraries.sh 038
 
-      - name: Build Yaml-cpp 0.9.0
+      - name: Build Ps3soundlib
         run: ./libraries.sh 039
 
-      - name: Build SDL2 Libs
+      - name: Build Tiny3d_libfont
         run: ./libraries.sh 040
+
+      - name: Build Libcurl 7.64.1
+        run: ./libraries.sh 041
+
+      - name: Build Libunrar
+        run: ./libraries.sh 042
+
+      - name: Build Libnfs
+        run: ./libraries.sh 043
+
+      - name: Build Libsmb2
+        run: ./libraries.sh 044
+
+      - name: Build Pthread-emb
+        run: ./libraries.sh 045
+
+      - name: Build Libun7zip
+        run: ./libraries.sh 046
+
+      - name: Build Libtinytar
+        run: ./libraries.sh 047
+
+      - name: Build Libya2d
+        run: ./libraries.sh 048
+
+      - name: Build Dbglogger
+        run: ./libraries.sh 049
+
+      - name: Build Mini18n
+        run: ./libraries.sh 050
+
+      - name: Build Libansilove
+        run: ./libraries.sh 051
+
+      - name: Build Yaml-cpp 0.9.0
+        run: ./libraries.sh 052
 
       - name: Build Package
         run: |

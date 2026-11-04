@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7b27db8..35e1251 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -71,7 +71,7 @@ include(GNUInstallDirs)
+ include(CheckSymbolExists)
+ 
+ set(PLATFORM_SUPPORTS_SHARED ON)
+-if(EMSCRIPTEN OR VITA OR PSP OR PS2 OR N3DS OR RISCOS)
++if(EMSCRIPTEN OR VITA OR PSP OR PS2 OR PS3 OR N3DS OR RISCOS)
+   set(PLATFORM_SUPPORTS_SHARED OFF)
+ endif()
+ 

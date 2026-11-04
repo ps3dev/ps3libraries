@@ -29,6 +29,16 @@ AR="powerpc64-ps3-elf-ar" CC="powerpc64-ps3-elf-gcc" RANLIB="powerpc64-ps3-elf-r
 ac_cv_func_malloc_0_nonnull=yes ac_cv_func_realloc_0_nonnull=yes \
 ./configure --prefix="$PS3DEV/portlibs/ppu" --host="powerpc64-ps3-elf" --enable-static --disable-shared
 
+## libjson.la is linked with -ljson-c, which is not a make prerequisite of
+## libjson-c.la. Parallel make can start that link while libjson-c.la is
+## still being written ("is not a valid libtool archive").
+sed -i.bak \
+	-e 's/^libjson_la_DEPENDENCIES =$/libjson_la_DEPENDENCIES = libjson-c.la/' \
+	-e 's/^libjson_la_LIBADD = -ljson-c$/libjson_la_LIBADD = libjson-c.la/' \
+	-e 's/^libjson_la_LDFLAGS = -version-info 1:0:1 -no-undefined -ljson-c$/libjson_la_LDFLAGS = -version-info 1:0:1 -no-undefined/' \
+	Makefile
+rm -f Makefile.bak
+
 ## Compile and install.
 jobs=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
 ${MAKE:-make} -j"$jobs" && ${MAKE:-make} -j"$jobs" install
