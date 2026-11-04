@@ -1,6 +1,10 @@
 name: Run Tests
 
-on: [push, pull_request, workflow_dispatch]
+# Manual only until ps3dev publishes its own toolchain image.
+# `make test` runs libraries.sh inside hldtux/ps3dev, which this repo does not
+# control. The build workflow already compiles every library on Linux,
+# macOS Intel, and macOS ARM.
+on: workflow_dispatch
 
 jobs:
   test:
