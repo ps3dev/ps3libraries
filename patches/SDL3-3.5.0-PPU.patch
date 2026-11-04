@@ -145,7 +145,7 @@ index 4d1374007..811024501 100644
  #define SDL_PLATFORM_PS2 1
  #endif
  
-+#if defined(__PS3__) || defined(PS3)
++#if defined(__lv2ppu__)
 +
 +/**
 + * A preprocessor macro that is only defined if compiling for Sony PlayStation

@@ -39,7 +39,7 @@ diff -Nru SDL-1.2.15/include/SDL_platform.h SDL-1.2.15/include/SDL_platform.h
  #undef __OS2__
  #define __OS2__		1
  #endif
-+#if defined(__PS3__) || defined(__PSL1GHT__)
++#if defined(__lv2ppu__) || defined(__PSL1GHT__)
 +#undef __PS3__
 +#define __PS3__		1
 +#endif

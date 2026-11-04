@@ -62,7 +62,8 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 
-add_compile_definitions(PS3 __PS3__)
+# powerpc64-ps3-elf-gcc already defines __lv2ppu__. PS3 is only a CMake
+# variable so project scripts can write if(PS3), the same way they write if(PS2).
 set(PS3 TRUE)
 
 macro(ps3_target_setup target)
